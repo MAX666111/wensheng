@@ -988,12 +988,12 @@ function renderGrid(){
       + '<div class="tag">'+m.era+' · '+m.cat+'</div></div></div>';
   }).join('');
 
-  // 绘制
-  requestAnimationFrame(function(){
-    list.forEach(function(m){
-      var cv = g.querySelector('canvas[data-mid="'+m.id+'"]');
-      if (cv) renderMotif(cv, m, {bone:m.defaultBone, n:m.symN, petals:m.petals, palette:m.palette});
-    });
+  // 绘制：必须同步完成。
+  // 若放进 requestAnimationFrame，页面在后台标签页打开（或被切走）时 rAF 不触发，
+  // 缩略图会一直停在 canvas 默认的 300x150 空尺寸上，用户看到一排空白框。
+  list.forEach(function(m){
+    var cv = g.querySelector('canvas[data-mid="'+m.id+'"]');
+    if (cv) renderMotif(cv, m, {bone:m.defaultBone, n:m.symN, petals:m.petals, palette:m.palette});
   });
 
   g.querySelectorAll('.card').forEach(function(c){
@@ -1461,6 +1461,13 @@ $('#q').addEventListener('input', function(){
 
 // 窗口尺寸变化时重绘（桌面端缩放）
 var rz = null;
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'visible') {
+    var atlas = document.getElementById('v-atlas');
+    if (atlas && atlas.classList.contains('on')) renderGrid();
+  }
+});
+
 window.addEventListener('resize', function(){
   clearTimeout(rz);
   rz = setTimeout(function(){
