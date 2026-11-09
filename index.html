@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F4EFE4">
+<meta name="description" content="纹生 —— 中国传统纹样的认知与创作工具，用图案学的骨式语言理解纹样。">
+<title>纹生 · 中国传统纹样认知与创作</title>
+<style>
+:root{
+  --paper:#F4EFE4; --paper-2:#EDE5D5; --paper-3:#E5DBC8;
+  --ink:#2A241E; --ink-2:#6B6154; --ink-3:#9A8F7E;
+  --line:rgba(42,36,30,.14); --line-2:rgba(42,36,30,.08);
+  --red:#A83B2C; --blue:#2F5D6B; --gold:#B8935A;
+  --serif:"Songti SC","STSong","SimSun","Noto Serif CJK SC","Source Han Serif SC",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+  --r:10px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans); color:var(--ink);
+  background:#23201C;
+  min-height:100vh; margin:0;
+  -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
+}
+#app{
+  width:100%; max-width:460px; min-height:100vh; position:relative; margin:0 auto;
+  background:var(--paper);
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(184,147,90,.055), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(47,93,107,.05), transparent 40%);
+  padding-bottom:calc(74px + env(safe-area-inset-bottom));
+  overflow-x:hidden;
+}
+@media(min-width:720px){
+  #app{ margin:22px auto; min-height:calc(100vh - 44px); border-radius:18px;
+        box-shadow:0 24px 60px rgba(0,0,0,.42); border:1px solid rgba(255,255,255,.06);
+        overflow:hidden; }
+}
+
+/* ---------- 顶栏 ---------- */
+.hdr{
+  position:sticky; top:0; z-index:30;
+  padding:calc(14px + env(safe-area-inset-top)) 18px 10px;
+  background:linear-gradient(180deg, var(--paper) 72%, rgba(244,239,228,0));
+  display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
+}
+.hdr h1{
+  font-family:var(--serif); font-size:27px; font-weight:600; letter-spacing:.16em;
+  margin:0; line-height:1.06;
+}
+.hdr .sub{
+  font-size:10.5px; color:var(--ink-3); letter-spacing:.14em; margin-top:5px;
+  text-transform:uppercase;
+}
+.hdr .mark{
+  width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+  display:grid;place-items:center;flex:0 0 auto; margin-bottom:2px;
+}
+.hdr .mark svg{width:19px;height:19px}
+
+/* ---------- 视图切换 ---------- */
+.view{display:none; padding:2px 16px 12px; animation:fade .28s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- 搜索 ---------- */
+.search{
+  display:flex; align-items:center; gap:8px;
+  background:rgba(255,255,255,.5); border:1px solid var(--line);
+  border-radius:var(--r); padding:9px 12px; margin:4px 0 12px;
+}
+.search input{
+  border:0;background:transparent;outline:0;font-size:14px;color:var(--ink);
+  width:100%;font-family:var(--sans);
+}
+.search input::placeholder{color:var(--ink-3)}
+.search svg{width:15px;height:15px;flex:0 0 auto;opacity:.45}
+
+/* ---------- 筛选条 ---------- */
+.filter-label{
+  font-size:10.5px;color:var(--ink-3);letter-spacing:.16em;margin:12px 0 7px;
+}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto; font-size:12.5px; padding:5px 12px; border-radius:999px;
+  border:1px solid var(--line); color:var(--ink-2); background:transparent;
+  cursor:pointer; font-family:var(--serif); letter-spacing:.06em;
+  transition:all .16s;
+}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* ---------- 卡片网格 ---------- */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:12px}
+.card{
+  border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
+  background:rgba(255,255,255,.34); cursor:pointer; min-width:0;
+  transition:transform .18s ease, box-shadow .18s ease;
+}
+.card:active{transform:scale(.975)}
+.card .cv-wrap{position:relative;width:100%;aspect-ratio:1/1;display:block;background:var(--paper-2);overflow:hidden}
+.card canvas{width:100%;height:100%;max-width:100%;display:block}
+.card .meta{padding:8px 10px 9px;border-top:1px solid var(--line-2)}
+.card .nm{font-family:var(--serif);font-size:14.5px;letter-spacing:.08em;line-height:1.2}
+.card .tag{font-size:10px;color:var(--ink-3);margin-top:3px;letter-spacing:.05em}
+
+/* ---------- 详情 ---------- */
+#detail{
+  position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:460px;z-index:60;background:var(--paper);
+  overflow-y:auto;display:none;
+  padding-bottom:40px;
+}
+#detail.on{display:block}
+#detail .back{
+  position:sticky;top:0;background:rgba(244,239,228,.94);backdrop-filter:blur(8px);
+  padding:14px 16px 10px;display:flex;align-items:center;gap:8px;z-index:2;
+  border-bottom:1px solid var(--line-2);
+  font-size:13px;color:var(--ink-2);cursor:pointer;
+}
+.d-hero{width:100%;aspect-ratio:4/3;display:block;background:var(--paper-2)}
+.d-body{padding:16px}
+.d-title{font-family:var(--serif);font-size:26px;letter-spacing:.1em;margin:0 0 2px}
+.d-alias{font-size:12px;color:var(--ink-3);letter-spacing:.08em;margin-bottom:14px}
+.d-sec{margin-top:18px}
+.d-sec h3{
+  font-family:var(--serif);font-size:13px;letter-spacing:.2em;margin:0 0 8px;
+  color:var(--red);display:flex;align-items:center;gap:8px;
+}
+.d-sec h3::after{content:"";flex:1;height:1px;background:var(--line)}
+.d-sec p{margin:0;font-size:14px;line-height:1.78;color:var(--ink);letter-spacing:.01em}
+.kv{display:grid;grid-template-columns:76px 1fr;gap:8px 10px;font-size:13px;line-height:1.6}
+.kv dt{color:var(--ink-3);letter-spacing:.1em;font-size:12px}
+.kv dd{margin:0;color:var(--ink)}
+.swatches{display:flex;gap:6px;margin-top:8px}
+.sw{width:26px;height:26px;border-radius:6px;border:1px solid rgba(0,0,0,.12)}
+.bone-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.bone-row span{
+  font-size:11px;padding:3px 9px;border-radius:4px;
+  background:rgba(47,93,107,.1);color:var(--blue);letter-spacing:.06em;
+}
+
+/* ---------- 问纹 ---------- */
+.talk{padding:6px 0 4px}
+.msg{margin-bottom:14px;display:flex;gap:8px;align-items:flex-start}
+.msg.u{flex-direction:row-reverse}
+.avatar{
+  width:26px;height:26px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  font-family:var(--serif);font-size:12px;letter-spacing:0;
+  background:var(--ink);color:var(--paper);
+}
+.msg.u .avatar{background:var(--red)}
+.bubble{
+  max-width:79%;font-size:14px;line-height:1.72;padding:10px 12px;
+  border-radius:11px;background:rgba(255,255,255,.62);border:1px solid var(--line);
+  white-space:pre-wrap;word-break:break-word;
+}
+.msg.u .bubble{background:rgba(168,59,44,.075);border-color:rgba(168,59,44,.2)}
+.trace{
+  margin-top:8px;font-size:11px;color:var(--ink-3);line-height:1.75;
+  border-left:2px solid var(--line);padding-left:9px;
+}
+.trace b{color:var(--blue);font-weight:600;letter-spacing:.06em}
+.sugs{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 14px}
+.sug{
+  font-size:12px;padding:6px 11px;border-radius:999px;border:1px dashed var(--line);
+  color:var(--ink-2);cursor:pointer;background:rgba(255,255,255,.4);
+}
+.askbar{
+  position:fixed;bottom:calc(74px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+  width:100%;max-width:460px;padding:8px 16px;
+  background:linear-gradient(0deg,var(--paper) 60%,rgba(244,239,228,0));
+}
+.askbar .row{
+  display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.72);
+  border:1px solid var(--line);border-radius:999px;padding:6px 6px 6px 14px;
+}
+.askbar input{flex:1;border:0;background:transparent;outline:0;font-size:14px;font-family:var(--sans);color:var(--ink)}
+.askbar button{
+  width:34px;height:34px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);
+  cursor:pointer;display:grid;place-items:center;flex:0 0 auto;
+}
+.askbar button:disabled{opacity:.35}
+
+/* ---------- 工坊 ---------- */
+.stage{
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  background:var(--paper-2);margin-bottom:14px;
+}
+.stage canvas{width:100%;aspect-ratio:1/1;display:block}
+.ctrl{margin-bottom:13px}
+.ctrl .lb{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:12px;color:var(--ink-2);letter-spacing:.1em;margin-bottom:6px;
+}
+.ctrl .lb em{font-style:normal;color:var(--red);font-family:var(--serif);font-size:13px}
+.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.seg button{
+  min-width:0;font-size:12.5px;padding:8px 6px;border-radius:7px;
+  border:1px solid var(--line);background:rgba(255,255,255,.45);color:var(--ink-2);
+  cursor:pointer;font-family:var(--serif);letter-spacing:.06em;transition:all .15s;
+}
+.seg button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.seg button:active{transform:scale(.97)}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:3px;border-radius:2px;
+  background:var(--line);outline:0;margin:10px 0 0;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:19px;height:19px;border-radius:50%;
+  background:var(--red);border:2px solid var(--paper);cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.22);
+}
+.actions{display:flex;gap:9px;margin-top:4px}
+.btn{
+  flex:1;padding:12px;border-radius:9px;border:1px solid var(--ink);
+  background:var(--ink);color:var(--paper);font-size:13.5px;letter-spacing:.12em;
+  cursor:pointer;font-family:var(--serif);
+}
+.btn.ghost{background:transparent;color:var(--ink)}
+.hint{font-size:11px;color:var(--ink-3);line-height:1.7;margin-top:10px;letter-spacing:.02em}
+
+/* ---------- 底栏 ---------- */
+#tabs{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:460px;z-index:40;
+  display:flex;background:rgba(244,239,228,.96);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#tabs button{
+  flex:1;border:0;background:transparent;padding:11px 0 12px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--ink-3);font-family:var(--serif);font-size:11.5px;letter-spacing:.14em;
+  transition:color .16s;
+}
+#tabs button.on{color:var(--red)}
+#tabs svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.5}
+#tabs .dot{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:0;margin-top:-1px}
+#tabs button.on .dot{opacity:1}
+
+/* ---------- 关于 ---------- */
+.about h2{font-family:var(--serif);font-size:15px;letter-spacing:.16em;margin:22px 0 8px;color:var(--red)}
+.about p,.about li{font-size:13px;line-height:1.8;color:var(--ink-2);margin:0 0 8px}
+.about ul{padding-left:18px;margin:0 0 10px}
+.about a{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(47,93,107,.3)}
+.author-card{
+  border:1px solid var(--line);border-radius:var(--r);padding:14px;
+  background:rgba(255,255,255,.42);margin-top:6px;
+}
+.author-card .kv{margin-top:2px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="hdr">
+    <div>
+      <h1>纹生</h1>
+      <div class="sub">Patterns of China · 认知与创作</div>
+    </div>
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#A83B2C" stroke-width="1.3">
+        <circle cx="12" cy="12" r="3.1"/>
+        <path d="M12 2.6v3.2M12 18.2v3.2M2.6 12h3.2M18.2 12h3.2M5.4 5.4l2.3 2.3M16.3 16.3l2.3 2.3M18.6 5.4l-2.3 2.3M7.7 16.3l-2.3 2.3"/>
+      </svg>
+    </div>
+  </header>
+
+  <main>
+    <section class="view on" id="v-atlas">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+        <input id="q" type="search" placeholder="搜纹样名、朝代、寓意、骨式…" autocomplete="off">
+      </div>
+      <div class="filter-label">朝 代</div>
+      <div class="chips" id="f-era"></div>
+      <div class="filter-label">类 属</div>
+      <div class="chips" id="f-cat"></div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section class="view" id="v-ask">
+      <div class="talk" id="talk"></div>
+      <div class="sugs" id="sugs"></div>
+    </section>
+
+    <section class="view" id="v-studio">
+      <div class="stage"><canvas id="stage"></canvas></div>
+      <div class="ctrl">
+        <div class="lb"><span>母 题</span><em id="lb-motif">宝相花</em></div>
+        <div class="seg" id="s-motif"></div>
+      </div>
+      <div class="ctrl">
+        <div class="lb"><span>骨 式</span><em id="lb-bone">适合纹样</em></div>
+        <div class="seg" id="s-bone" style="grid-template-columns:repeat(5,minmax(0,1fr))"></div>
+      </div>
+      <div class="ctrl">
+        <div class="lb"><span>对称阶数</span><em id="lb-n">8</em></div>
+        <input type="range" id="s-n" min="3" max="16" step="1" value="8">
+      </div>
+      <div class="ctrl">
+        <div class="lb"><span>单 元 密 度</span><em id="lb-d">40</em></div>
+        <input type="range" id="s-d" min="10" max="100" step="2" value="40">
+      </div>
+      <div class="ctrl">
+        <div class="lb"><span>配 色</span><em id="lb-p">丹青</em></div>
+        <div class="seg" id="s-pal"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-png">导出 PNG</button>
+        <button class="btn ghost" id="btn-rnd">随机生成</button>
+      </div>
+      <p class="hint">母题决定「画什么」，骨式决定「怎么排」。同一母题换一种骨式，就是从器物上的单只花变成织锦上的连续纹——这正是图案学的第一课。</p>
+    </section>
+
+    <section class="view" id="v-about">
+      <div class="about">
+        <h2>这是什么</h2>
+        <p>「纹生」是一个理解中国传统纹样的小工具。它不堆砌百科词条，而是用图案学的语言回答三个问题：<b>它叫什么</b>（母题）、<b>它是怎么排的</b>（骨式）、<b>它为什么这么排</b>（形式法则）。</p>
+        <h2>三种看法</h2>
+        <ul>
+          <li><b>图鉴</b>——按朝代与类属检索，每条纹样给出母题、骨式、对称方式与寓意。</li>
+          <li><b>问纹</b>——用一句话提问，它会检索知识库并展示推理路径。</li>
+          <li><b>工坊</b>——换骨式、调对称阶数、改配色，实时生成并导出。</li>
+        </ul>
+        <h2>关于图片来源</h2>
+        <p>本应用内所有纹样图形均由代码实时绘制（Canvas 矢量运算），<b>不使用任何外部图片素材</b>，因此不存在版权问题，且可在任意分辨率下保持清晰。这是刻意的技术选择。</p>
+        <h2>参考资料</h2>
+        <ul>
+          <li>故宫博物院《明清宫廷织物中的牡丹纹样设计》</li>
+          <li>中国国家博物馆《图必有意，意必吉祥——清代瓷器纹饰的意象主题》</li>
+          <li>百度百科「连续纹样」词条（二方连续 / 四方连续定义）</li>
+          <li>中国平面设计在线《传统图案中二方连续的形式语言浅析》</li>
+        </ul>
+        <h2>作品信息</h2>
+        <div class="author-card">
+          <dl class="kv">
+            <dt>作品名</dt><dd>纹生 · 中国传统纹样认知与创作</dd>
+            <dt>课程</dt><dd>人工智能通识课</dd>
+            <dt>形态</dt><dd>移动端 Web 应用（小程序形态）</dd>
+            <dt>技术</dt><dd>单文件 HTML + Canvas，零依赖</dd>
+            <dt>作者</dt><dd id="author">—</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav id="tabs">
+    <button data-v="atlas" class="on">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/></svg>
+      图鉴<span class="dot"></span>
+    </button>
+    <button data-v="ask">
+      <svg viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 0 1-12.3 7.6L3.5 20.5l1-4.4A8.5 8.5 0 1 1 20.5 12Z"/></svg>
+      问纹<span class="dot"></span>
+    </button>
+    <button data-v="studio">
+      <svg viewBox="0 0 24 24"><path d="M12 3.2 20 12l-8 8.8L4 12l8-8.8Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+      工坊<span class="dot"></span>
+    </button>
+    <button data-v="about">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 10.6v6M12 7.6v.1"/></svg>
+      关于<span class="dot"></span>
+    </button>
+  </nav>
+</div>
+
+<div id="detail">
+  <div class="back" id="d-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m14 6-6 6 6 6"/></svg>
+    返回图鉴
+  </div>
+  <canvas class="d-hero" id="d-hero"></canvas>
+  <div class="d-body" id="d-body"></div>
+</div>
+
+<div class="askbar" id="askbar" style="display:none">
+  <div class="row">
+    <input id="askinput" type="text" placeholder="问点什么，比如：唐代有什么纹样" autocomplete="off">
+    <button id="asksend" aria-label="发送">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   纹生 · 渲染引擎（纯 Canvas，零依赖）
+   核心思想：母题(unit) 与 骨式(bone) 正交分离
+   ============================================================ */
+
+var PALETTES = {
+  danqing: { name:'丹青', bg:'#F4EFE4', a:'#A83B2C', b:'#2F5D6B', c:'#B8935A', ink:'#2A241E' },
+  shiqing: { name:'石青', bg:'#EDF1F2', a:'#254E5C', b:'#7A8B7F', c:'#C0A062', ink:'#1F2A2E' },
+  zheshi:  { name:'赭石', bg:'#F3EADF', a:'#8A4B2A', b:'#6E5B46', c:'#C79A5B', ink:'#2E241C' },
+  mojin:   { name:'墨金', bg:'#1E1B18', a:'#C9A227', b:'#8C6E3F', c:'#E8D9B5', ink:'#F0E6D2' }
+};
+
+var UNITS = {
+  rosette: function(ctx,r,p,petals){
+    petals = petals || 8;
+    for (var ring=0; ring<3; ring++){
+      var rf = 1 - ring*0.26, pr = r*rf;
+      var col = [p.b,p.a,p.c][ring%3];
+      for (var i=0;i<petals;i++){
+        var a = (i*Math.PI*2)/petals + (ring*Math.PI)/petals;
+        ctx.save(); ctx.rotate(a);
+        ctx.beginPath();
+        ctx.ellipse(0, -pr*0.58, pr*0.17, pr*0.36, 0, 0, Math.PI*2);
+        ctx.globalAlpha=0.92; ctx.fillStyle=col; ctx.fill(); ctx.globalAlpha=1;
+        ctx.lineWidth=Math.max(0.6, r*0.012); ctx.strokeStyle=p.ink; ctx.stroke();
+        ctx.restore();
+      }
+    }
+    ctx.beginPath(); ctx.arc(0,0,r*0.16,0,Math.PI*2);
+    ctx.fillStyle=p.c; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.016); ctx.stroke();
+  },
+
+  vine: function(ctx,r,p){
+    ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.4,r*0.085); ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(-r*1.0, r*0.42);
+    ctx.bezierCurveTo(-r*0.5,-r*0.62, r*0.2,r*0.72, r*0.62,-r*0.28);
+    ctx.stroke();
+    // 卷须
+    ctx.beginPath();
+    ctx.moveTo(-r*0.18, r*0.05);
+    ctx.bezierCurveTo(-r*0.05, r*0.5, r*0.16, r*0.42, r*0.1, r*0.16);
+    ctx.lineWidth=Math.max(0.8,r*0.038); ctx.stroke();
+    // 叶片（放大）
+    var leaves=[[-0.60,0.22,0.55],[-0.05,0.30,0.15],[0.30,-0.30,-0.55]];
+    for (var k=0;k<leaves.length;k++){
+      var lx=leaves[k][0], ly=leaves[k][1], rot=leaves[k][2];
+      ctx.save(); ctx.translate(lx*r, ly*r); ctx.rotate(rot);
+      ctx.beginPath();
+      ctx.moveTo(0, r*0.30);
+      ctx.quadraticCurveTo(-r*0.26, 0, 0, -r*0.30);
+      ctx.quadraticCurveTo(r*0.26, 0, 0, r*0.30);
+      ctx.fillStyle=p.a; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+      ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.015); ctx.stroke();
+      ctx.restore();
+    }
+    // 花头
+    ctx.beginPath(); ctx.arc(r*0.34,-r*0.46,r*0.20,0,Math.PI*2);
+    ctx.fillStyle=p.c; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.018); ctx.stroke();
+    ctx.beginPath(); ctx.arc(r*0.34,-r*0.46,r*0.075,0,Math.PI*2);
+    ctx.fillStyle=p.a; ctx.fill();
+  },
+
+  meander: function(ctx,r,p){
+    var s=r*0.62;
+    ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(1.2,r*0.1); ctx.lineJoin='miter';
+    ctx.beginPath();
+    ctx.moveTo(-s,s); ctx.lineTo(-s,-s); ctx.lineTo(s,-s); ctx.lineTo(s,s);
+    ctx.lineTo(-s*0.4,s); ctx.lineTo(-s*0.4,-s*0.4); ctx.lineTo(s*0.4,-s*0.4);
+    ctx.lineTo(s*0.4,s*0.4);
+    ctx.stroke();
+  },
+
+  cloud: function(ctx,r,p){
+    ctx.fillStyle=p.b; ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.022);
+    // 云头：三瓣
+    ctx.beginPath();
+    ctx.arc(-r*0.42, r*0.06, r*0.30, Math.PI*0.80, Math.PI*2.06);
+    ctx.arc(0, -r*0.18, r*0.42, Math.PI*0.94, Math.PI*2.06);
+    ctx.arc(r*0.42, r*0.06, r*0.30, Math.PI*0.96, Math.PI*2.20);
+    ctx.lineTo(0, r*0.62);           // 尖底
+    ctx.closePath();
+    ctx.globalAlpha=0.93; ctx.fill(); ctx.globalAlpha=1; ctx.stroke();
+    // 云心：中心珠 + 内轮廓（不用横贯弧线，避免“眼眉”感）
+    ctx.beginPath();
+    ctx.arc(0, r*0.16, r*0.11, 0, Math.PI*2);
+    ctx.fillStyle=p.c; ctx.globalAlpha=0.95; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.016); ctx.stroke();
+    // 云瓣分隔（两条短弧，指向中心）
+    ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.8,r*0.028); ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(-r*0.22, -r*0.02);
+    ctx.quadraticCurveTo(-r*0.10, r*0.06, -r*0.06, r*0.16);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(r*0.22, -r*0.02);
+    ctx.quadraticCurveTo(r*0.10, r*0.06, r*0.06, r*0.16);
+    ctx.stroke();
+    // 左右卷尾
+    ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(1.1,r*0.05); ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(-r*0.58, r*0.34);
+    ctx.bezierCurveTo(-r*0.90, r*0.40, -r*0.86, r*0.78, -r*0.50, r*0.72);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(r*0.58, r*0.34);
+    ctx.bezierCurveTo(r*0.90, r*0.40, r*0.86, r*0.78, r*0.50, r*0.72);
+    ctx.stroke();
+  },
+
+  wave: function(ctx,r,p){
+    var bands=[[0.26,0.30,p.b],[0.50,0.24,p.a],[0.74,0.16,p.b]];
+    for (var k=0;k<bands.length;k++){
+      var y=r*bands[k][0], amp=r*bands[k][1];
+      ctx.beginPath(); ctx.moveTo(-r*1.05, y);
+      var step=r*0.34;
+      for (var x=-r*1.05; x<r*1.05; x+=step){
+        ctx.bezierCurveTo(x+step*0.16, y-amp*0.95, x+step*0.34, y-amp*0.95, x+step*0.5, y);
+        ctx.bezierCurveTo(x+step*0.66, y+amp*0.75, x+step*0.84, y+amp*0.75, x+step, y);
+      }
+      ctx.strokeStyle=bands[k][2];
+      ctx.lineWidth=Math.max(1.2, r*0.085);
+      ctx.lineCap='round';
+      ctx.stroke();
+    }
+    // 山崖（居中）
+    ctx.beginPath();
+    ctx.moveTo(-r*0.34, r*0.92);
+    ctx.lineTo(-r*0.17, r*0.00);
+    ctx.lineTo(0, -r*0.56);
+    ctx.lineTo(r*0.17, r*0.00);
+    ctx.lineTo(r*0.34, r*0.92);
+    ctx.closePath();
+    ctx.fillStyle=p.c; ctx.globalAlpha=0.95; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.022); ctx.stroke();
+  },
+
+  lattice: function(ctx,r,p){
+    var s=r*0.66;
+    ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.9,r*0.045);
+    ctx.beginPath();
+    for (var i=0;i<8;i++){
+      var a=(i*Math.PI)/4+Math.PI/8;
+      var x=Math.cos(a)*s, y=Math.sin(a)*s;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath(); ctx.stroke();
+    ctx.beginPath();
+    for (var j=0;j<4;j++){
+      var b=(j*Math.PI)/2;
+      ctx.moveTo(0,0); ctx.lineTo(Math.cos(b)*s*0.95, Math.sin(b)*s*0.95);
+    }
+    ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(0.6,r*0.028); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,r*0.16,0,Math.PI*2);
+    ctx.fillStyle=p.c; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.016); ctx.stroke();
+  },
+
+  fish: function(ctx,r,p){
+    ctx.beginPath(); ctx.ellipse(0,0,r*0.62,r*0.3,0,0,Math.PI*2);
+    ctx.fillStyle=p.b; ctx.globalAlpha=0.92; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.022); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(r*0.58,0); ctx.lineTo(r*0.92,-r*0.28); ctx.lineTo(r*0.92,r*0.28);
+    ctx.closePath(); ctx.fillStyle=p.a; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(-r*0.34,-r*0.08,r*0.055,0,Math.PI*2);
+    ctx.fillStyle=p.ink; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-r*0.3,r*0.02);
+    ctx.quadraticCurveTo(0,r*0.22,r*0.32,r*0.02);
+    ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.6,r*0.03); ctx.stroke();
+  },
+
+  honeysuckle: function(ctx,r,p){
+    // 贯穿的水平茎（tile 后成连续带）
+    ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.1,r*0.07); ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(-r*1.1, r*0.10);
+    ctx.bezierCurveTo(-r*0.55, -r*0.30, -r*0.15, r*0.45, r*0.15, r*0.05);
+    ctx.bezierCurveTo(r*0.45, -r*0.35, r*0.75, r*0.30, r*1.1, -r*0.02);
+    ctx.stroke();
+    // 上举棕叶
+    ctx.save(); ctx.translate(0, -r*0.02);
+    for (var i=-1;i<=1;i++){
+      ctx.save(); ctx.rotate(i*0.52 - Math.PI/2 + Math.PI/2);
+      ctx.beginPath();
+      ctx.moveTo(0, r*0.06);
+      ctx.quadraticCurveTo(-r*0.17, -r*0.20, 0, -r*0.50);
+      ctx.quadraticCurveTo(r*0.17, -r*0.20, 0, r*0.06);
+      ctx.fillStyle=(i===0?p.a:p.c); ctx.globalAlpha=0.92; ctx.fill(); ctx.globalAlpha=1;
+      ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.014); ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
+    // 下垂小叶
+    ctx.save(); ctx.translate(r*0.52, r*0.10); ctx.rotate(2.5);
+    ctx.beginPath();
+    ctx.moveTo(0, r*0.05);
+    ctx.quadraticCurveTo(-r*0.13,-r*0.16, 0,-r*0.34);
+    ctx.quadraticCurveTo(r*0.13,-r*0.16, 0, r*0.05);
+    ctx.fillStyle=p.b; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+    ctx.restore();
+  },
+
+  wan: function(ctx,r,p){
+    // 卍：十字 + 四个同向弯头
+    var s=r*0.62;
+    ctx.strokeStyle=p.a;
+    ctx.lineWidth=Math.max(1.4,r*0.13);
+    ctx.lineCap='square'; ctx.lineJoin='miter';
+    ctx.beginPath();
+    ctx.moveTo(-s,0); ctx.lineTo(s,0);        // 横
+    ctx.moveTo(0,-s); ctx.lineTo(0,s);        // 竖
+    ctx.moveTo(0,-s); ctx.lineTo(s,-s);       // 上端→右
+    ctx.moveTo(s,0);  ctx.lineTo(s,s);        // 右端→下
+    ctx.moveTo(0,s);  ctx.lineTo(-s,s);       // 下端→左
+    ctx.moveTo(-s,0); ctx.lineTo(-s,-s);      // 左端→上
+    ctx.stroke();
+  }
+};
+
+function drawUnit(ctx, unitId, r, p, petals){
+  var u = UNITS[unitId] || UNITS.rosette;
+  try { u(ctx, r, p, petals); } catch(e){}
+}
+
+var LAYOUTS = {
+  single: function(ctx,W,H,unitId,p,o){
+    ctx.save(); ctx.translate(W/2,H/2);
+    drawUnit(ctx, unitId, Math.min(W,H)*0.34, p, o.petals);
+    ctx.restore();
+  },
+
+  fitting: function(ctx,W,H,unitId,p,o){
+    var R = Math.min(W,H)*0.44;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(W/2-R,H/2-R,R*2,R*2); ctx.clip();
+    ctx.translate(W/2,H/2);
+    drawUnit(ctx, unitId, R*0.98, p, o.petals);
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle=p.ink; ctx.globalAlpha=0.3; ctx.lineWidth=1;
+    ctx.strokeRect(W/2-R,H/2-R,R*2,R*2);
+    ctx.restore();
+  },
+
+  radial: function(ctx,W,H,unitId,p,o){
+    var n=o.n||8, R=Math.min(W,H)*0.44;
+    for (var i=0;i<n;i++){
+      ctx.save(); ctx.translate(W/2,H/2); ctx.rotate((i*Math.PI*2)/n);
+      drawUnit(ctx, unitId, R*0.6, p, o.petals);
+      ctx.restore();
+    }
+    ctx.save(); ctx.translate(W/2,H/2);
+    drawUnit(ctx,'rosette', R*0.3, p, Math.min(n,8));
+    ctx.restore();
+  },
+
+  border2: function(ctx,W,H,unitId,p,o){
+    var bandH=H*0.64, top=(H-bandH)/2, mid=H/2;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0,top,W,bandH); ctx.clip();
+
+    var n=Math.min(8, Math.max(3, Math.round(o.density/16)+3));
+    var step=W/n;
+    var r=Math.min(step*0.52, bandH*0.44);
+
+    // 界带细线
+    ctx.strokeStyle=p.ink; ctx.globalAlpha=0.22; ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(0,top); ctx.lineTo(W,top);
+    ctx.moveTo(0,top+bandH); ctx.lineTo(W,top+bandH);
+    ctx.stroke(); ctx.globalAlpha=1;
+
+    // 缠绕类：先画一条贯穿全宽的主茎，再落花叶
+    var woven = (unitId==='vine' || unitId==='honeysuckle');
+    if (woven){
+      var amp=bandH*0.26;
+      ctx.beginPath();
+      ctx.moveTo(0,mid);
+      for (var x=0; x<W; x+=step){
+        ctx.quadraticCurveTo(x+step*0.25, mid-amp, x+step*0.5, mid);
+        ctx.quadraticCurveTo(x+step*0.75, mid+amp, x+step, mid);
+      }
+      ctx.strokeStyle=p.b; ctx.globalAlpha=0.55;
+      ctx.lineWidth=Math.max(1.6, bandH*0.075); ctx.lineCap='round';
+      ctx.stroke(); ctx.globalAlpha=1;
+    }
+
+    for (var i=0;i<n;i++){
+      var cx=i*step+step/2;
+      var y = woven ? mid - Math.sin((i+0.5)*Math.PI)*bandH*0.13 : mid;
+      ctx.save(); ctx.translate(cx,y);
+      drawUnit(ctx, unitId, r, p, o.petals);
+      ctx.restore();
+    }
+    ctx.restore();
+  },
+
+  allover4: function(ctx,W,H,unitId,p,o){
+    var n=Math.max(2, Math.round(o.density/22)+2);
+    var stepX=W/n, stepY=H/n, r=Math.min(stepX,stepY)*0.46;
+    for (var row=0; row<=n; row++){
+      for (var col=0; col<=n; col++){
+        var stagger = (row%2===0)?0:stepX/2;
+        var x=col*stepX+stagger-stepX/2, y=row*stepY;
+        ctx.save(); ctx.translate(x,y);
+        drawUnit(ctx, unitId, r, p, o.petals);
+        ctx.restore();
+      }
+    }
+  }
+};
+
+function renderMotif(canvas, motif, opts){
+  opts = opts || {};
+  var dpr = Math.min(window.devicePixelRatio||2, 2);
+  var rect = canvas.getBoundingClientRect();
+  var W = Math.max(60, Math.round(rect.width));
+  var H = Math.max(60, Math.round(rect.height));
+  canvas.width = Math.round(W*dpr);
+  canvas.height = Math.round(H*dpr);
+  var ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  var palKey = opts.palette || motif.palette || 'danqing';
+  var p = PALETTES[palKey] || PALETTES.danqing;
+
+  if (opts.bg !== false){
+    ctx.fillStyle = p.bg;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  var bone = opts.bone || motif.defaultBone || 'fitting';
+  var fn = LAYOUTS[bone] || LAYOUTS.fitting;
+  var o = {
+    n: opts.n || (motif.symN) || 8,
+    density: opts.density || 40,
+    petals: opts.petals || motif.petals || 8
+  };
+  fn(ctx, W, H, motif.unit || 'rosette', p, o);
+  return canvas;
+}
+</script>
+
+<script>
+/* ============================================================
+   知识库：16 条纹样
+   字段说明：
+   unit     —— 母题（画什么）
+   bones    —— 该母题可用的骨式（怎么排）
+   form     —— 形式法则拆解（对称 / 连续 / 节奏）
+   ============================================================ */
+var MOTIFS = [
+{
+  id:'baoxiang', name:'宝相花', alias:'宝相团花', era:'唐', cat:'植物',
+  unit:'rosette', petals:8, defaultBone:'radial', symN:8, palette:'danqing',
+  bones:['radial','fitting','allover4'],
+  carrier:'唐代铜镜、敦煌藻井、宋元织锦、明清瓷器',
+  form:'多层放射对称。以中心花心为轴，花瓣作 4 出或 8 出层层展开，每层花瓣大小按等比收缩、逐层错开位置，形成“由内向外、层层包裹”的秩序。属于<b>旋转对称（n 阶）</b>与<b>适合纹样</b>的结合。',
+  meaning:'“宝相”本是佛教对佛像的尊称。宝相花非写生之花，而是莲花、牡丹、菊花等多种花形的理想化复合体，寓意圣洁圆满、富贵吉祥。',
+  desc:'宝相花是唐代最具代表性的装饰母题之一。它不描摹自然界某一具体花卉，而是把莲花、牡丹、菊花的特征抽取、重组，形成一种“理想之花”。这种“复合而非写生”的造物思路，正是中国传统图案区别于西方写实装饰的关键。',
+  tags:['唐代','佛教','团花','放射对称','富贵']
+},
+{
+  id:'tuanhua', name:'团花', alias:'团窠纹', era:'唐', cat:'植物',
+  unit:'rosette', petals:6, defaultBone:'fitting', symN:6, palette:'zheshi',
+  bones:['fitting','radial','allover4'],
+  carrier:'唐代丝绸、宋代缂丝、明清补服',
+  form:'圆形外轮廓的<b>适合纹样</b>。单元纹样被约束在一个正圆之内，外部留白，内部密实。圆形的边界迫使图案向心聚拢，视觉重心稳定。',
+  meaning:'“团”取团圆、团聚之意。团花是吉祥纹样中寓意最直接的一类，常用于婚庆、节令织物。',
+  desc:'团花的成立条件不在花，而在“圆”。同一个花纹母题，装进圆形就是团花，铺满整匹布就是四方连续——这说明中国传统图案的“名”，很多时候命名的是<b>骨式</b>而非母题。',
+  tags:['团圆','圆形','适合纹样','织物']
+},
+{
+  id:'chanzhi', name:'缠枝纹', alias:'缠枝花、唐草纹', era:'唐', cat:'植物',
+  unit:'vine', petals:0, defaultBone:'border2', symN:0, palette:'shiqing',
+  bones:['border2','allover4'],
+  carrier:'唐代金银器与织锦、宋代瓷器、元代青花、明清织锦与建筑彩画',
+  form:'<b>二方连续或四方连续</b>。以 S 形波状藤蔓为骨架，花叶沿蔓生发，起伏婉转。藤蔓的波峰波谷构成节奏，花头落在波峰，叶落在波谷，形成“骨架＋填充”的双层结构。',
+  meaning:'枝蔓缠绕连绵、循环不绝，寓意生生不息、子孙绵延、富贵万代。',
+  desc:'缠枝纹的构思可上溯战国，汉代趋于成熟，南北朝至隋唐广泛流行（故又名唐草纹），宋元明清一路沿用，是延续时间最长的植物纹样之一；本库中的忍冬纹，就是它早期的形态。它的骨架本身就是一件作品。看缠枝纹要先看“脉”——那条 S 形的藤；再看“点”——落在波峰的花。骨架定节奏，花叶定疏密，这也是它最容易被现代设计借用的原因：换成任何花头，骨架依然成立。',
+  tags:['连续','S形','青花','生生不息','骨架']
+},
+{
+  id:'huiwen', name:'回纹', alias:'回字纹、云雷纹变体', era:'商周', cat:'几何',
+  unit:'meander', petals:0, defaultBone:'border2', symN:0, palette:'danqing',
+  bones:['border2','allover4'],
+  carrier:'商周青铜器、汉代漆器、明清家具与瓷器边饰',
+  form:'由横竖短线折绕成方形回环。单个单元是折绕成“回”字形的方形闭合折线，连续排列后彼此相扣，形成不可断的<b>二方连续</b>带。只有横竖两向，无曲线，靠转折生节奏。',
+  meaning:'回环往复、连绵不断。民间称之为“富贵不断头”，是使用历史最长、跨度最大的几何纹样之一。',
+  desc:'回纹与云雷纹同源，都出自商周青铜器上的雷纹体系；本作把两者分列，是为了呈现同一母题在两种场合下的不同用法——云雷纹多作衬托主纹的地纹，回纹则独立成带，用于边饰。回纹的生命力在于“简”。它只用直线和直角，却能生出无限长的连续带。从商周青铜器的地纹，到明清家具的牙板边线，三千年不断——这提醒我们，纹样能否流传，不取决于复杂，而取决于能否被稳定地复制与组合。',
+  tags:['几何','青铜','连续','富贵不断头','直线']
+},
+{
+  id:'yunlei', name:'云雷纹', alias:'雷纹', era:'商周', cat:'几何',
+  unit:'meander', petals:0, defaultBone:'allover4', symN:0, palette:'mojin',
+  bones:['allover4','border2'],
+  carrier:'商周青铜礼器（鼎、簋、尊）的地纹',
+  form:'圆转者为“云”，方折者为“雷”。多以细密线条<b>四方连续</b>铺满器表作地纹，衬托主纹（饕餮、夔龙），形成“地—主”两个层次。',
+  meaning:'云雷为天象，与祈雨、通天、敬神相关。在礼器上，它承担的是营造庄严神秘氛围的功能。',
+  desc:'关于它与回纹的关系，学界有两种说法：一说回纹是云雷纹的后身或同源纹饰，一说二者本是同物异名，本库采取前一种表述。云雷纹最重要的贡献不是图案本身，而是“地纹”这个概念。它退到背景，用密集的重复把主纹托起来。这种<b>层次意识</b>——什么该显、什么该隐——是中国装饰艺术很早成熟的能力。',
+  tags:['青铜','地纹','四方连续','天象','商周']
+},
+{
+  id:'ruyi', name:'如意云纹', alias:'如意纹、云头纹', era:'唐', cat:'云气',
+  unit:'cloud', petals:0, defaultBone:'single', symN:0, palette:'shiqing',
+  bones:['single','fitting','allover4'],
+  carrier:'唐代金银器与织物、宋元瓷器、明清家具与服饰',
+  form:'以“如意头”为基本形——三瓣卷云合并成一个心形云头，下方拖出卷尾。单看是<b>单独纹样</b>，组合可作适合或连续。曲线圆转，无锐角。',
+  meaning:'“如意”即顺心遂意。云纹本身又与“运气”“祥云”相联，是吉祥语汇中最普及的一种。',
+  desc:'需要先澄清一个常见误会：汉代流行的是云气纹，不是如意云纹——“如意”作为器物名始于魏晋，云头作如意形的纹样到唐宋才长足发展、宋元定型、明清成熟。如意云纹是“吉祥话”变成图形的典型案例。它把一句祝福（万事如意）压缩成一个可无限复用的形状，然后出现在家具、瓷器、织绣、建筑上。中国纹样的一大特征，正是这种<b>语—形对应</b>的稳定编码。',
+  tags:['吉祥','云','曲线','家具','如意']
+},
+{
+  id:'haishui', name:'海水江崖纹', alias:'海水江牙、江山万代', era:'明清', cat:'山水',
+  unit:'wave', petals:0, defaultBone:'border2', symN:0, palette:'shiqing',
+  bones:['border2'],
+  carrier:'明清龙袍下摆、官服补子、瓷器足部',
+  form:'下部为层层<b>二方连续</b>的水波（斜向排列的曲线带，即“立水”，其成熟形制见于清乾隆以后），中部耸立山石（江崖），上部留云。上下分层、动静对比，是“下重上轻”的稳定构图。',
+  meaning:'“海水”与“江崖”合为“江山”，寓意江山永固、福山寿海、绵延万代。是明清宫廷服饰等级最高的边饰之一。',
+  desc:'海水江崖纹很少单独出现，它几乎总是“托底”——托着龙、托着云、托着整个上身纹样。它证明纹样系统里存在明确的<b>等级与位置秩序</b>：什么纹样放哪里，本身就是一种语言。',
+  tags:['宫廷','龙袍','江山','波浪','明清']
+},
+{
+  id:'badayun', name:'八达晕', alias:'八答晕、八搭韵、天华锦', era:'宋', cat:'几何',
+  unit:'lattice', petals:0, defaultBone:'allover4', symN:0, palette:'danqing',
+  bones:['allover4'],
+  carrier:'宋代织锦、明代妆花缎、建筑彩画',
+  form:'骨架是水平、垂直与对角线构成的“米”字格，交叉点上套方、圆或多边形框架，再向上下左右及斜向<b>四方连续</b>延展，八向贯通；单元之间以细线相连，空隙填小朵花或几何形。',
+  meaning:'“八达”取四通八达、八面通途之意，寓意路路通畅、万事亨通。',
+  desc:'八达晕的价值在于“网格”。它把图案从“排列”推进到“系统”——“米”字格一旦建立，任何单元都能嵌进去，且永远不出现断口。这是宋人织锦工艺高度成熟的一个证据。',
+  tags:['织锦','网格','八边形','宋代','四通八达']
+},
+{
+  id:'yuwen', name:'鱼纹', alias:'双鱼纹、鱼藻纹', era:'新石器', cat:'动物',
+  unit:'fish', petals:0, defaultBone:'single', symN:0, palette:'zheshi',
+  bones:['single','border2','allover4'],
+  carrier:'仰韶彩陶、宋代瓷器、明清织绣与年画',
+  form:'单体为<b>单独纹样</b>，常两两相对或相向构成对称；作装饰带时转为二方连续。鱼身多作几何化处理，鳍尾简化为三角与弧线。',
+  meaning:'鱼纹最初与渔猎生活及生殖崇拜相关，先民借鱼的强繁殖力祈求族群繁盛。后世才逐步附会谐音——“鱼”谐“余”，寓意年年有余；双鱼相合又象征夫妇和合。需注意：谐音吉祥是较晚（明清尤盛）的用法，不宜直接套回新石器时代。',
+  desc:'鱼纹是中国最古老的纹样之一，仰韶彩陶上已见成熟形态。值得注意的是它的<b>几何化程度</b>：先民并不追求画得像鱼，而是把鱼压缩成“椭圆+三角+弧线”的可复制符号。这与现代标志设计的方法几乎一致。',
+  tags:['彩陶','谐音','有余','动物','古老']
+},
+{
+  id:'rendong', name:'忍冬纹', alias:'金银花蔓', era:'魏晋南北朝', cat:'植物',
+  unit:'honeysuckle', petals:0, defaultBone:'border2', symN:0, palette:'shiqing',
+  bones:['border2','allover4'],
+  carrier:'北朝石窟壁画、敦煌藻井、唐代金银器',
+  form:'三裂掌状叶沿藤蔓<b>二方连续</b>展开，叶片向两侧翻卷，节奏均齐。是缠枝纹的早期形态之一。',
+  meaning:'忍冬（金银花）凌冬不凋，寓意坚韧、长寿、轮回不绝，随佛教艺术东传而盛行。',
+  desc:'忍冬纹是外来纹样本土化的标本。它随佛教从西域传入，先在石窟边饰落脚，再被唐代工匠改造成更饱满的缠枝。需要说明：学界对它的原型有不同看法，主流认为源自地中海地区的茛苕叶（acanthus），“金银花”是后起的汉译比名。看它的演变，能直观看到一条<b>纹样传播路线</b>。',
+  tags:['佛教','石窟','藤蔓','坚韧','北朝']
+},
+{
+  id:'wanzi', name:'万字纹', alias:'卍字纹、万字不到头', era:'唐', cat:'几何',
+  unit:'wan', petals:0, defaultBone:'border2', symN:0, palette:'danqing',
+  bones:['border2','allover4'],
+  carrier:'唐代织物、明清建筑门窗、家具与瓷器',
+  form:'以“卍”为单元，四端向外延伸折线，彼此勾连成<b>二方或四方连续</b>。因四臂相互扣合，理论上可无限延展而无断点。',
+  meaning:'“卍”本是上古以来的一种刻画符号，在中国新石器时代彩陶上已见，后随佛教艺术广泛流传；梵文中意为“吉祥之所集”，武则天时定音为“万”，寓意万福万寿、绵延不绝，故又称“万字不到头”。此处“唐”指它作为定型纹样普遍流行的时期，而非符号的最早出现年代。',
+  desc:'万字纹是“单元决定整体”的极端例子：只要单元的四臂留出接口，整体就自动成为无限连续体。这种<b>接口设计</b>的思想，在今天看就是模块化系统设计。',
+  tags:['几何','吉祥','无限','门窗','唐代']
+},
+{
+  id:'mudan', name:'牡丹纹', alias:'富贵花', era:'唐', cat:'植物',
+  unit:'rosette', petals:5, defaultBone:'fitting', symN:5, palette:'zheshi',
+  bones:['fitting','radial','single'],
+  carrier:'唐代金银器、宋代瓷器、明清织绣',
+  form:'花头饱满，花瓣层层错叠，多作<b>适合纹样</b>嵌入圆形或器物开光；折枝形态则作单独纹样。花瓣层数不拘，重在花、叶、姿态三者的关系。',
+  meaning:'牡丹号称“花中之王”，寓意富贵、繁荣、兴旺，是吉祥纹样中出现频率最高的花卉。',
+  desc:'据故宫博物院《明清宫廷织物中的牡丹纹样设计》一文，牡丹图案塑造的重点在“花、叶、姿态”三者。明清宫廷织物中的牡丹，往往与凤凰、寿石、绶带鸟组合，形成“凤穿牡丹”“富贵长寿”等成套命题——<b>组合</b>才是吉祥纹样的真正语法。',
+  tags:['富贵','花卉','组合','宫廷']
+},
+{
+  id:'lianhua', name:'莲花纹', alias:'荷花纹、莲瓣纹', era:'南北朝', cat:'植物',
+  unit:'rosette', petals:8, defaultBone:'radial', symN:8, palette:'shiqing',
+  bones:['radial','fitting','border2'],
+  carrier:'南北朝造像、敦煌藻井、宋元瓷器、寺庙建筑',
+  form:'以八瓣为典型，作<b>放射对称</b>；器物上常简化为莲瓣纹带，转为二方连续环绕器身一周。',
+  meaning:'莲花出淤泥而不染，佛教中以莲表清净、圣洁、往生净土。世俗化后亦寓“连生贵子”“一路连科”。',
+  desc:'同一个莲花，在石窟里是宗教符号，在瓷碗上是吉祥话，在藻井中心是宇宙图式的中心点。纹样的意义随<b>载体与位置</b>而变，这是理解中国传统装饰的关键一课。',
+  tags:['佛教','清净','瓷器','藻井','莲瓣']
+},
+{
+  id:'zhezhi', name:'折枝花', alias:'折枝纹', era:'宋', cat:'植物',
+  unit:'vine', petals:0, defaultBone:'single', symN:0, palette:'zheshi',
+  bones:['single','fitting'],
+  carrier:'宋代院画、缂丝、明清瓷器开光',
+  form:'取花木的一枝（含花、叶、枝），不作连续，独立成图，属<b>单独纹样</b>；被纳入器物开光或圆形轮廓内时，转为适合纹样。讲究姿态的“势”与留白。',
+  meaning:'折枝取“聊赠一枝春”之意，多寓清雅、文人意趣；与牡丹组合则转为富贵。',
+  desc:'折枝花是宋代文人审美进入装饰领域的产物。它放弃了连续纹样的满铺与对称，转而追求“一枝即一世界”的写生感与留白。这在满密为尚的吉祥纹样系统里，是一个<b>反向的例外</b>，也是宋代之所以特殊的地方。',
+  tags:['宋代','文人','写生','留白','单独纹样']
+},
+{
+  id:'yunqi', name:'云气纹', alias:'云气、流云', era:'汉', cat:'云气',
+  unit:'cloud', petals:0, defaultBone:'border2', symN:0, palette:'mojin',
+  bones:['border2','single'],
+  carrier:'汉代漆器、帛画、画像石、织锦',
+  form:'以流畅的 S 形云带贯穿画面，云头简化、云尾拉长，多作<b>二方连续</b>或自由铺展。动势强于对称。',
+  meaning:'汉人信神仙方术，云气被视为通往仙界的媒介，寓升仙、长生、通达。',
+  desc:'云气纹与后世的如意云纹是两种气质：汉代的云在“动”，飘逸奔放；明清的云在“稳”，端正规整。同一条曲线，时代一变，<b>气息就变了</b>——这正是用纹样断代的依据。',
+  tags:['汉代','升仙','漆器','动势','断代']
+},
+{
+  id:'guibei', name:'龟背纹', alias:'龟甲纹、六角纹、锁纹', era:'唐', cat:'几何',
+  unit:'lattice', petals:0, defaultBone:'allover4', symN:0, palette:'shiqing',
+  bones:['allover4'],
+  carrier:'唐代织锦、宋元瓷器、建筑地砖',
+  form:'以六边形密铺构成<b>四方连续</b>，单元之间共用边线，无空隙，是最经济的平面填充方式之一。',
+  meaning:'龟象征长寿、稳固。龟背纹取“龟寿延年”“基业稳固”之意。',
+  desc:'龟背纹在数学上是正六边形密铺，是三种能无缝铺满平面的正多边形之一（另两种是正三角形与正方形）。古人凭经验找到了它，并把“稳固”的寓意附加上去——<b>几何必然性与文化寓意</b>在这里恰好重合。',
+  tags:['几何','长寿','密铺','六边形','织锦']
+}
+];
+</script>
+
+<script>
+/* ============================================================
+   应用逻辑
+   ============================================================ */
+var $ = function(s){ return document.querySelector(s); };
+var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+var state = { era:'全部', cat:'全部', q:'', cur:null };
+
+/* ---------------- 图鉴 ---------------- */
+function eras(){
+  var s = {}; MOTIFS.forEach(function(m){ s[m.era]=1; });
+  var order = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','明清'];
+  return order.filter(function(e){ return s[e]; });
+}
+function cats(){
+  var s = {}; MOTIFS.forEach(function(m){ s[m.cat]=1; });
+  return Object.keys(s);
+}
+
+function buildFilters(){
+  var fe = $('#f-era'), fc = $('#f-cat');
+  var all = '<button class="chip on" data-era="全部">全部</button>';
+  eras().forEach(function(e){
+    all += '<button class="chip" data-era="'+e+'">'+e+'</button>';
+  });
+  fe.innerHTML = all;
+  fe.addEventListener('click', function(ev){
+    var b = ev.target.closest('.chip'); if(!b) return;
+    $$('#f-era .chip').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on'); state.era = b.dataset.era; renderGrid();
+  });
+
+  var allc = '<button class="chip on" data-cat="全部">全部</button>';
+  cats().forEach(function(c){
+    allc += '<button class="chip" data-cat="'+c+'">'+c+'</button>';
+  });
+  fc.innerHTML = allc;
+  fc.addEventListener('click', function(ev){
+    var b = ev.target.closest('.chip'); if(!b) return;
+    $$('#f-cat .chip').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on'); state.cat = b.dataset.cat; renderGrid();
+  });
+}
+
+function filtered(){
+  var q = state.q.trim();
+  return MOTIFS.filter(function(m){
+    if (state.era!=='全部' && m.era!==state.era) return false;
+    if (state.cat!=='全部' && m.cat!==state.cat) return false;
+    if (!q) return true;
+    // 归一化：去标签、去标点与引号，这样搜"米字格"也能命中"“米”字格"
+    var norm = function(t){
+      return String(t||'')
+        .replace(/<[^>]+>/g,'')
+        .replace(/[\s，。、；：？！“”‘’（）《》「」【】·—…、,.;:?!"'()\[\]{}<>|/\\~`@#$%^&*+=_\-+＝－　]/g,'');
+    };
+    var hay = norm([m.name, m.alias, m.era, eraText(m.era), m.cat,
+                    m.meaning, m.desc, m.carrier, m.form]
+                   .concat(m.tags||[])
+                   .concat((m.bones||[]).map(boneCN))
+                   .join(' '));
+    return hay.indexOf(norm(q)) >= 0;
+  });
+}
+
+var gridTimer = null;
+function renderGrid(){
+  var list = filtered();
+  var g = $('#grid');
+  if (!list.length){
+    g.innerHTML = '<div style="grid-column:1/-1;padding:36px 0;text-align:center;color:var(--ink-3);font-size:13px">没有匹配的纹样，换个词试试</div>';
+    return;
+  }
+  g.innerHTML = list.map(function(m){
+    return '<div class="card" data-id="'+m.id+'">'
+      + '<div class="cv-wrap"><canvas data-mid="'+m.id+'"></canvas></div>'
+      + '<div class="meta"><div class="nm">'+m.name+'</div>'
+      + '<div class="tag">'+m.era+' · '+m.cat+'</div></div></div>';
+  }).join('');
+
+  // 绘制
+  requestAnimationFrame(function(){
+    list.forEach(function(m){
+      var cv = g.querySelector('canvas[data-mid="'+m.id+'"]');
+      if (cv) renderMotif(cv, m, {bone:m.defaultBone, n:m.symN, petals:m.petals, palette:m.palette});
+    });
+  });
+
+  g.querySelectorAll('.card').forEach(function(c){
+    c.addEventListener('click', function(){
+      var id = c.dataset.id;
+      var m = MOTIFS.filter(function(x){ return x.id===id; })[0];
+      openDetail(m);
+    });
+  });
+}
+
+/* ---------------- 详情 ---------------- */
+function boneCN(b){
+  return {single:'单独纹样', fitting:'适合纹样', radial:'放射对称',
+          border2:'二方连续', allover4:'四方连续'}[b] || b;
+}
+
+function openDetail(m){
+  state.cur = m;
+  var d = $('#detail');
+  d.classList.add('on');
+  d.scrollTop = 0;
+  var hero = $('#d-hero');
+  renderMotif(hero, m, {bone:m.defaultBone, n:m.symN, petals:m.petals, palette:m.palette});
+
+  var p = PALETTES[m.palette] || PALETTES.danqing;
+  var sw = [
+    '<span class="sw" style="background:'+p.a+'"></span>',
+    '<span class="sw" style="background:'+p.b+'"></span>',
+    '<span class="sw" style="background:'+p.c+'"></span>',
+    '<span class="sw" style="background:'+p.bg+'"></span>'
+  ].join('');
+
+  var bones = m.bones.map(function(b){ return '<span>'+boneCN(b)+'</span>'; }).join('');
+
+  $('#d-body').innerHTML =
+    '<h2 class="d-title">'+m.name+'</h2>'
+    + '<div class="d-alias">'+(m.alias||'')+'</div>'
+    + '<dl class="kv">'
+    + '<dt>盛行</dt><dd>'+m.era+'</dd>'
+    + '<dt>类属</dt><dd>'+m.cat+'</dd>'
+    + '<dt>载体</dt><dd>'+m.carrier+'</dd>'
+    + '</dl>'
+    + '<div class="bone-row" id="d-bones">'+bones+'</div>'
+    + '<div style="font-size:10.5px;color:var(--ink-3);margin-top:6px;letter-spacing:.04em">↑ 点击骨式可直接切换预览</div>'
+    + '<div class="d-sec"><h3>形式法则</h3><p>'+m.form+'</p></div>'
+    + '<div class="d-sec"><h3>寓意</h3><p>'+m.meaning+'</p></div>'
+    + '<div class="d-sec"><h3>解读</h3><p>'+m.desc+'</p></div>'
+    + '<div class="d-sec"><h3>配色</h3><p style="font-size:12.5px;color:var(--ink-2)">'+(p.name)+'</p><div class="swatches">'+sw+'</div></div>'
+    + '<div class="d-sec" style="margin-top:22px">'
+    + '<button class="btn" id="d-studio" style="width:100%">用这个母题去创作 →</button></div>';
+  // 骨式点击切换：让“认知”页也能直观看到同一母题的不同排布
+  (function(){
+    var spans = $('#d-bones').querySelectorAll('span');
+    spans.forEach(function(sp, i){
+      var bk = m.bones[i];
+      if (!bk) return;
+      sp.style.cursor = 'pointer';
+      sp.title = '切换为' + boneCN(bk);
+      sp.addEventListener('click', function(){
+        renderMotif(hero, m, {bone:bk, n:m.symN, petals:m.petals, palette:m.palette});
+        spans.forEach(function(x){ x.style.background = ''; x.style.color = ''; });
+        sp.style.background = 'rgba(168,59,44,.14)';
+        sp.style.color = '#A83B2C';
+      });
+    });
+  })();
+
+  $('#d-back').onclick = function(){ d.classList.remove('on'); };
+  $('#d-studio').onclick = function(){
+    d.classList.remove('on');
+    forFind(m.id);
+    go('studio');
+  };
+}
+
+/* ---------------- 问纹（智能体） ---------------- */
+/* 骨式与形式法则的概念词条：用于回答“什么是/有什么区别”这类定义问题，
+   这类问题不该由某条纹样来回答。 */
+var BONE_INFO = {
+  '单独纹样': '指不与周围发生直接联系、独立存在的纹样，分对称式与均衡式两类。常见于器物中心、刺绣主花、折枝花。',
+  '适合纹样': '指受一定外形轮廓（圆、方、三角、多边等）约束、纹样组织与该轮廓相适应的纹样。分形体适合、角隅适合、边缘适合。团花是典型的圆形适合纹样。',
+  '二方连续': '又称带状图案、花边图案。一个或一组单位纹样，向上下或左右其中一个方向重复排列，形成带状。多用于器物口沿、服饰镶边、建筑边饰。',
+  '四方连续': '一个或一组单位纹样，向上下左右四个方向同时重复排列，可无限延展。基本排列法有散点式、连缀式、重叠式。多用于织锦、壁纸、地砖。',
+  '放射对称': '纹样围绕一个中心向四周发散排列。最常见的实现是 n 阶旋转重复；若同时还具备镜面对称，才构成严格意义的放射对称。宝相花、莲花纹常用八出或四出。'
+};
+var BONE_KEYS = Object.keys(BONE_INFO);
+
+function answerBoneConcept(q){
+  var hit = BONE_KEYS.filter(function(k){ return q.indexOf(k) >= 0; });
+  if (!hit.length) return null;
+  var asksDiff = /区别|不同|差别|比较|一样吗|vs/i.test(q);
+  var asksDef  = /什么|定义|怎么排|什么叫|是指|意思/.test(q);
+  if (!asksDiff && !asksDef) return null;
+
+  var lines = hit.map(function(k){ return '【' + k + '】' + BONE_INFO[k]; });
+  var tail = '';
+  if (asksDiff && hit.length >= 2){
+    tail = '\n\n一句话区分：二方连续只在一个方向上重复，是“带”；四方连续在四个方向上重复，是“面”。';
+  }
+  return {
+    text: lines.join('\n\n') + tail,
+    trace: '<b>① 意图识别</b>　骨式概念询问（命中：' + hit.join('、') + '）'
+         + '<br><b>② 知识检索</b>　走概念词条，不检索具体纹样'
+         + '<br><b>③ 应答生成</b>　直接给出定义与区别'
+  };
+}
+
+var INTENTS = [
+  { id:'era',      kw:['唐','宋','明','清','汉','商周','周','南北朝','魏晋','新石器','朝代','时期','年代'], label:'按朝代检索' },
+  { id:'meaning',  kw:['寓意','意思','象征','代表什么','什么含义','为什么','祝福'], label:'寓意解释' },
+  { id:'form',     kw:['骨式','怎么排','排列','连续','对称','构图','形式','法则','怎么组合'], label:'形式法则分析' },
+  { id:'compare',  kw:['区别','不同','比较','差别','一样吗'], label:'多纹样对比' },
+  { id:'make',     kw:['生成','创作','做一个','设计','画一个','导出'], label:'调用创作工具' },
+  { id:'list',     kw:['有哪些','有什么','推荐','介绍','列举','全部'], label:'列表推荐' }
+];
+
+var ERA_TEXT = {'新石器':'新石器时代','商周':'商周','汉':'汉代','魏晋':'魏晋',
+                '南北朝':'南北朝','唐':'唐代','宋':'宋代','明清':'明清两代'};
+function eraText(e){ return ERA_TEXT[e] || e; }
+
+function tokenize(q){
+  return q.replace(/[，。？！、,.?!\s]+/g,' ').split(' ').filter(Boolean);
+}
+
+function route(q){
+  var toks = tokenize(q);
+  var scored = INTENTS.map(function(it){
+    var hit = [];
+    it.kw.forEach(function(k){
+      if (q.indexOf(k) >= 0) hit.push(k);
+    });
+    return { id:it.id, label:it.label, score:hit.length, hit:hit };
+  }).filter(function(x){ return x.score>0; })
+    .sort(function(a,b){ return b.score-a.score; });
+  return { tokens:toks, intents:scored };
+}
+
+function search(q, intentId){
+  var toks = tokenize(q);
+  return MOTIFS.map(function(m){
+    var score = 0, why = [];
+    // 朝代直接命中
+    if (q.indexOf(m.era) >= 0){ score += 6; why.push('朝代:'+m.era); }
+    // 名称/别名
+    if (q.indexOf(m.name) >= 0){ score += 10; why.push('名称'); }
+    if (m.alias && q.indexOf(m.alias) >= 0){ score += 8; why.push('别名'); }
+    // 标签
+    (m.tags||[]).forEach(function(t){
+      if (q.indexOf(t) >= 0){ score += 4; why.push('标签:'+t); }
+    });
+    // 类属
+    if (q.indexOf(m.cat) >= 0){ score += 3; why.push('类属'); }
+    // 分词散点
+    toks.forEach(function(t){
+      if (t.length<2) return;
+      if ((m.meaning+m.desc+m.form+m.carrier).indexOf(t) >= 0){ score += 1; }
+    });
+    // 意图加权
+    if (intentId==='meaning' && m.meaning){ score += 1; }
+    if (intentId==='form' && m.form){ score += 1; }
+    return { m:m, score:score, why:why };
+  }).filter(function(x){ return x.score>0; })
+    .sort(function(a,b){ return b.score-a.score; });
+}
+
+function answer(q){
+  // 问候与能力询问：直接自我介绍，不走检索
+  if (/^(你好|您好|hi|hello|嗨|在吗)/i.test(q.trim()) || /你能做什么|会什么|怎么用|介绍一下你|你是谁/.test(q)){
+    return {
+      text:'我是「纹生」，一个帮你读懂中国传统纹样的小助手。\n\n'
+        + '我能做三件事：\n'
+        + '① 查纹样——按朝代、类属检索 16 条纹样的母题、骨式与寓意\n'
+        + '② 讲法则——拆解它是怎么排的（单独 / 适合 / 二方连续 / 四方连续 / 放射对称）\n'
+        + '③ 帮你创作——把母题带进工坊，换骨式、调配色、导出 PNG\n\n'
+        + '可以直接问我，比如下面这些。',
+      trace:'<b>① 意图识别</b>　问候/能力询问<br><b>② 应答</b>　返回能力说明，不触发检索'
+    };
+  }
+  var boneAns = answerBoneConcept(q);
+  if (boneAns) return boneAns;
+
+  var r = route(q);
+  var top = r.intents[0];
+  var intentId = top ? top.id : 'list';
+  var hits = search(q, intentId);
+
+  var trace = [];
+  trace.push('<b>① 意图识别</b>　' + (top ? top.label + '（命中关键词：' + top.hit.join('、') + '）' : '未命中明确意图，转为列表推荐'));
+  trace.push('<b>② 知识检索</b>　在 16 条纹样中匹配到 ' + hits.length + ' 条'
+    + (hits.length ? '，最高分：' + hits[0].m.name + '（' + hits[0].score + '）' : ''));
+
+  if (!hits.length){
+    return {
+      text:'我没能在这 16 条纹样里找到直接相关的内容。\n\n'
+        + '可以试试问得更具体一点，比如：\n'
+        + '· 「唐代有什么纹样」\n· 「缠枝纹是什么寓意」\n· 「二方连续和四方连续的区别」',
+      trace: trace.join('<br>')
+    };
+  }
+
+  var m0 = hits[0].m;
+  var body = '';
+
+  if (intentId === 'form'){
+    trace.push('<b>③ 工具调用</b>　调用「形式法则解析器」拆解骨式与对称');
+    body = '【' + m0.name + '】的骨式是' + m0.bones.map(boneCN).join('、') + '。\n\n'
+      + m0.form.replace(/<[^>]+>/g,'') + '\n\n'
+      + '载体：' + m0.carrier + '。';
+  } else if (intentId === 'meaning'){
+    trace.push('<b>③ 工具调用</b>　调用「寓意检索器」');
+    body = '【' + m0.name + '】\n\n' + m0.meaning.replace(/<[^>]+>/g,'');
+  } else if (intentId === 'compare' && hits.length >= 2){
+    trace.push('<b>③ 工具调用</b>　调用「多纹样对比器」，取前 2 条并列');
+    var a = hits[0].m, b = hits[1].m;
+    body = '【' + a.name + '】vs【' + b.name + '】\n\n'
+      + '· 年代：' + a.era + ' / ' + b.era + '\n'
+      + '· 类属：' + a.cat + ' / ' + b.cat + '\n'
+      + '· 骨式：' + a.bones.map(boneCN).join('、') + ' / ' + b.bones.map(boneCN).join('、') + '\n\n'
+      + a.name + '：' + a.form.replace(/<[^>]+>/g,'') + '\n\n'
+      + b.name + '：' + b.form.replace(/<[^>]+>/g,'');
+  } else if (intentId === 'make'){
+    trace.push('<b>③ 工具调用</b>　跳转「创作工坊」，装载母题 ' + m0.name);
+    body = '好，我把【' + m0.name + '】的母题装进创作工坊了。\n\n'
+      + '你可以换骨式、调对称阶数、改配色，实时看效果，满意就导出 PNG。\n\n'
+      + '（已自动切到工坊页）';
+    setTimeout(function(){ forFind(m0.id); go('studio'); }, 900);
+  } else if (intentId === 'era'){
+    var same = hits.filter(function(h){ return h.m.era === m0.era; }).slice(0,4);
+    trace.push('<b>③ 工具调用</b>　按朝代聚合，取同代 ' + same.length + ' 条');
+    body = eraText(m0.era) + '较有代表性的纹样，从知识库里找到这几条：\n\n'
+      + same.map(function(h){ return '· 【' + h.m.name + '】' + h.m.meaning.replace(/<[^>]+>/g,'').slice(0,42) + '…'; }).join('\n')
+      + '\n\n其中【' + m0.name + '】最典型：' + m0.desc.replace(/<[^>]+>/g,'').slice(0,60) + '…';
+  } else {
+    trace.push('<b>③ 工具调用</b>　列表渲染');
+    body = '按相关度找到这几条：\n\n'
+      + hits.slice(0,5).map(function(h,i){
+          return (i+1) + '. 【' + h.m.name + '】（' + h.m.era + '·' + h.m.cat + '）\n   '
+            + h.m.meaning.replace(/<[^>]+>/g,'').slice(0,50) + '…';
+        }).join('\n\n');
+  }
+
+  trace.push('<b>④ 生成回答</b>　基于知识库第 ' + (hits.indexOf(hits[0])+1) + ' 条，结合模板合成');
+  return { text: body, trace: trace.join('<br>') };
+}
+
+var talkInit = false;
+function initTalk(){
+  if (talkInit) return; talkInit = true;
+  var sugs = ['唐代有什么代表纹样','缠枝纹是什么寓意','二方连续和四方连续的区别',
+              '宝相花和莲花纹有什么区别','回纹为什么叫富贵不断头','我想设计一个团花'];
+  $('#sugs').innerHTML = sugs.map(function(s){
+    return '<button class="sug">'+s+'</button>';
+  }).join('');
+  $('#sugs').addEventListener('click', function(e){
+    var b = e.target.closest('.sug'); if(!b) return;
+    ask(b.textContent);
+  });
+  $('#asksend').onclick = function(){ ask($('#askinput').value); };
+  $('#askinput').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') ask($('#askinput').value);
+  });
+  ask('你好，你能做什么？', true);
+}
+
+function bubble(role, html, trace){
+  var wrap = document.createElement('div');
+  wrap.className = 'msg ' + (role==='u' ? 'u' : 'a');
+  wrap.innerHTML = '<div class="avatar">' + (role==='u' ? '我' : '纹') + '</div>'
+    + '<div class="bubble">' + html
+    + (trace ? '<div class="trace">' + trace + '</div>' : '') + '</div>';
+  $('#talk').appendChild(wrap);
+  var sc = $('#v-ask');
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function ask(q, silent){
+  q = (q||'').trim();
+  if (!q) return;
+  if (!silent) bubble('u', q.replace(/</g,'&lt;'));
+  else bubble('u', '你好');
+  $('#askinput').value = '';
+  var res = answer(q);
+  setTimeout(function(){
+    bubble('a', res.text.replace(/</g,'&lt;').replace(/\n/g,'<br>'), res.trace);
+  }, 260);
+}
+</script>
+
+<script>
+/* ---------------- 工坊 ---------------- */
+var studio = { motif:'baoxiang', bone:'radial', n:8, density:40, palette:'danqing', petals:8 };
+
+var MOTIF_BTNS = [
+  ['baoxiang','宝相花'], ['tuanhua','团花'], ['chanzhi','缠枝'],
+  ['huiwen','回纹'], ['yunlei','云雷纹'], ['ruyi','如意云'],
+  ['haishui','海水江崖'], ['badayun','八达晕'], ['yuwen','鱼纹'],
+  ['rendong','忍冬'], ['wanzi','万字'], ['mudan','牡丹'],
+  ['lianhua','莲花'], ['zhezhi','折枝花'], ['yunqi','云气纹'], ['guibei','龟背纹']
+];
+var BONE_BTNS = [['single','单独'],['fitting','适合'],['radial','放射'],['border2','二方'],['allover4','四方']];
+
+function curMotif(){
+  return MOTIFS.filter(function(m){ return m.id===studio.motif; })[0] || MOTIFS[0];
+}
+
+function paintStage(){
+  var m = curMotif();
+  renderMotif($('#stage'), m, {
+    bone: studio.bone, n: studio.n, density: studio.density,
+    palette: studio.palette, petals: studio.petals
+  });
+}
+
+function initStudio(){
+  $('#s-motif').innerHTML = MOTIF_BTNS.map(function(p){
+    return '<button data-m="'+p[0]+'"'+(p[0]===studio.motif?' class="on"':'')+'>'+p[1]+'</button>';
+  }).join('');
+  $('#s-motif').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    studio.motif = b.dataset.m;
+    $$('#s-motif button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    var m = curMotif();
+    $('#lb-motif').textContent = m.name;
+    studio.petals = m.petals || 8;
+    if (m.bones.indexOf(studio.bone) < 0){ studio.bone = m.defaultBone; syncBone(); }
+    if (m.symN){ studio.n = m.symN; $('#s-n').value = studio.n; $('#lb-n').textContent = studio.n; }
+    paintStage();
+  });
+
+  $('#s-bone').innerHTML = BONE_BTNS.map(function(p){
+    return '<button data-b="'+p[0]+'"'+(p[0]===studio.bone?' class="on"':'')+'>'+p[1]+'</button>';
+  }).join('');
+  $('#s-bone').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    studio.bone = b.dataset.b;
+    $$('#s-bone button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    $('#lb-bone').textContent = boneCN(studio.bone);
+    paintStage();
+  });
+
+  $('#s-pal').innerHTML = Object.keys(PALETTES).map(function(k){
+    return '<button data-p="'+k+'"'+(k===studio.palette?' class="on"':'')+'>'+PALETTES[k].name+'</button>';
+  }).join('');
+  $('#s-pal').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    studio.palette = b.dataset.p;
+    $$('#s-pal button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    $('#lb-p').textContent = PALETTES[studio.palette].name;
+    paintStage();
+  });
+
+  $('#s-n').addEventListener('input', function(){
+    studio.n = +this.value;
+    $('#lb-n').textContent = studio.n;
+    paintStage();
+  });
+  $('#s-d').addEventListener('input', function(){
+    studio.density = +this.value;
+    $('#lb-d').textContent = studio.density;
+    paintStage();
+  });
+
+  $('#btn-png').onclick = function(){
+    var cv = $('#stage');
+    var out = document.createElement('canvas');
+    var S = 1024;
+    out.width = S; out.height = S;
+    var m = curMotif();
+    // 以 1024 尺寸重绘
+    var ctx = out.getContext('2d');
+    var dpr = 1;
+    var palKey = studio.palette;
+    var p = PALETTES[palKey];
+    ctx.fillStyle = p.bg; ctx.fillRect(0,0,S,S);
+    var fn = LAYOUTS[studio.bone] || LAYOUTS.fitting;
+    fn(ctx, S, S, m.unit, p, {n:studio.n, density:studio.density, petals:studio.petals});
+    var a = document.createElement('a');
+    a.download = '纹生-' + m.name + '-' + boneCN(studio.bone) + '.png';
+    a.href = out.toDataURL('image/png');
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    try { a.click(); } catch (e) {}
+    setTimeout(function(){ if (a.parentNode) a.parentNode.removeChild(a); }, 1500);
+  };
+
+  $('#btn-rnd').onclick = function(){
+    var ms = MOTIF_BTNS.map(function(x){ return x[0]; });
+    var bs = BONE_BTNS.map(function(x){ return x[0]; });
+    var ps = Object.keys(PALETTES);
+    studio.motif = ms[Math.floor(Math.random()*ms.length)];
+    studio.bone  = bs[Math.floor(Math.random()*bs.length)];
+    studio.palette = ps[Math.floor(Math.random()*ps.length)];
+    studio.n = 3 + Math.floor(Math.random()*13);
+    studio.density = 20 + Math.floor(Math.random()*8)*10;
+    var m = curMotif();
+    studio.petals = m.petals || 8;
+    $('#s-n').value = studio.n; $('#lb-n').textContent = studio.n;
+    $('#s-d').value = studio.density; $('#lb-d').textContent = studio.density;
+    $('#lb-motif').textContent = m.name;
+    $('#lb-p').textContent = PALETTES[studio.palette].name;
+    syncBone();
+    $$('#s-motif button').forEach(function(x){ x.classList.toggle('on', x.dataset.m===studio.motif); });
+    $$('#s-pal button').forEach(function(x){ x.classList.toggle('on', x.dataset.p===studio.palette); });
+    paintStage();
+  };
+
+  paintStage();
+}
+
+function syncBone(){
+  $$('#s-bone button').forEach(function(x){
+    x.classList.toggle('on', x.dataset.b===studio.bone);
+  });
+  $('#lb-bone').textContent = boneCN(studio.bone);
+}
+
+function forFind(id){
+  var m = MOTIFS.filter(function(x){ return x.id===id; })[0];
+  if (!m) return;
+  studio.motif = m.id;
+  studio.bone = m.defaultBone;
+  studio.petals = m.petals || 8;
+  studio.n = m.symN || 8;
+  studio.palette = m.palette;
+  $('#lb-motif').textContent = m.name;
+  $('#lb-p').textContent = PALETTES[studio.palette].name;
+  $('#s-n').value = studio.n; $('#lb-n').textContent = studio.n;
+  $$('#s-motif button').forEach(function(x){ x.classList.toggle('on', x.dataset.m===studio.motif); });
+  $$('#s-pal button').forEach(function(x){ x.classList.toggle('on', x.dataset.p===studio.palette); });
+  syncBone();
+  paintStage();
+  $$('#s-motif button').forEach(function(x){ x.classList.toggle('on', x.dataset.m===studio.motif); });
+}
+
+/* ---------------- 视图切换 ---------------- */
+function go(v){
+  $$('.view').forEach(function(s){ s.classList.remove('on'); });
+  var el = $('#v-' + v);
+  if (el) el.classList.add('on');
+  $$('#tabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===v); });
+  $('#askbar').style.display = (v==='ask') ? 'block' : 'none';
+  window.scrollTo(0,0);
+  if (v==='ask') initTalk();
+  if (v==='studio') paintStage();
+}
+
+$$('#tabs button').forEach(function(b){
+  b.addEventListener('click', function(){ go(b.dataset.v); });
+});
+
+/* ---------------- 启动 ---------------- */
+buildFilters();
+renderGrid();
+initStudio();
+
+$('#q').addEventListener('input', function(){
+  clearTimeout(gridTimer);
+  var v = this.value;
+  gridTimer = setTimeout(function(){ state.q = v; renderGrid(); }, 160);
+});
+
+// 窗口尺寸变化时重绘（桌面端缩放）
+var rz = null;
+window.addEventListener('resize', function(){
+  clearTimeout(rz);
+  rz = setTimeout(function(){
+    renderGrid(); paintStage();
+    if (state.cur && $('#detail').classList.contains('on')){
+      renderMotif($('#d-hero'), state.cur, {bone:state.cur.defaultBone, n:state.cur.symN, petals:state.cur.petals, palette:state.cur.palette});
+    }
+  }, 220);
+});
+
+/* ---------------- 深链路由 ----------------
+   支持：
+   #atlas / #ask / #studio / #about     直接进入某页
+   #ask=问题文本                          进入问纹并自动提问
+   #motif=baoxiang                       打开某纹样详情
+   ------------------------------------------- */
+function applyHash(){
+  var h = (location.hash||'').replace(/^#/,'');
+  if (!h) return;
+  if (h.indexOf('ask=') === 0){
+    go('ask');
+    var q = decodeURIComponent(h.slice(4));
+    setTimeout(function(){ if(q) ask(q); }, 320);
+    return;
+  }
+  if (h.indexOf('motif=') === 0){
+    var id = h.slice(6);
+    var m = MOTIFS.filter(function(x){ return x.id===id; })[0];
+    if (m) openDetail(m);
+    return;
+  }
+  if (['atlas','ask','studio','about'].indexOf(h) >= 0) go(h);
+}
+if (location.hash) setTimeout(applyHash, 60);
+
+// 作者名占位（可在部署前修改）
+(function(){
+  var el = document.getElementById('author');
+  if (el) el.textContent = '（待填写）';
+})();
+</script>
+</body>
+</html>
