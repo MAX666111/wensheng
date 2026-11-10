@@ -64,6 +64,8 @@ body{
 
 /* ---------- 视图切换 ---------- */
 .view{display:none; padding:2px 16px 12px; animation:fade .28s ease}
+/* 问纹页底部还叠着输入条（约 63px），要单独多留出空间，否则最后一行推荐问题点不到 */
+#v-ask{padding-bottom:86px}
 .view.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -299,11 +301,11 @@ input[type=range]::-webkit-slider-thumb{
         <div class="seg" id="s-bone" style="grid-template-columns:repeat(5,minmax(0,1fr))"></div>
       </div>
       <div class="ctrl">
-        <div class="lb"><span>对称阶数</span><em id="lb-n">8</em></div>
+        <div class="lb"><span>对称阶数 <i id="hint-n" style="font-style:normal;font-size:10px;color:#9A8F7E"></i></span><em id="lb-n">8</em></div>
         <input type="range" id="s-n" min="3" max="16" step="1" value="8">
       </div>
       <div class="ctrl">
-        <div class="lb"><span>单 元 密 度</span><em id="lb-d">40</em></div>
+        <div class="lb"><span>单 元 密 度 <i id="hint-d" style="font-style:normal;font-size:10px;color:#9A8F7E"></i></span><em id="lb-d">40</em></div>
         <input type="range" id="s-d" min="10" max="100" step="2" value="40">
       </div>
       <div class="ctrl">
@@ -1333,7 +1335,7 @@ function initStudio(){
     studio.bone = b.dataset.b;
     $$('#s-bone button').forEach(function(x){ x.classList.remove('on'); });
     b.classList.add('on');
-    $('#lb-bone').textContent = boneCN(studio.bone);
+    syncBone();          // 内部会同时刷新骨式标签与滑杆可用状态
     paintStage();
   });
 
@@ -1351,12 +1353,12 @@ function initStudio(){
 
   $('#s-n').addEventListener('input', function(){
     studio.n = +this.value;
-    $('#lb-n').textContent = studio.n;
+    updateSliderState();
     paintStage();
   });
   $('#s-d').addEventListener('input', function(){
     studio.density = +this.value;
-    $('#lb-d').textContent = studio.density;
+    updateSliderState();
     paintStage();
   });
 
@@ -1404,7 +1406,24 @@ function initStudio(){
     paintStage();
   };
 
+  updateSliderState();
   paintStage();
+}
+
+// 参数适用范围：对称阶数只对放射对称有意义；单元密度只对两种连续骨式有意义。
+// 不适用时禁用滑杆并说明，否则用户拖动无反应会以为应用坏了。
+function updateSliderState(){
+  var usesN = (studio.bone === 'radial');
+  var usesD = (studio.bone === 'border2' || studio.bone === 'allover4');
+  var sn = $('#s-n'), sd = $('#s-d');
+  if (sn){ sn.disabled = !usesN; sn.style.opacity = usesN ? '1' : '.35'; }
+  if (sd){ sd.disabled = !usesD; sd.style.opacity = usesD ? '1' : '.35'; }
+  var ln = $('#lb-n'), ld = $('#lb-d');
+  if (ln) ln.textContent = usesN ? studio.n : '不适用';
+  if (ld) ld.textContent = usesD ? studio.density : '不适用';
+  var hn = $('#hint-n'), hd = $('#hint-d');
+  if (hn) hn.textContent = usesN ? '' : '（仅"放射对称"使用）';
+  if (hd) hd.textContent = usesD ? '' : '（仅"二方/四方连续"使用）';
 }
 
 function syncBone(){
@@ -1412,6 +1431,7 @@ function syncBone(){
     x.classList.toggle('on', x.dataset.b===studio.bone);
   });
   $('#lb-bone').textContent = boneCN(studio.bone);
+  updateSliderState();
 }
 
 function forFind(id){
@@ -1439,6 +1459,8 @@ function go(v){
   if (el) el.classList.add('on');
   $$('#tabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===v); });
   $('#askbar').style.display = (v==='ask') ? 'block' : 'none';
+  // 图鉴在隐藏时尺寸为 0，绘制会被压成 60px；切回来必须重绘
+  if (v === 'atlas') renderGrid();
   window.scrollTo(0,0);
   if (v==='ask') initTalk();
   if (v==='studio') paintStage();
@@ -1504,9 +1526,11 @@ function applyHash(){
 if (location.hash) setTimeout(applyHash, 60);
 
 // 作者名占位（可在部署前修改）
+// 作者署名：只需改这一行
+var AUTHOR_NAME = '（提交前请填写姓名）';
 (function(){
   var el = document.getElementById('author');
-  if (el) el.textContent = '（待填写）';
+  if (el) el.textContent = AUTHOR_NAME;
 })();
 </script>
 </body>
