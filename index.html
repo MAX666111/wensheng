@@ -263,6 +263,180 @@ input[type=range]::-webkit-slider-thumb{
   background:rgba(255,255,255,.42);margin-top:6px;
 }
 .author-card .kv{margin-top:2px}
+
+/* ===================================================================
+   设计层 v2 ——「宋式书卷 · 装裱感」
+   只改表现层，不动任何交互逻辑。
+   =================================================================== */
+:root{
+  --paper:#F6F1E6; --paper-2:#EFE7D7; --paper-3:#E4D9C4;
+  --ink:#241E18; --ink-2:#5E564A; --ink-3:#9C9180;
+  --line:rgba(36,30,24,.13); --line-2:rgba(36,30,24,.07);
+  --red:#9E3325; --blue:#2B5665; --gold:#B08B52;
+  --shadow-1:0 1px 2px rgba(36,30,24,.06);
+  --shadow-2:0 2px 6px rgba(36,30,24,.07), 0 12px 26px -14px rgba(36,30,24,.26);
+  --shadow-3:0 3px 10px rgba(36,30,24,.10), 0 22px 44px -20px rgba(36,30,24,.32);
+}
+
+/* 纸面：暖光 + 极淡帘纹 */
+#app{
+  background-image:
+    radial-gradient(120% 55% at 50% -8%, rgba(255,252,244,.9) 0%, rgba(255,252,244,0) 62%),
+    repeating-linear-gradient(98deg, rgba(36,30,24,.015) 0 1px, rgba(0,0,0,0) 1px 4px),
+    linear-gradient(180deg,#F7F2E8 0%, #F2EADA 100%);
+  box-shadow:0 0 0 1px rgba(36,30,24,.16), 0 30px 80px -40px rgba(0,0,0,.7);
+}
+
+/* ---------- 页头 ---------- */
+.hdr{padding:26px 18px 16px; position:relative}
+.hdr::after{
+  content:''; position:absolute; left:18px; right:18px; bottom:0; height:3px;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line-2);
+}
+.hdr h1{
+  font-family:var(--serif); font-size:27px; font-weight:600;
+  letter-spacing:.20em; text-indent:.20em;
+}
+.hdr .sub{font-size:11px; letter-spacing:.24em; color:var(--ink-3); margin-top:7px}
+.stats{
+  margin-top:11px; font-size:11.5px; color:var(--ink-3); letter-spacing:.05em;
+  display:flex; flex-wrap:wrap; gap:4px 0; align-items:baseline;
+}
+.stats b{
+  font-family:var(--serif); font-size:14px; color:var(--red);
+  font-weight:600; margin-right:2px;
+}
+
+/* ---------- 检索框 ---------- */
+.search{
+  background:rgba(255,253,247,.92);
+  border:1px solid var(--line); border-radius:999px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), var(--shadow-1);
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.search:focus-within{
+  border-color:rgba(176,139,82,.55);
+  box-shadow:0 0 0 3px rgba(176,139,82,.13), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+/* ---------- 筛选 chip ---------- */
+.chip{
+  border-radius:999px; padding:5px 12px;
+  background:rgba(255,255,255,.5); border:1px solid var(--line);
+  color:var(--ink-2); font-size:12px; letter-spacing:.06em;
+  transition:background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.chip:hover{background:rgba(255,255,255,.88); color:var(--ink)}
+.chip.on{
+  background:var(--ink); color:#F6F1E6; border-color:var(--ink);
+  box-shadow:0 2px 8px -3px rgba(36,30,24,.55);
+}
+
+/* ---------- 纹样卡片：装裱双框 + 入口错落 ---------- */
+.grid{gap:13px; margin-top:15px}
+.card{
+  position:relative; border-radius:4px;
+  border:1px solid rgba(36,30,24,.16);
+  background:linear-gradient(180deg,#FFFDF8 0%, #F7F1E5 100%);
+  box-shadow:var(--shadow-2);
+  transition:transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease;
+  animation:cardIn .42s cubic-bezier(.2,.8,.3,1) both;
+}
+.card::after{
+  content:''; position:absolute; inset:5px; border-radius:2px;
+  border:1px solid rgba(36,30,24,.09); pointer-events:none;
+}
+.card:active{transform:scale(.972); box-shadow:var(--shadow-1)}
+@media (hover:hover){
+  .card:hover{transform:translateY(-3px); box-shadow:var(--shadow-3)}
+}
+.card .cv-wrap{background:#FBF7EE}
+.card .meta{
+  padding:9px 11px 10px; border-top:1px solid var(--line-2);
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));
+}
+.card .nm{
+  font-family:var(--serif); font-size:15px; font-weight:600; letter-spacing:.10em;
+  display:flex; align-items:center; gap:6px;
+}
+.card .nm::before{
+  content:''; width:4px; height:4px; border-radius:50%;
+  background:var(--red); opacity:.75; flex:0 0 auto;
+}
+.card .tag{font-size:10px; color:var(--ink-3); margin-top:4px; letter-spacing:.10em; padding-left:10px}
+@keyframes cardIn{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+
+/* ---------- 底部标签栏 ---------- */
+#tabs{
+  background:rgba(250,246,238,.95);
+  -webkit-backdrop-filter:saturate(160%) blur(14px);
+  backdrop-filter:saturate(160%) blur(14px);
+  border-top:1px solid var(--line);
+  box-shadow:0 -8px 24px -18px rgba(36,30,24,.5);
+}
+#tabs button{
+  color:var(--ink-3); letter-spacing:.06em; position:relative;
+  transition:color .18s ease, transform .18s ease;
+}
+#tabs button.on{color:var(--red)}
+#tabs button.on::before{
+  content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:22px; height:2px; background:var(--red);
+}
+#tabs button:active{transform:scale(.94)}
+
+/* ---------- 详情页 ---------- */
+#detail{
+  background-image:
+    radial-gradient(120% 45% at 50% 0%, rgba(255,252,244,.92), rgba(255,252,244,0) 60%),
+    linear-gradient(180deg,#F7F2E8,#F1E9D8);
+}
+.d-title{font-family:var(--serif); font-size:28px; font-weight:600; letter-spacing:.16em}
+.d-sec h3{
+  font-family:var(--serif); font-size:13.5px; letter-spacing:.22em; color:var(--ink-2);
+  display:flex; align-items:center; gap:8px; padding-bottom:6px;
+  border-bottom:1px solid var(--line-2); margin-bottom:9px;
+}
+.d-sec h3::before{content:''; width:3px; height:12px; background:var(--red); opacity:.8}
+.d-sec p{line-height:1.92}
+.kv{grid-template-columns:86px 1fr; gap:10px 12px}
+.kv dt{color:var(--ink-3); letter-spacing:.16em; font-size:11.5px}
+.kv dd{font-size:13.5px; line-height:1.7}
+.src{
+  font-size:12.5px; color:var(--ink-2); line-height:1.85;
+  padding:10px 12px; border-left:2px solid var(--gold);
+  background:rgba(176,139,82,.07); border-radius:0 6px 6px 0;
+}
+
+/* ---------- 工坊 ---------- */
+#stage{
+  border-radius:4px; background:#FBF7EE;
+  box-shadow:var(--shadow-2), 0 0 0 1px rgba(36,30,24,.14);
+}
+
+/* ---------- 问答 ---------- */
+.bubble{
+  border-radius:12px 12px 12px 4px; box-shadow:var(--shadow-1); line-height:1.88;
+  animation:bubbleIn .3s cubic-bezier(.2,.8,.3,1) both;
+}
+@keyframes bubbleIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+.sug{
+  border-radius:999px; background:rgba(255,255,255,.6);
+  transition:background .18s ease, border-color .18s ease;
+}
+.sug:hover{background:#fff; border-color:rgba(176,139,82,.5)}
+
+/* ---------- 滚动条 ---------- */
+#detail::-webkit-scrollbar, .view::-webkit-scrollbar{width:6px}
+#detail::-webkit-scrollbar-thumb, .view::-webkit-scrollbar-thumb{
+  background:rgba(36,30,24,.16); border-radius:3px;
+}
+
+/* ---------- 尊重"减少动态效果" ---------- */
+@media (prefers-reduced-motion: reduce){
+  .card, .bubble{animation:none !important}
+  .card:hover{transform:none}
+}
 </style>
 </head>
 <body>
@@ -621,6 +795,379 @@ var UNITS = {
   }
 };
 
+/* ============================================================
+   扩充母题绘制单元（第二批 14 个）
+   ============================================================ */
+
+UNITS.taotie = function(ctx,r,p){
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.3,r*0.085);
+  [-1,1].forEach(function(s){
+    ctx.beginPath();
+    ctx.moveTo(s*r*0.26,-r*0.40);
+    ctx.bezierCurveTo(s*r*0.92,-r*0.92, s*r*1.08,-r*0.10, s*r*0.66, r*0.16);
+    ctx.stroke();
+  });
+  ctx.beginPath();
+  ctx.moveTo(-r*0.46,-r*0.34);
+  ctx.lineTo(-r*0.30,-r*0.58); ctx.lineTo(r*0.30,-r*0.58); ctx.lineTo(r*0.46,-r*0.34);
+  ctx.lineTo(r*0.38, r*0.30); ctx.lineTo(0, r*0.78); ctx.lineTo(-r*0.38, r*0.30);
+  ctx.closePath();
+  ctx.fillStyle=p.c; ctx.globalAlpha=0.28; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.9,r*0.028); ctx.stroke();
+  [-1,1].forEach(function(s){
+    ctx.beginPath();
+    ctx.ellipse(s*r*0.24,-r*0.10, r*0.17, r*0.12, 0, 0, Math.PI*2);
+    ctx.fillStyle=p.a; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.022); ctx.stroke();
+    ctx.beginPath(); ctx.arc(s*r*0.24,-r*0.10, r*0.055, 0, Math.PI*2);
+    ctx.fillStyle=p.ink; ctx.fill();
+  });
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.026);
+  ctx.beginPath(); ctx.moveTo(0,-r*0.52); ctx.lineTo(0,r*0.26); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.30,r*0.36); ctx.quadraticCurveTo(0, r*0.66, r*0.30, r*0.36);
+  ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(1.1,r*0.06); ctx.stroke();
+};
+
+UNITS.kuilong = function(ctx,r,p){
+  ctx.lineCap='round';
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.4,r*0.10);
+  ctx.beginPath();
+  ctx.moveTo(-r*0.78, r*0.26);
+  ctx.bezierCurveTo(-r*0.42,-r*0.34, r*0.02, r*0.30, r*0.40,-r*0.10);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(r*0.40,-r*0.10);
+  ctx.bezierCurveTo(r*0.86,-r*0.34, r*0.96, r*0.16, r*0.60, r*0.30);
+  ctx.stroke();
+  ctx.beginPath(); ctx.arc(-r*0.74, r*0.14, r*0.24, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.022); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.94, r*0.10); ctx.lineTo(-r*0.76, r*0.30);
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.9,r*0.035); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-r*0.70, r*0.04, r*0.055, 0, Math.PI*2);
+  ctx.fillStyle=p.ink; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-r*0.16, r*0.16); ctx.lineTo(-r*0.26, r*0.66); ctx.lineTo(-r*0.06, r*0.66);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1.1,r*0.055); ctx.stroke();
+};
+
+UNITS.phoenix = function(ctx,r,p){
+  ctx.lineCap='round';
+  for (var i=0;i<3;i++){
+    ctx.beginPath();
+    ctx.moveTo(r*0.06, r*0.02);
+    ctx.bezierCurveTo(r*0.52, r*(0.16+i*0.22), r*0.92, r*(0.02+i*0.20), r*1.00, r*(0.34+i*0.18));
+    ctx.strokeStyle=[p.a,p.b,p.c][i]; ctx.lineWidth=Math.max(1.1,r*(0.075-i*0.012));
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.ellipse(-r*0.10, r*0.04, r*0.36, r*0.26, -0.35, 0, Math.PI*2);
+  ctx.fillStyle=p.b; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.022); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-r*0.22,-r*0.06);
+  ctx.quadraticCurveTo(r*0.06,-r*0.44, r*0.30,-r*0.10);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1.1,r*0.05); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.34,-r*0.10); ctx.lineTo(-r*0.44,-r*0.46);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.1,r*0.055); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-r*0.46,-r*0.54, r*0.17, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.020); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-r*0.54,-r*0.66); ctx.quadraticCurveTo(-r*0.30,-r*0.98, -r*0.24,-r*0.64);
+  ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(1.2,r*0.06); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.60,-r*0.52); ctx.lineTo(-r*0.80,-r*0.44);
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.9,r*0.032); ctx.stroke();
+};
+
+UNITS.sishen = function(ctx,r,p){
+  var cols=[p.b,p.c,p.a,p.ink];
+  for (var i=0;i<4;i++){
+    var a = i*Math.PI/2 - Math.PI/2;
+    ctx.save();
+    ctx.translate(Math.cos(a)*r*0.52, Math.sin(a)*r*0.52);
+    ctx.rotate(a+Math.PI/2);
+    ctx.beginPath();
+    ctx.ellipse(0,0, r*0.30, r*0.16, 0, 0, Math.PI*2);
+    ctx.fillStyle=cols[i]; ctx.globalAlpha=0.88; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+    ctx.beginPath(); ctx.arc(r*0.30,0, r*0.11, 0, Math.PI*2);
+    ctx.fillStyle=cols[i]; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-r*0.30,0);
+    ctx.quadraticCurveTo(-r*0.48,-r*0.20, -r*0.62,-r*0.02);
+    ctx.strokeStyle=cols[i]; ctx.lineWidth=Math.max(0.9,r*0.04); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(0,0,r*0.17,0,Math.PI*2);
+  ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.02); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,r*0.06,0,Math.PI*2); ctx.fillStyle=p.a; ctx.fill();
+};
+
+UNITS.zhuyu = function(ctx,r,p){
+  ctx.lineCap='round';
+  for (var i=0;i<4;i++){
+    ctx.save(); ctx.rotate(i*Math.PI/2 + Math.PI/4);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-r*0.70);
+    ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.1,r*0.06); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0,-r*0.44); ctx.lineTo(-r*0.22,-r*0.72);
+    ctx.moveTo(0,-r*0.44); ctx.lineTo( r*0.22,-r*0.72);
+    ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.9,r*0.045); ctx.stroke();
+    [[-0.22,-0.78],[0.22,-0.78],[0,-0.80]].forEach(function(q){
+      ctx.beginPath(); ctx.arc(q[0]*r, q[1]*r, r*0.075, 0, Math.PI*2);
+      ctx.fillStyle=p.a; ctx.fill();
+      ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.014); ctx.stroke();
+    });
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(0,0,r*0.10,0,Math.PI*2); ctx.fillStyle=p.c; ctx.fill();
+};
+
+UNITS.lianzhu = function(ctx,r,p){
+  var R=r*0.86, n=22;
+  ctx.fillStyle=p.c;
+  for (var i=0;i<n;i++){
+    var a=i/n*Math.PI*2;
+    ctx.beginPath(); ctx.arc(Math.cos(a)*R, Math.sin(a)*R, r*0.085, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.7,r*0.02);
+  ctx.beginPath(); ctx.arc(0,0,R*0.80,0,Math.PI*2); ctx.stroke();
+  for (var k=0;k<8;k++){
+    ctx.save(); ctx.rotate(k*Math.PI/4);
+    ctx.beginPath();
+    ctx.ellipse(0,-r*0.30, r*0.10, r*0.20, 0, 0, Math.PI*2);
+    ctx.fillStyle=k%2 ? p.a : p.b; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(0,0,r*0.13,0,Math.PI*2); ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+};
+
+UNITS.juancao = function(ctx,r,p){
+  ctx.lineCap='round';
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.5,r*0.10);
+  ctx.beginPath();
+  ctx.moveTo(-r*1.1, r*0.18);
+  ctx.bezierCurveTo(-r*0.72,-r*0.52, -r*0.20, r*0.56, r*0.18, r*0.00);
+  ctx.bezierCurveTo(r*0.56,-r*0.56, r*0.80, r*0.34, r*1.1,-r*0.14);
+  ctx.stroke();
+  [[-0.76,0.06,-1.9],[-0.24,0.16,1.2],[0.30,-0.12,-1.4],[0.76,0.06,1.5]].forEach(function(q){
+    ctx.save(); ctx.translate(q[0]*r, q[1]*r); ctx.rotate(q[2]);
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.bezierCurveTo(-r*0.28,-r*0.20, -r*0.30,-r*0.54, 0,-r*0.62);
+    ctx.bezierCurveTo(r*0.30,-r*0.54, r*0.28,-r*0.20, 0,0);
+    ctx.closePath();
+    ctx.fillStyle=p.a; ctx.globalAlpha=0.88; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+    ctx.restore();
+  });
+  ctx.beginPath(); ctx.arc(r*0.52,-r*0.34, r*0.16, 0, Math.PI*2);
+  ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+};
+
+UNITS.lingyang = function(ctx,r,p){
+  var R=r*0.84;
+  for (var i=0;i<14;i++){
+    var a=i/14*Math.PI*2;
+    ctx.save(); ctx.translate(Math.cos(a)*R, Math.sin(a)*R); ctx.rotate(a+Math.PI/2);
+    ctx.beginPath();
+    ctx.ellipse(0,0, r*0.115, r*0.155, 0, 0, Math.PI*2);
+    ctx.fillStyle=i%2 ? p.c : p.a; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.7,r*0.02);
+  ctx.beginPath(); ctx.arc(0,0,R*0.74,0,Math.PI*2); ctx.stroke();
+  [-1,1].forEach(function(s){
+    ctx.save(); ctx.scale(s,1);
+    ctx.beginPath();
+    ctx.ellipse(r*0.26, r*0.04, r*0.30, r*0.17, 0.25, 0, Math.PI*2);
+    ctx.fillStyle=p.b; ctx.globalAlpha=0.92; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+    ctx.beginPath(); ctx.arc(r*0.52,-r*0.10, r*0.11, 0, Math.PI*2);
+    ctx.fillStyle=p.b; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-r*0.02,r*0.02);
+    ctx.quadraticCurveTo(-r*0.20,-r*0.24, -r*0.36,-r*0.04);
+    ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.9,r*0.04); ctx.stroke();
+    ctx.restore();
+  });
+};
+
+UNITS.mantang = function(ctx,r,p){
+  ctx.strokeStyle=p.b; ctx.globalAlpha=0.45; ctx.lineWidth=Math.max(0.8,r*0.032);
+  for (var w=0;w<2;w++){
+    ctx.beginPath();
+    for (var x=-r; x<r; x+=r*0.5){
+      ctx.quadraticCurveTo(x+r*0.125, r*(0.46+w*0.22)-r*0.06, x+r*0.25, r*(0.46+w*0.22));
+      ctx.quadraticCurveTo(x+r*0.375, r*(0.46+w*0.22)+r*0.06, x+r*0.5, r*(0.46+w*0.22));
+    }
+    ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  ctx.beginPath();
+  ctx.moveTo(-r*0.62, r*0.30);
+  ctx.arc(0, r*0.30, r*0.62, Math.PI, Math.PI*2);
+  ctx.closePath();
+  ctx.fillStyle=p.b; ctx.globalAlpha=0.50; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+  for (var k=0;k<7;k++){
+    ctx.save(); ctx.translate(r*0.34,-r*0.18); ctx.rotate((k-3)*0.30 - Math.PI/2);
+    ctx.beginPath();
+    ctx.moveTo(0, r*0.04);
+    ctx.quadraticCurveTo(-r*0.14,-r*0.20, 0,-r*0.46);
+    ctx.quadraticCurveTo(r*0.14,-r*0.20, 0, r*0.04);
+    ctx.fillStyle= k===3 ? p.c : p.a; ctx.globalAlpha=0.92; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.save(); ctx.translate(-r*0.34,-r*0.26);
+  ctx.beginPath(); ctx.ellipse(0,0, r*0.24, r*0.14, -0.2, 0, Math.PI*2);
+  ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+  ctx.beginPath(); ctx.arc(r*0.24,-r*0.12, r*0.09, 0, Math.PI*2); ctx.fillStyle=p.c; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(r*0.33,-r*0.12); ctx.lineTo(r*0.44,-r*0.09);
+  ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(0.8,r*0.03); ctx.stroke();
+  ctx.restore();
+};
+
+UNITS.yunjian = function(ctx,r,p){
+  function ruyi(cx,cy,rot){
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot);
+    ctx.beginPath();
+    ctx.moveTo(0, r*0.30);
+    ctx.bezierCurveTo(-r*0.52,r*0.20, -r*0.50,-r*0.34, 0,-r*0.20);
+    ctx.bezierCurveTo(r*0.50,-r*0.34, r*0.52,r*0.20, 0, r*0.30);
+    ctx.closePath();
+    ctx.fillStyle=p.a; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.020); ctx.stroke();
+    ctx.restore();
+  }
+  ruyi(0,-r*0.34, 0);
+  ruyi(0, r*0.34, Math.PI);
+  ruyi(-r*0.34, 0, -Math.PI/2);
+  ruyi( r*0.34, 0,  Math.PI/2);
+  ctx.beginPath(); ctx.arc(0,0, r*0.16, 0, Math.PI*2);
+  ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+};
+
+UNITS.bajixiang = function(ctx,r,p){
+  var s=r*0.26;
+  ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(1,r*0.045); ctx.lineCap='round';
+  ctx.save(); ctx.translate(-r*0.34,-r*0.30);
+  ctx.beginPath();
+  ctx.moveTo(-s,-s); ctx.lineTo(s,-s); ctx.lineTo(s,s); ctx.lineTo(-s,s); ctx.closePath();
+  ctx.moveTo(-s,0); ctx.lineTo(0,-s); ctx.lineTo(s,0); ctx.lineTo(0,s); ctx.closePath();
+  ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.translate(r*0.34,-r*0.30);
+  ctx.beginPath(); ctx.arc(0,0,r*0.26,0,Math.PI*2);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1,r*0.042); ctx.stroke();
+  for (var i=0;i<8;i++){
+    ctx.save(); ctx.rotate(i*Math.PI/4);
+    ctx.beginPath(); ctx.moveTo(0,-r*0.26); ctx.lineTo(0,-r*0.10);
+    ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.8,r*0.03); ctx.stroke(); ctx.restore();
+  }
+  ctx.restore();
+  ctx.save(); ctx.translate(-r*0.34, r*0.34);
+  ctx.beginPath(); ctx.moveTo(-r*0.28,-r*0.02);
+  ctx.quadraticCurveTo(0,-r*0.44, r*0.28,-r*0.02); ctx.closePath();
+  ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,-r*0.02); ctx.lineTo(0,r*0.30);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.8,r*0.03); ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.translate(r*0.34, r*0.34);
+  for (var k=0;k<5;k++){
+    ctx.save(); ctx.rotate((k-2)*0.44 - Math.PI/2);
+    ctx.beginPath(); ctx.moveTo(0,r*0.03);
+    ctx.quadraticCurveTo(-r*0.11,-r*0.14, 0,-r*0.32);
+    ctx.quadraticCurveTo(r*0.11,-r*0.14, 0,r*0.03);
+    ctx.fillStyle=k===2?p.a:p.c; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke(); ctx.restore();
+  }
+  ctx.restore();
+};
+
+UNITS.anbaxian = function(ctx,r,p){
+  ctx.save(); ctx.translate(-r*0.36,-r*0.28);
+  ctx.beginPath(); ctx.arc(0,-r*0.14, r*0.14, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, r*0.14, r*0.20, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill(); ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.translate(r*0.36,-r*0.28);
+  ctx.beginPath(); ctx.moveTo(0, r*0.26);
+  ctx.arc(0, r*0.26, r*0.36, -Math.PI*0.78, -Math.PI*0.22); ctx.closePath();
+  ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.translate(-r*0.36, r*0.30);
+  ctx.beginPath(); ctx.moveTo(0,-r*0.30); ctx.lineTo(0,r*0.28);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1,r*0.04); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.12,-r*0.18); ctx.lineTo(r*0.12,-r*0.18);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.8,r*0.03); ctx.stroke(); ctx.restore();
+  ctx.save(); ctx.translate(r*0.36, r*0.30);
+  ctx.beginPath(); ctx.moveTo(-r*0.20,-r*0.06);
+  ctx.lineTo(r*0.20,-r*0.06); ctx.lineTo(r*0.13,r*0.24); ctx.lineTo(-r*0.13,r*0.24);
+  ctx.closePath(); ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,-r*0.10, r*0.11, Math.PI, Math.PI*2);
+  ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(0.6,r*0.022); ctx.stroke(); ctx.restore();
+};
+
+UNITS.bingmei = function(ctx,r,p){
+  ctx.strokeStyle=p.b; ctx.globalAlpha=0.55; ctx.lineWidth=Math.max(0.6,r*0.020);
+  var pts=[], i, j;
+  for (i=0;i<9;i++){ pts.push([-r + i*(2*r/8), -r + ((i*37)%100)/100*2*r]); }
+  for (i=0;i<9;i++){
+    for (j=i+2;j<9;j++){
+      var a=pts[i], b=pts[j];
+      if (Math.sqrt((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])) < r*0.72){
+        ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha=1;
+  [[-0.30,-0.26,1.00],[0.28,0.02,1.18],[0.02,-0.50,0.82],[-0.16,0.42,0.94]].forEach(function(q){
+    ctx.save(); ctx.translate(q[0]*r, q[1]*r); ctx.scale(q[2],q[2]);
+    for (var k=0;k<5;k++){
+      ctx.save(); ctx.rotate(k*Math.PI*2/5);
+      ctx.beginPath(); ctx.ellipse(0,-r*0.11, r*0.070, r*0.095, 0, 0, Math.PI*2);
+      ctx.fillStyle=p.a; ctx.fill();
+      ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.35,r*0.010); ctx.stroke();
+      ctx.restore();
+    }
+    ctx.beginPath(); ctx.arc(0,0,r*0.032,0,Math.PI*2); ctx.fillStyle=p.c; ctx.fill();
+    ctx.restore();
+  });
+};
+
+UNITS.denglong = function(ctx,r,p){
+  ctx.beginPath(); ctx.arc(0,-r*0.52, r*0.24, Math.PI, Math.PI*2);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1,r*0.045); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0,-r*0.30);
+  ctx.bezierCurveTo(r*0.56,-r*0.36, r*0.62, r*0.22, 0, r*0.30);
+  ctx.bezierCurveTo(-r*0.62, r*0.22, -r*0.56,-r*0.36, 0,-r*0.30);
+  ctx.closePath();
+  ctx.fillStyle=p.a; ctx.globalAlpha=0.90; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.024); ctx.stroke();
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.6,r*0.020);
+  [-0.26,0,0.26].forEach(function(x){
+    ctx.beginPath(); ctx.moveTo(x*r,-r*0.32); ctx.lineTo(x*r,r*0.31); ctx.stroke();
+  });
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1,r*0.05);
+  ctx.beginPath(); ctx.moveTo(-r*0.30,-r*0.30); ctx.lineTo(r*0.30,-r*0.30);
+  ctx.moveTo(-r*0.32,r*0.30); ctx.lineTo(r*0.32,r*0.30); ctx.stroke();
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.8,r*0.032);
+  [-0.18,0,0.18].forEach(function(x){
+    ctx.beginPath(); ctx.moveTo(x*r, r*0.34); ctx.lineTo(x*r*1.5, r*0.72); ctx.stroke();
+  });
+};
+
 function drawUnit(ctx, unitId, r, p, petals){
   var u = UNITS[unitId] || UNITS.rosette;
   try { u(ctx, r, p, petals); } catch(e){}
@@ -916,6 +1463,197 @@ var MOTIFS = [
   tags:['几何','长寿','密铺','六边形','织锦']
 }
 ];
+
+/* ============================================================
+   第二批纹样（15 条），每条附文物出处
+   ============================================================ */
+MOTIFS.push(
+{
+  id:'taotie', name:'兽面纹', alias:'饕餮纹、兽面纹',
+  era:'商周', cat:'动物', unit:'taotie',
+  bones:['single','fitting'], defaultBone:'single', palette:'shiqing', symN:0, petals:0,
+  carrier:'商周青铜礼器（鼎、簋、尊、卣）',
+  form:'以<b>鼻梁为中轴</b>左右严格对称，双目是视觉中心，两侧展开身躯与卷角；典型<b>单独纹样</b>对称式。',
+  meaning:'兽面纹并非某一具体猛兽，而是多种猛兽特征的拼合。学界多认为它承担沟通天地、威慑护佑的功能。',
+  desc:'“饕餮”一名出自《吕氏春秋》“周鼎著饕餮，有首无身”，是宋代金石学家对这类纹样的定名。学者把商周兽面纹分为<b>独立兽面纹、歧尾兽面纹、连体兽面纹与分解兽面纹</b>四型，其中分解兽面纹到殷墟二期才兴起。无论哪一型，<b>中轴对称</b>都是不变的结构原则——这也是中国纹样最早成熟的构图法则。',
+  tags:['商周','青铜','对称','兽面','礼器']
+},
+{
+  id:'kuilong', name:'夔龙纹', alias:'夔纹、夔龙',
+  era:'商周', cat:'动物', unit:'kuilong',
+  bones:['single','border2'], defaultBone:'single', palette:'shiqing', symN:0, petals:0,
+  carrier:'商周青铜器',
+  form:'侧身表现，大口卷唇、无角、<b>一足</b>、卷尾；单体作<b>单独纹样</b>，两两相对则构成二方连续。',
+  meaning:'夔是传说中一足的龙形神兽。夔龙纹象征王权与神权，多饰于青铜礼器与兵器。',
+  desc:'夔龙纹是仅次于兽面纹的青铜纹饰，盛行于商与西周前期。<b>商的夔身短，多作单独纹样；西周夔身变长，常作二方连续排列。</b>它是后世龙纹最重要的早期形态。',
+  tags:['商周','青铜','龙','一足','带状']
+},
+{
+  id:'fenghuang', name:'凤鸟纹', alias:'凤纹、鸟纹',
+  era:'商周', cat:'动物', unit:'phoenix',
+  bones:['single','border2'], defaultBone:'single', palette:'danqing', symN:0, petals:0,
+  carrier:'商周青铜器、战国楚绣、汉代织锦',
+  form:'高冠、勾喙、长尾，尾羽多作卷曲或分叉；单体作<b>单独纹样</b>，成对出现则构成二方连续。',
+  meaning:'凤为百鸟之王，象征祥瑞与高洁。楚文化尤重凤鸟，视之为沟通天地的神使。',
+  desc:'凤鸟纹在商周已成形，至战国楚地达到高峰。研究者指出，马王堆汉墓“长寿绣”中的凤鸟纹样被汉代刺绣继承后，形态愈趋<b>抽象与简化</b>——说明这一母题的生命力来自结构而非写实。',
+  tags:['祥瑞','楚文化','高冠','长尾']
+},
+{
+  id:'sishen', name:'四神纹', alias:'四灵纹、青龙白虎朱雀玄武',
+  era:'汉', cat:'动物', unit:'sishen',
+  bones:['radial','fitting','allover4'], defaultBone:'radial', palette:'zheshi', symN:4, petals:0,
+  carrier:'汉代瓦当、画像石、铜镜、漆器',
+  form:'青龙、白虎、朱雀、玄武分据东南西北四方，环中心作<b>四等分放射</b>；在瓦当上则依圆形轮廓作适合安排。',
+  meaning:'四神本是指示方向的星辰：东方苍龙、西方白虎、南方朱雀、北方玄武，分别对应木、金、火、水与春、夏、秋、冬，是方位的守护神。',
+  desc:'汉代九卿之一的卫尉卿掌宫门屯卫，属下即有苍龙司马、玄武司马、朱雀司马，白虎则为殿名——可见四神已进入<b>制度层面</b>，不只是装饰。故宫博物院藏陶白虎纹瓦当直径 19.3 厘米，白虎依圆瓦而呈弧形，动感强烈。',
+  tags:['汉','四神','方位','瓦当','宇宙观']
+},
+{
+  id:'zhuyu', name:'茱萸纹', alias:'叉形纹、叉刺纹',
+  era:'汉', cat:'植物', unit:'zhuyu',
+  bones:['single','allover4','border2'], defaultBone:'allover4', palette:'zheshi', symN:0, petals:0,
+  carrier:'汉代丝织品与刺绣（长沙马王堆汉墓）',
+  form:'以四出或三出的<b>叉形骨架</b>为主体，末端缀小蕾，单元之间常作四方连续散布。',
+  meaning:'茱萸在汉代被视为辟邪之物，重阳佩茱萸的习俗即由此而来。茱萸纹寓意“辟除不祥，祝颂长寿”。',
+  desc:'茱萸纹又称叉形纹、叉刺纹，是马王堆汉墓出土丝织品上的重要纹样。它不是写实的植物描写，而是把茱萸的<b>辟邪功能</b>转译成简洁的几何骨架——这是汉代纹样“以意造型”的典型做法。',
+  tags:['汉','辟邪','长寿','马王堆','丝织']
+},
+{
+  id:'lianzhu', name:'联珠纹', alias:'联珠团窠、毬路纹',
+  era:'南北朝', cat:'几何', unit:'lianzhu',
+  bones:['radial','allover4','border2'], defaultBone:'radial', palette:'shiqing', symN:8, petals:8,
+  carrier:'北朝至唐织锦、敦煌壁画、石窟装饰',
+  form:'以一个接一个的双线圆轮为骨架，圆轮以大小相等的圆珠连缀，环内主纹左右对称；典型的<b>团窠</b>结构。',
+  meaning:'联珠纹随丝路商贸自西亚、中亚传入，圆珠象征连缀不断的宝珠。它本身没有固定寓意，价值在于带来了一种全新的<b>骨架观念</b>。',
+  desc:'联珠纹盛行于南北朝至唐代，是丝绸之路上最典型的外来纹样。它对中原纹样有两点深远影响：一是“<b>团窠</b>”这种圆框式骨架，二是“主纹居中、边框环绕”的组织方式。唐代在此基础上走向两个方向——继续仿制粟特锦的联珠纹锦，以及由联珠团花发展出大型宝花纹样。',
+  tags:['丝路','外来','团窠','连珠','南北朝']
+},
+{
+  id:'juancao', name:'卷草纹', alias:'卷枝纹、卷叶纹、唐草纹',
+  era:'唐', cat:'植物', unit:'juancao',
+  bones:['border2','allover4','single'], defaultBone:'border2', palette:'danqing', symN:0, petals:0,
+  carrier:'唐代金银器、织锦、敦煌壁画边饰',
+  form:'以柔和的“S”形波状曲线为骨架，沿线生发卷叶与花头，多作<b>二方连续</b>。',
+  meaning:'连续的波曲象征生生不息。卷草纹在唐代高度成熟，成为最具时代标识的植物纹样。',
+  desc:'卷草纹由忍冬纹发展而来，因唐代盛行，日本称之为“唐草”。它与忍冬纹的区别在于：<b>忍冬纹叶片瘦长、骨感；卷草纹叶形饱满、曲线圆润，且常与牡丹、莲花组合。</b>',
+  tags:['唐','唐草','波曲','二方连续','植物']
+},
+{
+  id:'lingyang', name:'陵阳公样', alias:'陵阳公花样',
+  era:'唐', cat:'动物', unit:'lingyang',
+  bones:['radial','fitting'], defaultBone:'radial', palette:'shiqing', symN:8, petals:8,
+  carrier:'唐代织锦',
+  form:'<b>花环团窠</b>为骨架，窠内安置成对的动物纹样，左右相向；团窠本身依放射对称组织。',
+  meaning:'它是唐代吸收西域联珠团窠后形成的、具有中国特色的新型团窠图案，标志着外来骨架与本土题材的彻底融合。',
+  desc:'陵阳公样得名于窦师纶（593—671）。他字希言，扶风平陵人，先祖出自鲜卑纥豆陵氏，李唐立国后因功官拜陵阳郡开国公，故名。张彦远《历代名画记》称他“性绝巧”。其根本结构特征是<b>采用团窠骨架，并把花环团窠与动物纹样结合</b>——这是中国纹样史上一次典型的“拿来—改造—超越”。',
+  tags:['唐','织锦','团窠','窦师纶','融合']
+},
+{
+  id:'manchi', name:'满池娇', alias:'莲塘双雁、池塘小景',
+  era:'元', cat:'植物', unit:'mantang',
+  bones:['fitting','single','allover4'], defaultBone:'fitting', palette:'danqing', symN:0, petals:0,
+  carrier:'元代刺绣、织锦、青花瓷器',
+  form:'以池塘为底的<b>适合纹样</b>：荷叶、莲花与游禽（鸳鸯、鸂鶒）共处一池，构成有景深的局部写实小景。',
+  meaning:'池中莲荷与鸳鸯相偶，寓意夫妻和睦、连年有余。',
+  desc:'“满池娇”之名取自宋代，元代成为宫廷刺绣的固定图案。元代张昱《可闲老人集·宫中词》载：“鸳鸯鸂鶒满池娇，彩绣金茸日几条。早晚君王天寿节，要将着御大明朝。”可见它是<b>宫廷服装图案的名称</b>。它的价值在于把纹样从“符号排列”推向了<b>有场景的画面</b>。',
+  tags:['元','刺绣','莲塘','鸳鸯','场景']
+},
+{
+  id:'yunjian', name:'云肩纹', alias:'云肩、四合如意',
+  era:'元', cat:'几何', unit:'yunjian',
+  bones:['radial','fitting'], defaultBone:'radial', palette:'zheshi', symN:4, petals:4,
+  carrier:'金元明清服饰、瓷器开光',
+  form:'由四个<b>如意云头</b>作四方环绕，构成四合式适合轮廓；中心留一圆，可另置主纹。',
+  meaning:'四合如意寓意“事事如意、四方来和”。',
+  desc:'云肩本是披在肩部的服饰部件，金元之际已见于北方民族服饰。此后它的外形被抽象出来，成为一种独立的<b>开光式骨架</b>，广泛用于瓷器和织物，用来框住主题纹样。',
+  tags:['元','服饰','云头','开光','四合']
+},
+{
+  id:'bajixiang', name:'八吉祥', alias:'八宝、八宝生辉',
+  era:'明清', cat:'宗教', unit:'bajixiang',
+  bones:['allover4','border2','radial'], defaultBone:'allover4', palette:'zheshi', symN:0, petals:0,
+  carrier:'明清瓷器、织锦、建筑彩画',
+  form:'由<b>法螺、法轮、宝伞、白盖、莲花、宝瓶、金鱼、盘长</b>八件佛教宝物组合而成，多作散点式四方连续排列。',
+  meaning:'八件宝物各有佛教含义，整体寓意吉祥如意、圆满不断。',
+  desc:'八吉祥是典型的<b>组合式纹样</b>——它不靠单一母题的形态取胜，而靠一组器物的固定搭配来表意。这类纹样在明清极为流行，也派生出只用其中几件的简化形式。',
+  tags:['明清','佛教','组合','吉祥','八宝']
+},
+{
+  id:'anbaxian', name:'暗八仙', alias:'暗八仙纹、八仙法器',
+  era:'明清', cat:'宗教', unit:'anbaxian',
+  bones:['allover4','border2','fitting'], defaultBone:'allover4', palette:'danqing', symN:0, petals:0,
+  carrier:'明清瓷器、织绣、木雕',
+  form:'不画八仙人物，只画<b>各自的法器</b>（葫芦、扇、剑、花篮、渔鼓、玉板、箫、荷花），以器代人。',
+  meaning:'借八仙庆寿、八仙过海的典故，寓意长寿与逢凶化吉。',
+  desc:'暗八仙是一种成熟的<b>转喻手法</b>：把人物替换成其随身器物，让观者自行补全。这样做既回避了人物描绘的难度，也让纹样更适合满铺排列——是“符号经济”的典型例子。',
+  tags:['明清','道教','转喻','法器','八仙']
+},
+{
+  id:'bingmei', name:'冰梅纹', alias:'冰裂梅花纹',
+  era:'明清', cat:'植物', unit:'bingmei',
+  bones:['allover4','fitting'], defaultBone:'allover4', palette:'shiqing', symN:0, petals:5,
+  carrier:'清代青花瓷器、织绣',
+  form:'<b>冰裂纹</b>作地为底，梅花点缀其上，两层叠加；冰裂为几何网格，梅花为自然形态，形成动静对比。',
+  meaning:'取“梅花香自苦寒来”之意，象征在严寒冰雪中依然高洁不屈的品格。',
+  desc:'冰梅纹最早出现于康熙时期，此后雍正、乾隆至晚清民国均有延续。康熙朝最为写实、花形饱满。它把宋代官窑的<b>冰裂开片</b>从釉面缺陷转化为纹样母题，是一次很典型的“工艺特征反哺装饰语言”。',
+  tags:['清','青花','冰裂','梅花','品格']
+},
+{
+  id:'piqiuhua', name:'皮球花', alias:'小团花',
+  era:'明清', cat:'植物', unit:'rosette',
+  bones:['allover4','radial'], defaultBone:'allover4', palette:'danqing', symN:6, petals:6,
+  carrier:'清代瓷器、家具、服饰',
+  form:'以团花为单位，<b>三三两两成组、作散点式分布</b>，疏密错落而不成行列。',
+  meaning:'散点排布带来轻快活泼的观感，寓意圆满而不过分严肃。',
+  desc:'皮球花是一种不对称、呈散点分布的圆形纹饰，两三个成组或单独呈现，多用于瓷器，清代宫廷家具与服饰上也常见。它是<b>散点式四方连续</b>的典型——同一单元，仅靠疏密与错位就获得了节奏感。',
+  tags:['清','散点','团花','瓷器','节奏']
+},
+{
+  id:'denglong', name:'灯笼锦', alias:'庆丰收、天下乐',
+  era:'宋', cat:'几何', unit:'denglong',
+  bones:['allover4','border2'], defaultBone:'allover4', palette:'danqing', symN:0, petals:0,
+  carrier:'宋代蜀锦、明清织绣、瓷器',
+  form:'以<b>灯笼</b>为主体单元，下垂流苏，常配蜜蜂（寓“丰”），作四方连续排列。',
+  meaning:'灯谐音“登”，蜜蜂谐音“丰”，合为“五谷丰登”，故又名“庆丰收”“天下乐”。',
+  desc:'灯笼锦是宋代成都蜀锦的纹样名，因以金线织成灯笼形状而得名，宋代已见，至明清发展出梅花形、荷花形、银锭形、如意头形、八角形等多种变体。它是<b>谐音表意</b>手法的代表作——纹样的含义不是画出来的，而是读出来的。',
+  tags:['宋','蜀锦','谐音','五谷丰登','灯笼']
+}
+);
+
+/* 文物出处：一句话交代这条纹样在哪个实物上可以见到 */
+var MOTIF_SRC = {
+  baoxiang:'敦煌莫高窟唐代壁画、唐代金银器与织锦',
+  tuanhua:'唐代铜镜背纹、敦煌藻井、明清织绣',
+  chanzhi:'明代青花瓷、清代织锦与刺绣',
+  huiwen:'商周青铜器、汉代漆器、明清瓷器边饰',
+  yunlei:'商周青铜器（鼎、爵）与玉器',
+  ruyi:'唐代铜镜、宋元瓷器、明清家具',
+  haishui:'明清龙袍下摆、清乾隆以后官服',
+  badayun:'中国丝绸博物馆藏明清织锦',
+  yuwen:'新石器时代彩陶（半坡、姜寨）',
+  rendong:'北魏云冈、龙门石窟边饰',
+  wanzi:'明清织锦、瓷器与建筑装修',
+  mudan:'唐代金银器、宋代织绣、明清瓷器',
+  lianhua:'南北朝造像、唐代铜镜、明清瓷器',
+  zhezhi:'宋代院画与织绣、明清瓷器',
+  yunqi:'汉代漆器、马王堆出土丝织品',
+  guibei:'唐宋织锦、建筑地砖',
+  taotie:'商周青铜礼器（司母戊鼎、四羊方尊）',
+  kuilong:'商周青铜器、西周早期礼器',
+  fenghuang:'商代青铜器、战国楚墓帛画与刺绣',
+  sishen:'汉代瓦当（陕西历史博物馆藏四神瓦当）、铜镜',
+  zhuyu:'长沙马王堆汉墓出土丝织品与刺绣',
+  lianzhu:'北朝至唐织锦、敦煌莫高窟壁画',
+  juancao:'唐代金银器、敦煌壁画边饰',
+  lingyang:'唐代织锦（新疆吐鲁番阿斯塔那出土）',
+  manchi:'元代宫廷刺绣、元青花瓷器',
+  yunjian:'金元服饰实物、明清瓷器开光',
+  bajixiang:'明清瓷器、织锦与建筑彩画',
+  anbaxian:'明清瓷器、织绣与木雕',
+  bingmei:'清代康熙至光绪青花瓷器',
+  piqiuhua:'清代雍正至乾隆瓷器、宫廷家具',
+  denglong:'宋代蜀锦、明清织绣与瓷器'
+};
 </script>
 
 <script>
@@ -929,8 +1667,11 @@ var state = { era:'全部', cat:'全部', q:'', cur:null };
 /* ---------------- 图鉴 ---------------- */
 function eras(){
   var s = {}; MOTIFS.forEach(function(m){ s[m.era]=1; });
-  var order = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','明清'];
-  return order.filter(function(e){ return s[e]; });
+  var order = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','元','明清'];
+  // 固定顺序里没有的朝代也要出现，否则新增纹样会筛不到
+  var known = order.filter(function(e){ return s[e]; });
+  var rest  = Object.keys(s).filter(function(e){ return order.indexOf(e) < 0; });
+  return known.concat(rest);
 }
 function cats(){
   var s = {}; MOTIFS.forEach(function(m){ s[m.cat]=1; });
@@ -984,6 +1725,7 @@ function filtered(){
 }
 
 var gridTimer = null;
+var _gridAnim = true;   // 切到图鉴页时置 true，只错落一次，避免搜索时反复跳动
 function renderGrid(){
   var list = filtered();
   var g = $('#grid');
@@ -1005,6 +1747,13 @@ function renderGrid(){
     var cv = g.querySelector('canvas[data-mid="'+m.id+'"]');
     if (cv) renderMotif(cv, m, {bone:m.defaultBone, n:m.symN, petals:m.petals, palette:m.palette});
   });
+
+  if (_gridAnim){
+    g.querySelectorAll('.card').forEach(function(c, i){
+      c.style.animationDelay = Math.min(i*26, 340) + 'ms';
+    });
+    _gridAnim = false;
+  }
 
   g.querySelectorAll('.card').forEach(function(c){
     c.addEventListener('click', function(){
@@ -1053,6 +1802,7 @@ function openDetail(m){
     + '<div class="d-sec"><h3>寓意</h3><p>'+m.meaning+'</p></div>'
     + '<div class="d-sec"><h3>解读</h3><p>'+m.desc+'</p></div>'
     + '<div class="d-sec"><h3>配色</h3><p style="font-size:12.5px;color:var(--ink-2)">'+(p.name)+'</p><div class="swatches">'+sw+'</div></div>'
+    + '<div class="d-sec"><h3>文物出处</h3><p class="src">'+(MOTIF_SRC[m.id]||'—')+'</p></div>'
     + '<div class="d-sec" style="margin-top:22px">'
     + '<button class="btn" id="d-studio" style="width:100%">用这个母题去创作 →</button></div>';
   // 骨式点击切换：让“认知”页也能直观看到同一母题的不同排布
@@ -1701,7 +2451,7 @@ function go(v){
   $$('#tabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===v); });
   $('#askbar').style.display = (v==='ask') ? 'block' : 'none';
   // 图鉴在隐藏时尺寸为 0，绘制会被压成 60px；切回来必须重绘
-  if (v === 'atlas') renderGrid();
+  if (v === 'atlas') { _gridAnim = true; renderGrid(); }
   window.scrollTo(0,0);
   if (v==='ask') initTalk();
   if (v==='studio') paintStage();
@@ -1727,7 +2477,21 @@ var rz = null;
 document.addEventListener('visibilitychange', function(){
   if (document.visibilityState === 'visible') {
     var atlas = document.getElementById('v-atlas');
-    if (atlas && atlas.classList.contains('on')) renderGrid();
+    if (atlas && atlas.classList.contains('on')) /* 页头展示体量：让"内容多"这件事一眼可见 */
+(function(){
+  var h = document.querySelector('.hdr');
+  if (!h || h.querySelector('.stats')) return;
+  var eras = {}, units = {}, cats = {};
+  MOTIFS.forEach(function(m){ eras[m.era]=1; units[m.unit]=1; cats[m.cat]=1; });
+  var box = document.createElement('div');
+  box.className = 'stats';
+  box.innerHTML = '<b>' + MOTIFS.length + '</b> 条纹样　·　<b>' + Object.keys(eras).length
+    + '</b> 个朝代　·　<b>' + Object.keys(units).length + '</b> 种母题　·　<b>'
+    + Object.keys(cats).length + '</b> 个类属　·　<b>5</b> 种骨式';
+  h.appendChild(box);
+})();
+
+renderGrid();
   }
 });
 
