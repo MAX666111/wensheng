@@ -6,6 +6,14 @@
 <meta name="theme-color" content="#F4EFE4">
 <meta name="description" content="纹生 —— 中国传统纹样的认知与创作工具，用图案学的骨式语言理解纹样。">
 <title>纹生 · 中国传统纹样认知与创作</title>
+<!-- 小程序化：添加到手机主屏幕后全屏运行、没有地址栏，观感与原生小程序一致 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="纹生">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAA0SElEQVR42u19e4yU53nv816+21y97AJ7Y70DrA12MJAE4x6TGJ26bohahTauG+dIRGoqp/JR0oOa/FX/UVVVzzlNjpAa9ZIoqRpO1VhWnOOoUUhct8EOtCKQYLxxwFnMLMNegWWYnds3872X88ez8/Ixe/GyM3sBzyv+WHZmvv3mfX/f8/yeO9nS3wut1VpzLdragtZqgaO1WuBorRY4WqsFjtZqgaO1WuBorRY4WqsFjtZqgaO1WuBordZqgaO1WuBorRY4WqsFjtZajcVbWwAAhNT/RuvWrrzvwUEIaA1iFhRY7aUWON5fEoLUBIXWWmjgBLYwBgDbLAsALgQBAFyWEl8Kv/n9JlH4PY+G8OkqqQGgXBUAIJW2OY16/EnbiVuszZrZij5wsoHYFsjXqpViWVSFYpQAgGczAKCMhC94b2OF38OAQDRUhcQDZpREPd6edAFgz/p4z8Pto29Picx0X8RJWpbNGQMAAAmQtGQuCJ4E4FvX49tOX8sDwFTOL5aFVBqBZXNqsHJPAoXcMwnGBhNSqHJVGsHQnnQRCqm+ZPeGGAC4DmOcDqWzP/uHwf6IF+FMaq1uN+EYISUhh0vlD/3BjoFUmxTKr0gAGLtaSGdyCBfECiLPsxnj9B5Dyb0ADkpvYQIAElGrPeke3N+PaEAo4BtmyCanQ+ns8a+9uSMZi3AWaD3LWAENYBFSEnIwV9j/uV2ID/NxvJpfkYiVV44PT+X86WKA2gffoJRugWOVRYXBRKo7jhLi8Q/31AEifJz49B//2pt9EafLc+dERhgf42U/U6rs/9yusNSZ88onz4yiREmP5Q1K7mpBcleCA0VF2RdVoZIx++MD6xET0ahVd2zFYhBWBMgbegl9Khnr9FwxPzIMPjghE2X/1VxhRKswX0GxNOdfRJT8YOharlC1OfVcfpcKkrsMHJQSrbVfkVLpVHccdcdAqg0AKlXJKWGcln0xMp43gJi4XjIUBAAejNh7Iu5APEoBFnNcBEABDOWLp0v+O6UqABiS0dkRMUDp7Yp7LpdCCaUdmwHAUDqLGic9lmeUuA4jhNxdELlrwIHSolAKGCV9nbGD+/s/srfXc3mlKgHAsZnviyvj+RPHLp2+lp+8Uc6XAjzCsEHBKHnSdvoizmLERp3wyJQqr1UrUumwKYSwi0esjeu8Pevj+w5s3tQVd0N3VfbFT06NvHJ8ODNRkErHItZdJEXuAnAgtyj7AgD6OmOHD+3cvCnJODWiwjyjmYlCVSibU8dmCCaj8gkBoWELZyg2yB3eg64Jj3eF5DXPqbGPlNKVqsQ/jcBFeWYEiRTq0pXckaPnMhMFAPBcfldwkbUODkpnKGeqO3740E6z45wSoXRmdPrEsUs/vHgtm7+l3efbd0LgN133jsTGbOHxI9+f7+IIFGRCbXH7Y1vX7zuwua8ngbdqcHzk6Ln0WB7p6hoXIWsXHEgvpovB1t7Ewf39H93b67q87AubUzQNsqcmp2+U8M0XgmBEq4rUs2MieGyB0ksWG7OFh0VJHQTxj0oAh5FeQtETDwCJdZG2vRvRgKoK5bnc98Ubp0ZeOT58cWQ6EbXWMhFh6+5LrE1klH0hpH5mZ/fh5/dsH2gPhLI4FUId/88r546+ffWdGxsJ7Yt4G13bZWSLa7crUKBvKi0BGAFKCSFESV0JVMkXRMO+iNvp2gnLUgBLUCucEKmUpfT5UqXkC62BEcIYRYEhNFCAzZw9atsfjEeSFsd7I1WROX99+D9HJyy4vzdhcRoItW3ruv17euhkeXBsWghlW2xtqpg1JzkwcIECA/WI7wuLU8bpq68PXz6WBgB0UcDt5kZZyOFSOR/Ify37VYCKL4xDDG2Ky8fSO5Ixh9GlgYMCVKQazBXuP5AyHlJ0fDkutwF+w3PjFuuPeB5nYWMHANBZAgD3H0g99US/FCoQynU5ahkUIWswqre2wIEMoyrUJ3d0ffoPd3FKUBTjJnrTVdQLFiHBrI3khAitr/uVTKly1iMICPPq6NtT3njxwXi0kf0nAO/ki+WuaN2VT1/L7y7rvojT4Tp4G3UfxBtGrVRO2Ah6VJFC6X/+xpsvD47bnK41FrKGwMEZmS4Giaj1F5/fO5BqKxaDaNQqFoOXvvXWy4Pjxj+Bu0/mebgpIeenCyTutO3daPwcBV/sSLiLdHwtxiE2OO3HXG78HNlTkzpf2Z6IKa3nFEu6hl3jL/nkjq5nPvMIfsFo1BpKZ1/46in8+kLqFueo44yQKwRbehJ/88ITnRuiZsv+/O9Ov/Gr6w/FnD0Rtz/iOYzOd7qkpmXWOfZUvvzGLyb/7XK2WpWKkpjLH7Xtvohn0aXolFuCjRBGiArkOAcBUCwGPx/J5Ydz3ZoMxKMAMN/F0ZPGCYkxFgWogP63y9mf/eLqA/cn8ct2boh+fN/9pwcnx66XXJsR0gJHTZUgbTz86R3//b89ApRIqSkj//drZ4/8v1/mCtVE1HrUtjtde51jL/zck9ozGmMMj1ADaIB+xlKuvd51oDGdgndbEKIgZFZpSkjU5Y/a9oPxqMOoXBB2iA+XUaGUpfQ4h+s3/R+dvFLJ5Hfu6cKv/FtP9He1uSfPTVJCGKOrTkFWGRxIMigjz//ew0890V8uC8/j6Uzuz/7mp2/86nosYgEleLSbop5exEOPZ+Awygi0K3hHCABYR+kHIm6Mc92MhGyl9buValZpDfAx1+2LOG3vhdrwvUU4R3jlCDgWO5O5efqtyYc2t23oiJTLYvtAe0fc/vk715XUq46P1QQHZ6TkC9dhf/mFxx7d1YWq5NXXh//P0XOTN8r3xWyptM2IeTQXqRHIDD+lZSXLUmWV/i+Ok7R4fElGbB11YIQUhLCUHhJiC2cp1+50ncWrgbBgy2gplY66fPJG+eTZ8aTLtw+0F4vB9oH23Q92vH5mrOQL12aryFBXDRxIP/u74n/63IeQukci1quvD//1i78gAK7DldayphE2us4dnasGcBiVSr1bqRaV3mLxxglHmHZcrVQvC5Gk9AMRt82x5aIvO6P4KMkLURBySmkC4NhMCPUfb012xO3tA+1lX2xcH931QPv5d7OTN8qes2r4WB1wIDJS3fEvf/Hx9eu8alUCwD99/ezXX70Yi1jGxWnEhn2Hzgl8p8d5UBUB6A7GNjaD5uHnpdZXK9UA9DbL2hKPLk38GOGhFGgNlBLLYj8+MyZGCh/Y3SmF6mjz/uve3tODk6uIj1UARxgZ3KJKgxT6i18++cavrrfFbak02i8yRCT1Un2ajICldNxiGzy3aVvGaEGIBJC+iJOwLHmH94bCwxDbKaUZAa1Ba4i6/PTlm2cGJ5/8tU1ACWXkycc2rSI+6OoiAwBEoL70lZPpsXxb3K4z8bdZVpvFOSFL3pZkLcbBmvg8zbr40lwmbRbfdvsVhNRtcTs9lv/SV06KQAEAt+iXv/h4qjs+XQw4I/ey5KCUlHzR3zUHMsLOHwyvO4zsdJ07onuzH1Cb0Wkh2iwet7hsmHAYpSCUUgBdniuX5FILU+YhIQIF5tyVBs9hkzfKpwcnn3xsE2W35Mf1m/4KR2HoClutUY8fPrTTddh8yMCiI1GVvYS2WdxhVDdwkASgzeLZQOhmIMNgLhuINosbt9vS7s1htM3ivYSKqiShB0BInYhaYfnhOuzwoZ1Rj0uhME/lnpIchICSmjLyl194bCDVFgg1HzIoJYVS0N8Vf/y+mCv0EpT6bOPiSqmyzrZ4M7aVAPhSXSlV+iIeb8D8Qc1SEKL9Pu+mS6/eKDv2LalQJz+Akg0dkV0PtP/7T0eV1CuGj5WTHFWhnvud7Wi1KqUXQAYmh07fKCUtq5EnngBIrW1G4xbLBQFrgLuEdUouCOIWsxmVSw3TGAmUtKzpG6WD+/tT3fFCKQifelh+KKXLvhhItT33O9urQt1TkoNSMl0MDn96x1NP9BeLQSRi/dPXz77xq+v3xew6ZOQK1U/t6vn9p7efe/ECmhgNJtNhecG1StVXar1jN+7nYIRcKfsAsNF1ZOMuNUYLQlx958azn90Vz4szmZuew+vkx9j1Epko7fm1XvSPdcTtH/9sPPy2u1hyoDDY2ptAZKAP9NtnR+tsE0TGs7t79h3YfOTouQtB0GZx1oBSDy+sgxUNPOjmccdwvCmsbVQOAbRZ/EIQHDl6bt+Bzc/u7skVqnXyoy1uf/vs6KuvD2MI96kn+rf2JurEzF0pOZBqRFz+Ny88oQE8j6MPNBaxpKrXJp/aNYOMzERhX8RNWjxm8QafdQJAarSjw7bsBugtio1KiHA0IVJTc8b/dKp4/t3s7z+9PVmQZ0dys/gHP/nmBPpPK1X55GObfnjislh+ckpXgGr8xef3YvHPUDr7ze9dsDkNKwvDMxAZ6bF81OONeBHqltLaYhQAckEAjdkX5iIWo6pJYh2/ZtTj6bE8yo/Z/ENrbXP6ze9dGEpnASAatf7i83tXgHzQ5aYan9zRhZk7nJIjR89NFwPGbwUbMVcUM8sNMnoJjVsMD6ApnglOSNxi0DDhwI/HLcYb5rYzQVqtLUbjFusl1ODj8KGdqe542RcGH1oD43S6GBw5eo5TUiwGA6m2T+7omi4ur3Khy5ohvLU3cei53Ug1jn79LCZLmkw4QsB4PkwqpWmyQ5pxAHXeDmjM9oFmeDjq763m4RAaElHr4sg04gO9Gsb9oZTGV49+/SySj0PP7d7amwhj6K4BByqOw4d2ohgcSmdfHhyvc4Oi/PjsJ7adOHYpPZZPxmxDRJrIRsOqRDRmfJrk0GYhQwMQrQ29lUonY3Z6LH/i2KXPfmIbygyDDzRuXx4cH0pnUU3j9i5fdRRdJrFRLAtUKFWhisXgyNFz4X5L+HO+FPzR0w8BwLfPjsYi1rLm1iYtKx/Ixv0c+UA2SIZ0jdtyQjghdcEBpXQsYn377CgA/NHTD+VLQd2mAcCRo+eKxaAqFCqXYnm5hAddDgtFCpXqjj/zmUd8X3guf+lbb10cmY563Bw/ktBnd/ek+pJf++75mMtNxy2Lkm2W1Sw2alQ7/hxIRZcauKeEBFIZkkuWquAsQjRAWciJsl8WUmidtKxtlmVRgreptY65/GvfPZ/qSz67uydMTpXSUY9fHJl+6VtvYX3UM595JNUdDyugNQ4OUq7Kg/v7o1HL4nQonf2X85PxyC2FYkgomieVqgxT1GVaaLAsWSnoeS51p7xYAYyX/Z/fmB7MFTKlymCu8LMb08Olcl2XS6wENsZLmFgIqeMR61/OTw6lsxan0ah1cH9/+fbozBoFhzn4j+7tLRYDxumRo+fKVVlnmAHAwf39J45dujgy7bm3JIoE6KO0jgM2S36gE72Ri6DjnCzVUVsW8uc3prOB6Is4O5KxD65L7EjG+iIzac99lMqQcvFcfnFk+sSxSwf399cRC0pJuSqPHD3HOC0Wg4/u7a0D0JrmHIcP7XRdjs7QzEQhzCeMfQsASFHDyMByVmPHQvMIqVHtDVorSBf0nSNjvOwP5gp9EWd7ItbluQ6jFMBhtNNzH0rEdiRjeyLuFs7C+ED6CQB1VivyksxEAd2mrsuRma5pyYFMoq8zhtE13xevHB+eTUfa4va+A5vxJSMMDTLaLJ4PJNwrK9w7akcyhikggda6Zq0IrQOtPc76I14dPnBzXjk+vO/A5ra4PZtYvHJ82PcFxuT6OmNN96k3WXIwSg4f2imF8lz+xqmR9Fg+rDUIIQVfoO1qFApmBJoS+GU9KnR1rNjHkWeUhERkYHO6OulFakZyHT4IuU25fPYT2wq+MM8SvpQey79xagQ7Ch0+tJOtWbWCbKOvM7Z5U7IqFIoNRolRlsYtlupLIkVFZGDS1zbL6o94FiFNdEHO9oOZn5cWYUcHzOI9YBRAao3aZL62hWEnCuJjm2U5jAg9gw+kn6m+ZJ3LCxsVofCoCrV5U7KvM9Zc5tFMySGVPri/n3EaFhuGOWit8Q0njl0yFFVrYADYisnj7F5q84pE51f5Ytxii6nRNfjoizhP2g6rFd0j/URmKtWtriBaQ1h4ME7xDWtOchACaKR8ZG+v74tKVaLYqHOLPbOzGwBeOjeGPo+ZFHPO4hbrcB3ZjEjK2kEGBSgJmQ9kf8SDxTen07rDdeIW6w8pl6jHXzo3BgDP7Oyuc3mh8KhUpe+Lj9TMlmZZtc0CB6kKdXB/v+dyi9PM6HRmohBmG0ppz2Y9D7cjaGo914A1I8V8bS5GyHCpHLdYhLPFu+1VKDHdCA9CCIKg5+F2z2a37arLMxOFzOi0xann8oP7+6tCNcvnQZvlEk3G7FRfUgrFOD1x7FJdukbJF50dEQDITBRch80pNuAeFRt39NUwtXG28HAdhs3mOjsipduJhVT6xLFLjFMpVKovmYzZzXKY0ma5RD8+sH4g1SaUHkpnfzB0zbNZSDtqRsnB/f2jb0+FWjW+X8TGneYr6XmEh1R69O2pg/v7wzRfa+3Z7AdD14bSWaH0QKrt4wPrm+UwbRohxWY3js3SmVyuUDUecUqJX5F9nTEA+P47VyMu13pGbHBG4hZLWpa6h9gG7mmgNYoNDUsMBiUtK24xzoiciWDriMu//85V7LfpV0KMntNcoZrO5LA5brjr0CqDw4TZHv9wD9KiV44PY69gCCWDodjIlwJaCy8BAFameJwpuNeMlOt+JW4xZ6kZ6grA4wyrWoxtQinJlwIUHnVpYDanaNNWqvLxD/c0KxRHm6JT9qyPR6MWp+TKeN6wirBLNNWXPH0tb6KvxrcxX/RVLQMFadADtsiLhKueGiyGwGgt+jxMtPb0tXyqLxl2mBpGcmU8zymJRq096+NN0Sy0iToFqWiYLSN0PrZ1fTqTS4/lUdfgiyYXMPxs6VrihWp21G0JLqyludEIQFlITPtYsnGOtNRkEJrcKMZpeiyfzuQ+tvU2YoHWItLSJmoW2rhOSUStxz/cI4Uq++L0tXw4fxipKA47grkqBu4xKhquenIay3Q3tHT2S6NvT/U83F5HS21OT1/Ll30hhXr8wz2JqNW4ZqGN65T2pIu1ryPj+clQWR/WJSAV/eHFW/bLYjJ6TFrN3bWMTllC8HYBzRLOA/Js9sOL15CWKqnx+LUGx2aTN8oj43kAcB3WnnQb1yy0WS5zxmk6k8uHAoOGjgCASTpHO4XeKiq/JXjJ7VSDNk+ooGcag70NlibkAyneK0SSD2Sb1Wj/sfBuUAIypFmwM24dsUC6ms7k8Cya4kpvFBw2p6m+pBF3bFZSz5w6BQmHPVcwZWl5VnfarqO+zSUhJoauQ79874/X+b5qqYRNsc81gM2ZoR2zNUtdEhCjxGx1qi9ZZzOuKDhMYUH3hpgUqlgMTl/LG0WIOgW7Np++lg/7xBbILzc1JrkgaBYhDZ/ZrVqY2tlXhcR/vJbxywkxvwzPQzDFUZiIqud53JFwNCWIaOol69L6PZvh1KlE1AppFs0oOX0tXywGUqjuDbG64gZYydGhhJCqkJ0dESQcY1cLE9dLrmMIx8yrADBxvURuaU3gBLY1L38YFp3hh+fqMAqEaK0DqTzOIpx5T6cAAEe44Rq7WgCA8nfSmAlsYfd7rRFhuSAIdzef09YlS80NmHNts6zLUpoNJJRMXC8BQHvSzUwUPD4zvcV12MT10tjVwuZNSaQd5tVVmCtbFWrP+jiaT+lMrlyVsYhlbkUqjYSj4ItkzEbPhwRwKJlPRIcLkDq9pm0uCUGki7slIT3OEp/airMj8SUR0tCbNyUBAA7vwvmPpe+ky0JG+K0UVDK//dmsMuvbdVmFUYIDQ2aKzksztAOHDYZInkhncjjXbM/6+MWRaW+1OAeaqUYLzi5qQsLBblHUmVexOHFhrSybmkNqHuuSkBHOtj6/YyDVxi1aFcqvyEAorbT5FwjlV2RVKG7RgVTb1ud3RDgrCWk8YHr+HrTo4dBNLarA7QpvINKL2bQjfBBo7sIqggMjsVIo1ILh/Hqsh0YiQkLPJdKr+QrejR+sKhVp0hZLrbOBuBAE+UC2f2rrw4d3cYsWi4FWmgCwufLJGSMEQCtdLAbcog8f3tX+qa35QF4IgmwgZnu39KzCFlPT1ignZdRs2sw3UjP0AgCiXn2jjtPX8ngiqb7k6oAjzEYBAOe1htlopSo3tHkAMJXzbU7rzhk9lQvUFqMKoE2qV65KBQBXhLz/QGog1eZXpFaaLa7GgDGilfYrciDVdv+B1BUhAWBh4FqMMkIsQixCOCENFtaSWXpKEbA5ncr5ALChzatUZZiTmuNonJPyRggH8k1cCAKj/IyRXSwLw1LrCsjmm4zRrKL4cFFCPpB/+LvbsYEMu/PSE8YINk4BABwINOf9o6kSSHU9VCDT4ToWIULrpXVTnd1MUWugjBTLwnA7QmYeSwMaXMhJXcZWWHLMHL8xVYplUVe4hmz0Tl0xTW8BSACGS2Xel1gyMurwwfsSw6UymYf25gOJ1WzZQGQDkSlVfn5jerzs47gg3dSMXbPJ4VK5YlmgtYVHYxJoVppz4J2xuZwteOvh7J7Fl8Ia2tGURk1SaxJ3nvnMIzieYe6NlhoACCWEEvPfOTaLESnUM595hMSdunihKU6JWwyr2bYnYtsTsQ+uS/RFnGwgfpUvloVcGj7qnOjh3J/5Hj88lDB0VhQcUumeh9uNHRvOMMA40Eyo9nZO9J4MKUw7rvuVBmkHNmpq27sxGrX8ipzvj7sOI5SIQIlAEUqMfTtHn8mKjEattr0bK1KhwA8joy/iPJSIeZwhKKXWFKDTc7cnYgAwmCssGR+ztw43tufh9rpOSVWh0pkc4qPn4fZGnOjNtMhnrzoTBgD0Itog4HbHLZYNRJcHDfZ8AgBMRJpToRBKtNKXruTQ5YUI8J5ObeqK40uzlQsm1Az+xzWldV1B2+yyJV1rCvJQIoYVkTuSMe9OUo4X2LrT1/I90L58x8cbsWPv1MARGsINvMmCbgmkHQ3VKxBSEdLmjFtUz/UAobR4928HS0KasE4gVenFi2XOtjy/Y84PaqW5RW3OKkJ6nGFB2wJlS/ibQGucaDlcKj8Qj9JFFyvc+pkRKTUndzZEshFrljbo5AAAKVS4SgWjKujkCNu34ZDbwnXSJgM7H0iU3rqBDvbXH13n2GxOGqGVRmTYnNmcYWUi/lwS8t2/HZwTUlJqx2bXH11n2C6OMg3ea8SY0LrTcwHgV/ni4r+Uuj3rJ5wogz9HPW4iLKaSRQoFAA26Opa3m2DYvsU1otVi0jVUTbPMaRcs3urJBQG66WYfsMXplfE8ImNmpIWhzVojPq6M5y1OZwMLXUy5IBgv+/lAbnCdxagJvEp/xMsHsnQn5AO3C7cOQvHwsNUK98BIjTs6XbOPdKk5HDdd1r0hJma5vBgjQunyd9ILX6T8nfR8n+3eELvpMlQoi2TNeEsRzvoiDjZsIWs+jR7WZkqV1NrjbGlty9F3VJXKDLufk21o5BlzKjitLUY1ANovc15k+kYJ62AXT4zCGrMsJFvbWZJrWnKgEM6UKoHW9M7DsHXtlJZjLb4Otk5j3hXCg67lfEwjPK77lcU/ZCg2Jsp+PpCJdZG536M0tyhBdT6nA5GQQCoCMJ+lAwCJdZElzE7A74VevjUuPCis7WRuIzwWz+DQjYZs4D5fjl0tcErqSKWUmlOCaT4LLO/p1HyfHbtauM9fokdLAUQ4a4Ru3wvgaE+6dbVZaI8tMlHUMDjcx8UIYYzbXfUrcYt1eW7SsjDndrYvKxBqU1c8wllVyNsyRgkBQqpCRjjb1BUPhJrtPcNs6kbGwRi6vRiNac2K2qMntD3prlFwSKWNmzac6zxnzDBsyuYDufh+oCiEH4hHAWCi7C/8pIb9laZOteOnNxZwj255fgfioyokpl/gzxHOtjy/Y04qik7Sjp/ewMS2JWtMh9HFaExME8kHMmzK1sW9KbsVdjH1AACQzuRWx31+x+FWDex2H/AiHztsWdEf8QZzBQDo8tzZ4W+8qFVrwGX8lQ6jFSFFoBbwdT7w+UeujOeN+9zibAH3ubF0qkI6jC45PRMlHABgiIAsov+pltoU3S/fMa1cbKUuyRF9wEvzWHic7UjGBnOFbCAwjqVCJ4M5NSb6ZfyVKJ9OnhmdL16Px795U1L88U4zrZNTgomDc7pHoy5//T+vJAAoIY3kMmqANosbW+w9L0QYgdvZT4NB1+V1n4++PWXctGFPKJZuzhlQXhqOw/gAgPPThYmyrwAYIazWLfqX04U6ZEBNemdPTRaLgevMWy6AuWHcoihgMJNqzuN0HVYsBtlTk1hB32B+aIfrLFzrsMDWmaSIulY+ppJIClVXSbSihBSDrnKuqTAmoByOrRACgdIXgmAJnYQNPh6IR/GB+/mN6fPThfPTBewWnQ/k7BgHmrU6X3npW28xTtU8MWGUKJhdDPNklQKAkppx+tK33tL5SlPGCS6ySCcXBBeCIFC3AiimCHm+0Boeyuyo+EqAYzHpinhnTWyOaYZadHkuJtG0WbzN4tgtGjML9Tx2gchMY79fudTRCVJq7MksMtNL68rS3Jw33Njw8S+c2LuikmN2uqKxWheIGYaDjUue5RzUkmi6av8sRuccdhHO7v/Gd88vGR8GGd/47vnF1FU0q/6WzNWqZIG4d519OzvwuTKSY6F0RSz6vpotG9DUlSHgs9JgMTs2hg60lrVatIWz+zdxdvlYeiidxbyvRUJESo25YUPp7OVj6U2cLVBXsbT2TgvTDj2rYwzVt0BwNRtua/Deib0rxznQ1YFl3XXMmRBAV8ee9XGptKakLmrfeFkKqQkS4zKZcywc0g7svxa32NSLF98+8qYIVDRqEUr0PBmjWH1IKIlGLRGot4+8OfXixbjFsMMda96IMTMTmSxYVxF2cmhKTDVhsVzfdRRrENFN12ChfaPgCNdX1aWnm2LwsH8MaoK0iU0WTPkynb8WDWrZZVi7dvFvB4fSWREom1PXYRanmF2M/yxOXYfZnIpADaWzF/92EOvkTP0IaWrfwYVLwM12hTcQE3hx8+uSy8M1iA2CgzfYf+H0tfyhmjVbV0qPVVk90B4LdatlNRts4XJkWFKrLkZIME8tDNTSuKXWNmdC66kXL5Y4w4zRukLqzKxCapszOaMCKs2qdlxkbTBadlJpFh715d6qJqwrwDfJTdhlaXXAgSnmUznfr0jXYd0bYp0dEewWp/WtVwGgsyMycb2ELl7MJL0QBH3gNL3fF7xXOfJMTEdrQgied1Wq0osXAaAUQmpZzDypNqM2/l5rDWDySyLNg/Vi1oUgEBowexTZKJaTId80VYbY0tOYKuFXV1qthDkp4xSb2IU5KWVkzh405lmXTapZMg3a9HvVOtzifbW8QMwYRVli/plfQuidTa+2es8iHQIgZ7HRun5JJqqCbBTbOjJOG2ejTYjKmioJ1HZhJRemHXWfwvBbVUjSjMYs4SnRZBFdOuoxrjVoTWoMl4R+Od9Blhu+c1hEGzQCUBWyLuRmtno24UAigj/XVRKtDjhMrjPm3MZDE7vqetCgiwzDbwZCjXNSApANxMIjWppSf7tMRd7ztUHTIStMYcxS32rfOLtfEk5mMU0P6qZWrAI48PiRdgBAb1d847pw0TdQRrCde7hvZiNO9AX6pZDmDSl+T4d3NhBkeSZXLuw4N31dccRASKdApSo3rvN6u+KGcMxutbXC4JhpbnfyzCjO4NmzPl7XpBbN3TnbpmYD0WA1LAGoSNVgR9iVnPh0p7GCORsmo04JJ8pgpHPP+jhO5Tl5ZtS0b1z9TLCZAKxQ+w5srmtSi30zU31J05AbXzRZP0t2KIU7wi7coE2HJtE3eKhNpx04f6POD4ZfLZzjY3RKqjue6kuG+7oay3Hfgc1oxM7ZEngVwGGIRbEYCKU3dcVn9/TP5qvpTG7P+rgZYccJVGSjmsW07FmkTmm8VdcydUqdLykOdUpFak5ujU/csz6ezuSy+TnmUmzqigulsa1j4zqlKeCYach98syoYzO3Nixodk//nofbzdA/Y7NkA1FeUs2SrlXQ5wO5kiPAwt4OspxZNmUhs4EwdooZBojTruacS+G63LHZyTOjps38WkkwRlFWqcq6YUHhKUO/9eCGki8IIWizCKnzgVwy88c61bjFLEJWshk2ad4MhoXt83wgRS01kBBS8sVvPbghPO2qbkxWpSqbqFOaA47wsCBOyexhQUhLUXiE+4ZJAOy/dqe0tJE5WU0Jsi8rJzVU9EIQyFoHQZPd88rx4ToqasZkcUpmj8ladXDcGhaEk8b2HdgcNrKV0hGXY19Vw0hQeAwLmQ/kHdUsNT4nq1mNK5dJl+Esn3wgh4VktTE8ZtrVxPVSJBSrQlcTUlGMxIbHZK0JtYJs+ZXjw2VfBEL19STqBuDicFScMmSGo9YJD3qHY55XXmxAKFKTD6ReQbGBBQejb0+ZkbzhQc99PYlAqHJtTJZu0p40CxwzA3B/cmoEaVFd1/45h6PWCY/F16pDjW2svNhY1rkfeh6xMXskL9w+tQJNgZ/MGvS8hirejCu97IuPzhqAa4aj7juw2QxHReHxWrWSKVUW0y8LxQbWwT4Qj678nOLlcKLXBREzpcpr1YoRGziSd9+BzeGRvOFBzx/d24szeJriMl8WcJgBuJeu5GxO0aYNUyd8w8WR6XQm99vbN5phgMbnMVwqL4wPHSpb2pGMsUUbKeEZOU30sieb0d4/PAsm0Hq4VDa+DTP077e3b0xnchdHpsNznJHmowVrc3rpSq5u0POaq5WVSh85eo5xGhYeRkfiCLtvfu/CvgObt/Ym8CVULu8Kebrkh/Gh5yloG8wVsKBtCa735rasbzw2VLeG8sXTJf/dkEIp+2Jrb2Lfgc3f/N4FMz7RsA0jNhinR46ea+4g+yaDQykdi1iZicJQOuu5HIXHbLsmm6+eOHYJXzLftg4fpjE0/rMIYYRgN77FNOBamfBbE/MFMZhnkBEeLnBwf/+JY5fCLlGzUGx4Lh9KZzMThVgoJL52q+yPHD3n+wL7/fZ1xgqh2V5K6UTUenlwHAA+uaNrunjrJYOPwVzhl9OFibJfkUoBVKQaL/vnpwuoTZaADBKawaBhbS1TJ12HDErJdDH45I4uAHh5cDwRvXXwlJJCKejrjGGNp++LI0fP3QUtGJBYpMfyb5waiUYtKdThQzsN/QwnASEzNcrF4COjZohEplQZzM1Us2VKlTaLf3BdwpunneNiHvc5C1tgDTQgmfm+SoWRYRTKK8eH65J6kKIePrRTChWNWm/UjBS1ltVK2GH6yvHhYjEIhBpItSH9NB1IDYBOHLt0+NBOx2azO/v3R7wPrUvsSMawmu2D6xJdnktrDV8bNDsJrOmFHnHHZocP7Txx7FLdwXM2Q1EHUm2BUMVi8Mrx4Wa5RFcAHDOhuJe+9Zbr8rIvnvnMI1t7E+jbCLOTb58dTWdyn/vd7SZaG84D4oR4nHV6LnaLDpY0daAupWrh/qertWZn9BR88bnf3Z7O5L59djTMJNDnsbU38cxnHin7wnX5S996q1lhthXiHOjyenlwfCidtTmNRq3Dh3bWzRTSWscj1t9/55cA8OzunjAvMc5pTPeVtzeMXvIBxC22xmWG4RPP7u4BgL//zi/jobFoZgMPH9oZjVo2p0Pp7MuD43Vusbug7RNKAiRKxWIwkGpD+mmUi5lbjpZtqjueK1SNDycbCF2zVpo4422tDcCuyy9nlOQK1VR3HG1XM6XcKBSkqAOptmIxMNvb+Mz6lQaHcXkd/frZaNQqFoNDz+3e2psImyemuOHI0XOHD+3EV3moywBp6pRoE0pdWxOsa4fPCUwXg629icOHdh45eq6usACNl629iUPP7S4Wg2jUOvr1s3VusbupYZyxWofS2WjUEkofPrSzbsa6IaeIj1R3vFgW4b5hem2Mo16+vA2TC1gsi1R3HJFRR0JN0vnhQzuF0tGohQolbN/ela0mbU5f+OopFIMDqbbPfmJbXScaJKfGeEF8NNH/GJ4SDU0qo2oi2vBrGmSgeVLnzsL84c9+YhvOBC0Wgxe+eqrxgdPvudi6+xLL+wcYzZeC04OTn/j1zcVisH2gvSNu//jMWNTlKtSK3rHZmczNZEH+/tPbz7+bzZWDLa4ds7hqOB+YEXK9UlUAG1xHN09PjZcrfRHPorSRO6SEFIQ4VfKj7R4i49tnRxNRO4wMzsjNQvXwp3egy8vz+P/4nz+ZvFF2Hb7chteygwMPfvx6aWPS2T7QjvgQI4XTl2/W4cNzuMFH4ew1BbDOsUkzcmeulH0A2Og6zSrARHC4jDQCXwKgCRkt+wkgz352FyLDTGc2yMjmq8/u7nn69x5CqvHq68PfP5GpA9DdCg48eNdmJ89NdsTt7QPtZV98YHfnmcHJyRtlz2F1+Dg7krtwKfvYb6SuvnOjw7YabJOCg4CnqkGbxeMNy6FwYvPVSrUv4rEGLAVGSEXIK6XK/QdS//i9d05enJotM6aLwZaexJ98/lEhVCRivfr68F+/+IvZs2TvYnAgpaKE/Pyd67sf7Ni4PqqUfvKxTafnwodjs6s3ypNT5QcTEVIVcYvLBroEc0IqUl0pVfoiHm2SyUcJEUpfrVR7oy5pWN/puPOji9dn8wxERqo7/uUvPs44dR0+lM7+1T++SQkhdIX8NSsEDiQfSurXz4zteqC9/T4XKFkAH1M3/UpVbHHtBpsdGMLR5bmqeaGyqUpVAXQ4doO6qSjkG1P5S9ly1JsXGdgX9d3LN1/46ikp9DI5Q1e5Mb5S2ng1sLaWW/TLX3w81R0PO8fQw8FthlUtlQa6Q4U9HE3M8SGLaMqzyEJOrEzht0dG6pABAH5FGs/HClCN1ZmagG719Fj+S185adoFz8aHSQ9rpKoF5Ta27mhiRw0DuEYGYoQrUyq3z/SbjQwRqC995WR6LL98bvK1MlJDSJ2IWnPiI5uv8tujH0urapkzWUs27yvIhjPBwinm4d+jbTInMhJRS8iV9uGtHOcIt2n2HDZ5o3x6cPLJxzbZFtUAT+3rIxOl05dveg6fad8AUCDQSyjaLHdqaFAACXBhunQhCBJAOmyLN4PHYXu/K6XKhSCwlN7oObQBmvymFFDroUApuVmoPru7508+/yilxGK0Wl1NZKwOOOrwsS1138b1USHUnl/r3Zh0Tr45QQlh2KVJgQIdBWi3rSXolKt+5VTJvyLkFotvdO0lIGzOy6KpcrYaBKC7OItb1h1dFt/5brH0VqV6TSpGgFKipK5U5eFP73j69x4SQnkuf/fyzT//u9OriIzVnNSE+iUzUXjhq6cw5xTTCr/wqQ9YFi2UAkYJq3VquNPpsqYQGQCqzU4GxktVa9HjOyoED9d/j2jFABglhVJgWfQLn/rAjA/U5UPp7AtfPZWZKKwiMlZNchj5YVtMCPXvPx29z7OM/3TXA+0XLmXHrpc8h1eVRuHRZlvkTg5gqlK9VglOVQMAUKAbt4rNQ18U8lTJzyqdVfp+ylxGFi880Cl3qSY2OCU3C9UtPYk/fe5Dj+7qMj7Qv/rHN6XQts2kWjVkrDI4ZqL2jCqp/+OtyY64/UCqLRAqmXA+9pH7Ybz01ti0ktrnpJdQi0DSst7TIYYavSzkUKH8WrUCGjTAOkrXMbrOsWnjFU0Ao+XKWCCySjOAYS3bFayzLWcROgvrbq76lWuV4E0pKhUphHpmZ/eX/nhvMuFIqW2LvvaTy3/94i8oIStsta5FcECtQINz+uOfjZ86N/HkY5s8j1d8+ejjvXseXn/+3ezY9RKz6DpGo4wtfAa6xkPx0bycr9iMakJKDRDb2RoBiaTUQJSeLgXMoijY6IJ19wa1E5Uq3luqO/5nz+/59ac2V3yJX/nw/z7x/ROZqMcJJWshm3H1wWFW1OWTN8o/PHF51wPtnRuixWLQuSG6f08PnSz/ZDRXqSkXTsicB4zIoIS8ky+SuPOBX7//fsanQReLAR5hr8UbDPOib/RUyb+crziMdnZEfnNLx+6PbPKv+VP58gbXma8vAyJDaH2pWDpd8t8pVZ/Z2X34+T34NTE/44//108mb5Tvi9lKwVrJRdrS3wuwhjIopVBVoT65o+vTf7iLU1IVCgnakaPnvOnqnog7EI9ahASznizc/et+JVOqnPXInvXxcJe60benvPHig/GobkytvJMvlruidVc+fS2/u6z7Ik6H6+Bt1H0QbxgL2soJ+/ChnQOptrIvbE6F0v/8jTdfHhy3OV0LqmTtggNq1cMmYW4g1eb7wuKUcfrq68OXj6UBAIve6nJtykIOl8r5QP5r2a8CVHwBAImo1Z50ESiXj6V3JGPOkjQLiqWKVIO5wv0HUgiIqZyPLZodl9sAv+G5cYv1R7xwT3f8Qzh8DgDuP5B66ol+KVQglFsD/cWRaWwtutYS49ccOMJVPQDwyR1dz3zmkWjUKvvCc3nZFz85NXLjtQwO7cLkLrQtM6XKhSAYFlICcDKTdotyqCqUzeknktG+iNPpuUtwuZrq/kyp8r1cES+IzzoGg4QGBtDP2TbL6os4UEs8ywVBplSJW2zdk30f2duLXwHt9pe+9RZW/i1rHug9CA7Eh9YaRcjB/f0f3duLVTA2p35Fnjwzmj01OX2jZBztI1pVpGa3Z2zXZgiTQOktnKFWWjIhNYXOFiVa67q/ojVIAIeRXkK31UrrEusibXs3Pv7hHtdhqCJ9X7xxauSV48MoMAghaxMZaxocYRZSrkpMsRxItUmhhNKcEqF0ZnT6xLFLP7x4LZuv2px6Lrre567+IgR+03WXIDzCYuNHvj/fxVFWlX1RFaotbn9s6/p9Bzb39STwVjkljFPUI+mxvGeztcYw7j5wmH1HLdPXGTt8aOfmTUnGaaUqzY6nM7lXjg9nJgoo8B2b1RqhatMAWmhYsvAIiw0TRDWAUEpXqhL/dF9n7OD+/lRf0uAY6z0vXckdOXoOuyp6Lp8PwS1wLFGEAAC61fEAUIVjf0XHZr4vroznTxy7dPpafvJGOV8KGCWezSgjtSkfmlHypO3ckfAIi43XqpXQzBCtpC5XpVQ6HrE2rvP2rI/vO7B5U1fcDd0VkiQErlQ6FrEQTHfFnt814AgTEb8ipdKp7rh5RgHACJKyL0bG8+lMDm2KieslPELM5X8wYqPwoItL/0GvKIqNd0pVAKgKhbDr7IigHZTqS/Z2xT2XG1EBAEaepcfyjBLXYWuZXtwL4AhLEdTuyZj98YH1PQ+3P/7hnmjUMvN20Y4oFoOxqwUDFACYyvm9hD6VjC1GeBix8WquMKJnBjIaQHRviM35F0+eGR19e+oHQ9dyhVtM6O6CxV0MjjAXQboKAKnuOB4bmgZ4VOFjk0JheuLY1cLxr735nh2CMBSCLor9n9uF47EWuDJi4vS1fHosDwBIOe8KbnEPgqNOkBiUoOMLNU73hljdceKJDqWzx7/25o5kLDJPNxgdakG2/3O7kF2ajxtAoFh65fiwcYghJu5SUXEPgqPOmESUIMmIetx4SBEr5ukfSmd/9g+D/REvwpnUtw3KogCMkJKQw6Xyh/5gByLDSB2jpKZyfrEsDAUxDjGt4R7Z0nsGHLNRggYFekgZJYwSxIrhDaNvT4nMNHpabc5YLUW0KiR6NnlfAt9m+EqxLKTSiDyb07ApdM9g4l4Gx5xAMVgBANQ+RrQ8aTtxi4W7UGJy+WvVihEMqC8AwKDhXgXE+wgcc0b1wqeL81rvZwwA0OeNGeGXpcSXwm9eg7GxFjiWFy4YE6lbs2M078PF4f298Pg5mXvc7Pt8vd/BEYZIa62V0oTWaoGjtVrgaK0WOFqrBY7Waq0WOFqrBY7WaoGjtVrgaK0WOFqrBY7WaoGjtVrgaK0WOFqrBY7Wen+v/w9uGY7ITh/U3wAAAABJRU5ErkJggg==">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <style>
 :root{
   --paper:#F4EFE4; --paper-2:#EDE5D5; --paper-3:#E5DBC8;
@@ -1117,8 +1125,64 @@ var ERA_TEXT = {'新石器':'新石器时代','商周':'商周','汉':'汉代','
                 '南北朝':'南北朝','唐':'唐代','宋':'宋代','明清':'明清两代'};
 function eraText(e){ return ERA_TEXT[e] || e; }
 
+/* ---------------- 说法归一：同义词、简称、常见误写 ----------------
+   用户很少写标准全名。先把口语说法映射成知识库标准名拼回查询串，
+   后面的匹配逻辑就一行都不用改。 */
+var SYN = {
+  '缠枝莲':'缠枝纹','缠枝':'缠枝纹','缠支纹':'缠枝纹','缠枝纹样':'缠枝纹',
+  '卷草纹':'忍冬纹','卷草':'忍冬纹','忍冬草':'忍冬纹',
+  '回字纹':'回纹','回形纹':'回纹',
+  '雷纹':'云雷纹','云雷':'云雷纹',
+  '如意云':'如意云纹','云头纹':'如意云纹','如意纹':'如意云纹',
+  '江崖海水':'海水江崖纹','海水江牙':'海水江崖纹','海水江崖':'海水江崖纹',
+  '八答晕':'八达晕','八搭韵':'八达晕','天华锦':'八达晕',
+  '卍字纹':'万字纹','万字不到头':'万字纹',
+  '双鱼纹':'鱼纹',
+  '宝相':'宝相花',
+  '团窠':'团花','团花纹':'团花',
+  '荷花纹':'莲花纹','莲纹':'莲花纹','荷花':'莲花纹',
+  '折枝纹':'折枝花','折枝':'折枝花',
+  '龟背':'龟背纹','六边形纹':'龟背纹','锁纹':'龟背纹',
+  '牡丹花':'牡丹纹'
+};
+var SYN_KEYS = Object.keys(SYN);
+
+function expandQ(q){
+  var add = [];
+  SYN_KEYS.forEach(function(k){
+    if (q.indexOf(k) >= 0 && q.indexOf(SYN[k]) < 0) add.push(SYN[k]);
+  });
+  return add.length ? (q + ' ' + add.join(' ')) : q;
+}
+
+/* 从一句话里认出说的是哪条纹样：标准名优先，其次口语说法 */
+function findMotifInText(q){
+  for (var i=0;i<MOTIFS.length;i++){
+    if (q.indexOf(MOTIFS[i].name) >= 0) return MOTIFS[i];
+  }
+  for (var j=0;j<SYN_KEYS.length;j++){
+    if (q.indexOf(SYN_KEYS[j]) >= 0){
+      var t = SYN[SYN_KEYS[j]];
+      for (var k=0;k<MOTIFS.length;k++){ if (MOTIFS[k].name === t) return MOTIFS[k]; }
+    }
+  }
+  return null;
+}
+
+/* ---------------- 多轮上下文 ----------------
+   记住上一轮谈的是哪条纹样，"那它的骨式呢""还有呢"才接得住。 */
+var CTX = { motif:null, intent:null };
+
+function stripTags(s){ return String(s||'').replace(/<[^>]+>/g,''); }
+
 function tokenize(q){
   return q.replace(/[，。？！、,.?!\s]+/g,' ').split(' ').filter(Boolean);
+}
+
+/* 显式创作动词：说了"画一个/生成/设计/导出"，就该走创作，
+   哪怕句子里还带着"唐朝"这种会被朝代检索抢走的词。 */
+function isMakeRequest(q){
+  return /(画一?[个幅张]|画个|帮我画|给我画|画一下|生成|做一?[个张]|来个|来一?[个条]|设计|创作|导出|弄一?个|整一?个)/.test(q);
 }
 
 function route(q){
@@ -1135,6 +1199,7 @@ function route(q){
 }
 
 function search(q, intentId){
+  q = expandQ(q);
   var toks = tokenize(q);
   return MOTIFS.map(function(m){
     var score = 0, why = [];
@@ -1162,6 +1227,138 @@ function search(q, intentId){
     .sort(function(a,b){ return b.score-a.score; });
 }
 
+/* ---------------- 追问承接 ----------------
+   只在"这句话里没出现任何纹样名"时介入，避免抢走正常提问。 */
+function answerFollowUp(q){
+  if (isMakeRequest(q)) return null;
+  if (!CTX.motif) return null;
+  if (findMotifInText(q)) return null;
+  var m = CTX.motif;
+  var p = q.replace(/[，。？！、,.?!\s]+/g,'');
+  function T(what){
+    return '<b>① 意图识别</b>　追问承接（沿用上一轮的【' + m.name + '】）<br><b>② 应答</b>　' + what;
+  }
+
+  if (/^(那)?(它的?|这个的?|这条的?)?(骨式|怎么排|怎么排列|排列方式|构图|结构)/.test(p)
+      || /骨式呢|怎么排的|怎么排列的|什么构图/.test(p)){
+    return { text:'【'+m.name+'】的骨式是' + m.bones.map(boneCN).join('、') + '。\n\n'
+        + stripTags(m.form) + '\n\n载体：' + m.carrier + '。',
+      trace:T('调用「形式法则解析器」') };
+  }
+  if (/^(那)?(它的?|这个的?|这条的?)?(寓意|意思|含义|象征|代表什么)/.test(p)
+      || /寓意呢|什么意思|象征什么/.test(p)){
+    return { text:'【'+m.name+'】\n\n' + stripTags(m.meaning), trace:T('调用「寓意检索器」') };
+  }
+  if (/(哪个朝代|什么朝代|哪个年代|哪个时期|什么时候的|多久历史|年代呢)/.test(p)){
+    return { text:'【'+m.name+'】属' + eraText(m.era) + '，类属' + m.cat + '。\n\n' + stripTags(m.desc),
+      trace:T('调用「年代检索器」') };
+  }
+  if (/(用在哪|用在哪儿|什么地方用|哪里用|什么器物|载体|长在哪里)/.test(p)){
+    return { text:'【'+m.name+'】常见载体：' + m.carrier + '。\n\n' + stripTags(m.desc),
+      trace:T('调用「载体检索器」') };
+  }
+  if (/^(还有|还有呢|还有吗|还有别的|继续|再举|再多|别的|其他的|换一批|再来几个)/.test(p)
+      || /还有没有/.test(p)){
+    var same = MOTIFS.filter(function(x){ return x.era === m.era && x.id !== m.id; });
+    var pool = same.length ? same : MOTIFS.filter(function(x){ return x.cat === m.cat && x.id !== m.id; });
+    var basis = same.length ? ('同属' + eraText(m.era)) : ('同属' + m.cat + '类');
+    if (!pool.length) return null;
+    return { text: basis + '的还有这几条：\n\n'
+        + pool.slice(0,5).map(function(x){
+            return '· 【'+x.name+'】' + stripTags(x.meaning).slice(0,40) + '…';
+          }).join('\n'),
+      trace:T('按' + basis + '扩散检索') };
+  }
+  if (/(详细|展开|多说|具体讲|讲全|完整)/.test(p)){
+    return { text:'【'+m.name+'】完整词条\n\n'
+        + '· 年代：' + eraText(m.era) + '\n'
+        + '· 类属：' + m.cat + '\n'
+        + '· 骨式：' + m.bones.map(boneCN).join('、') + '\n'
+        + '· 载体：' + m.carrier + '\n\n'
+        + '形式：' + stripTags(m.form) + '\n\n'
+        + '寓意：' + stripTags(m.meaning) + '\n\n'
+        + stripTags(m.desc),
+      trace:T('展开完整词条') };
+  }
+  return null;
+}
+
+/* ---------------- 自然语言作图 ----------------
+   从"画一个唐朝风格的金色团花"里解析出母题、骨式、配色，直接把工坊调好。 */
+var PALETTE_WORDS = [
+  { kw:['金色','金','鎏金','华丽','富丽','宫廷','贵气'], p:'mojin' },
+  { kw:['蓝色','石青','青蓝','冷色','沉静'], p:'shiqing' },
+  { kw:['红色','赭','棕','暖色','土色','古朴'], p:'zheshi' },
+  { kw:['墨','黑','素','淡雅','清雅','水墨','低调'], p:'mojin' },
+  { kw:['丹青','传统色','经典'], p:'danqing' }
+];
+var BONE_WORDS = [
+  { kw:['团','中心','放射','向心','圆形','宝相'], b:'radial' },
+  { kw:['连绵','连续','带状','边饰','镶边','缠绕','一圈','花边','二方'], b:'border2' },
+  { kw:['满铺','铺满','四方','壁纸','底纹','满地','织锦','重复'], b:'allover4' },
+  { kw:['单独','独立','单个','一枝'], b:'single' },
+  { kw:['适合','圆形适合','方形适合'], b:'fitting' }
+];
+var ERA_MOTIF = { '唐':'baoxiang', '宋':'zhezhi', '明清':'haishui',
+                  '南北朝':'lianhua', '汉':'yunqi', '商周':'yunlei',
+                  '新石器':'yuwen', '魏晋南北朝':'rendong' };
+var ERA_KEYS = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','明清'];
+
+function parseMake(q, fallback){
+  var reasons = [], target = findMotifInText(q), palette = null, bone = null, i, j, e;
+  if (target){ reasons.push('母题：句中出现「'+target.name+'」'); }
+  else {
+    for (e=0;e<ERA_KEYS.length;e++){
+      if (q.indexOf(ERA_KEYS[e]) >= 0 && ERA_MOTIF[ERA_KEYS[e]]){
+        (function(mid, eraName){
+          var hit = MOTIFS.filter(function(x){ return x.id===mid; })[0];
+          if (hit){ target = hit; reasons.push('母题：出现「'+eraName+'」，取该代代表纹样「'+hit.name+'」'); }
+        })(ERA_MOTIF[ERA_KEYS[e]], ERA_KEYS[e]);
+        if (target) break;
+      }
+    }
+  }
+  if (!target){ target = fallback; reasons.push('母题：沿用检索结果「'+fallback.name+'」'); }
+
+  outerPal:
+  for (i=0;i<PALETTE_WORDS.length;i++){
+    for (j=0;j<PALETTE_WORDS[i].kw.length;j++){
+      if (q.indexOf(PALETTE_WORDS[i].kw[j]) >= 0){
+        palette = PALETTE_WORDS[i].p;
+        reasons.push('配色：出现「'+PALETTE_WORDS[i].kw[j]+'」→'+PALETTES[palette].name);
+        break outerPal;
+      }
+    }
+  }
+  outerBone:
+  for (i=0;i<BONE_WORDS.length;i++){
+    for (j=0;j<BONE_WORDS[i].kw.length;j++){
+      if (q.indexOf(BONE_WORDS[i].kw[j]) >= 0){
+        bone = BONE_WORDS[i].b;
+        reasons.push('骨式：出现「'+BONE_WORDS[i].kw[j]+'」→'+boneCN(bone));
+        break outerBone;
+      }
+    }
+  }
+  if (bone && target.bones.indexOf(bone) < 0){
+    reasons.push('该母题不支持「'+boneCN(bone)+'」，回退到「'+boneCN(target.defaultBone)+'」');
+    bone = null;
+  }
+
+  var useBone = bone || target.defaultBone;
+  var usePal  = palette || target.palette;
+  var lines = ['好，我把它装进创作工坊了：', '',
+    '· 母题：' + target.name + '（' + eraText(target.era) + '·' + target.cat + '）',
+    '· 骨式：' + boneCN(useBone),
+    '· 配色：' + PALETTES[usePal].name];
+  if (target.symN && useBone === 'radial') lines.push('· 对称阶数：' + target.symN);
+  lines.push('', '到工坊里还能换骨式、拖滑杆、改配色，满意就导出 PNG。');
+  lines.push('（已自动切到工坊页）');
+
+  return { motif:target.id, bone:bone, palette:palette, name:target.name,
+           reasons:reasons, text:lines.join('\n') };
+}
+
 function answer(q){
   // 问候与能力询问：直接自我介绍，不走检索
   if (/^(你好|您好|hi|hello|嗨|在吗)/i.test(q.trim()) || /你能做什么|会什么|怎么用|介绍一下你|你是谁/.test(q)){
@@ -1178,10 +1375,26 @@ function answer(q){
   var boneAns = answerBoneConcept(q);
   if (boneAns) return boneAns;
 
+  // 追问优先：只有这句里没提任何纹样名时才接管
+  var fu = answerFollowUp(q);
+  if (fu) return fu;
+
   var r = route(q);
+
+  // 创作请求优先：只要出现显式创作动词，就压过朝代/列表等意图
+  if (isMakeRequest(q)){
+    r.intents = [{ id:'make', label:'调用创作工具', score:99, hit:['显式创作动词'] }]
+      .concat(r.intents.filter(function(x){ return x.id !== 'make'; }));
+  }
+
   var top = r.intents[0];
   var intentId = top ? top.id : 'list';
   var hits = search(q, intentId);
+
+  // 创作请求即使一个词都没命中，也要能出图（兜底给第一条母题）
+  if (isMakeRequest(q) && !hits.length){
+    hits = [{ m: MOTIFS[0], score: 0, why: ['兜底'] }];
+  }
 
   var trace = [];
   trace.push('<b>① 意图识别</b>　' + (top ? top.label + '（命中关键词：' + top.hit.join('、') + '）' : '未命中明确意图，转为列表推荐'));
@@ -1198,6 +1411,7 @@ function answer(q){
   }
 
   var m0 = hits[0].m;
+  CTX.motif = m0; CTX.intent = intentId;
   var body = '';
 
   if (intentId === 'form'){
@@ -1218,11 +1432,11 @@ function answer(q){
       + a.name + '：' + a.form.replace(/<[^>]+>/g,'') + '\n\n'
       + b.name + '：' + b.form.replace(/<[^>]+>/g,'');
   } else if (intentId === 'make'){
-    trace.push('<b>③ 工具调用</b>　跳转「创作工坊」，装载母题 ' + m0.name);
-    body = '好，我把【' + m0.name + '】的母题装进创作工坊了。\n\n'
-      + '你可以换骨式、调对称阶数、改配色，实时看效果，满意就导出 PNG。\n\n'
-      + '（已自动切到工坊页）';
-    setTimeout(function(){ forFind(m0.id); go('studio'); }, 900);
+    var cfg = parseMake(q, m0);
+    trace.push('<b>③ 工具调用</b>　解析创作参数 → 装载母题 ' + cfg.name);
+    if (cfg.reasons.length) trace.push('<b>　└ 参数来源</b>　' + cfg.reasons.join('；'));
+    body = cfg.text;
+    setTimeout(function(){ applyStudioCfg(cfg); go('studio'); }, 900);
   } else if (intentId === 'era'){
     var same = hits.filter(function(h){ return h.m.era === m0.era; }).slice(0,4);
     trace.push('<b>③ 工具调用</b>　按朝代聚合，取同代 ' + same.length + ' 条');
@@ -1238,6 +1452,11 @@ function answer(q){
         }).join('\n\n');
   }
 
+  // 多轮能力不提示就等于不存在
+  if (CTX.motif && intentId !== 'make'){
+    body += '\n\n（可以接着问：「那它的骨式呢」「还有呢」「讲详细点」）';
+  }
+
   trace.push('<b>④ 生成回答</b>　基于知识库第 ' + (hits.indexOf(hits[0])+1) + ' 条，结合模板合成');
   return { text: body, trace: trace.join('<br>') };
 }
@@ -1246,7 +1465,7 @@ var talkInit = false;
 function initTalk(){
   if (talkInit) return; talkInit = true;
   var sugs = ['唐代有什么代表纹样','缠枝纹是什么寓意','二方连续和四方连续的区别',
-              '宝相花和莲花纹有什么区别','回纹为什么叫富贵不断头','我想设计一个团花'];
+              '画一个唐朝风格的金色团花','宝相花和莲花纹有什么区别','回纹为什么叫富贵不断头'];
   $('#sugs').innerHTML = sugs.map(function(s){
     return '<button class="sug">'+s+'</button>';
   }).join('');
@@ -1452,6 +1671,28 @@ function forFind(id){
   $$('#s-motif button').forEach(function(x){ x.classList.toggle('on', x.dataset.m===studio.motif); });
 }
 
+/* 把自然语言解析出的创作参数写进工坊并同步界面 */
+function applyStudioCfg(cfg){
+  var m = MOTIFS.filter(function(x){ return x.id===cfg.motif; })[0];
+  if (!m) return;
+  studio.motif = m.id;
+  studio.petals = m.petals || 8;
+  var bone = cfg.bone || m.defaultBone;
+  if (m.bones.indexOf(bone) < 0) bone = m.defaultBone;
+  studio.bone = bone;
+  studio.palette = cfg.palette || m.palette || studio.palette;
+  if (m.symN) studio.n = m.symN;
+  var el;
+  el = $('#lb-motif'); if (el) el.textContent = m.name;
+  el = $('#lb-p');     if (el) el.textContent = PALETTES[studio.palette].name;
+  el = $('#s-n');      if (el) el.value = studio.n;
+  el = $('#s-d');      if (el) el.value = studio.density;
+  $$('#s-motif button').forEach(function(x){ x.classList.toggle('on', x.dataset.m===studio.motif); });
+  $$('#s-pal button').forEach(function(x){ x.classList.toggle('on', x.dataset.p===studio.palette); });
+  syncBone();
+  paintStage();
+}
+
 /* ---------------- 视图切换 ---------------- */
 function go(v){
   $$('.view').forEach(function(s){ s.classList.remove('on'); });
@@ -1526,6 +1767,20 @@ function applyHash(){
 if (location.hash) setTimeout(applyHash, 60);
 
 // 作者名占位（可在部署前修改）
+// 关于页补一条「装到手机上」的说明
+(function(){
+  var ab = document.getElementById('v-about');
+  if (!ab) return;
+  var d = document.createElement('div');
+  d.style.cssText = 'margin:14px 16px 28px;padding:12px 14px;border:1px solid var(--line);'
+    + 'border-radius:10px;background:rgba(255,255,255,.45);font-size:12.5px;line-height:1.8;color:var(--ink-2)';
+  d.innerHTML = '<b style="color:var(--ink)">把它装到手机上（像小程序一样用）</b><br>'
+    + '① iPhone：Safari 打开本页 → 底部「分享」→「添加到主屏幕」<br>'
+    + '② 安卓：Chrome / 夸克打开 → 右上角菜单 →「添加到主屏幕」<br>'
+    + '添加后桌面出现「纹生」图标，点开即全屏运行、没有地址栏。';
+  ab.appendChild(d);
+})();
+
 // 作者署名：只需改这一行
 var AUTHOR_NAME = '（提交前请填写姓名）';
 (function(){
