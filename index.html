@@ -495,6 +495,144 @@ input[type=range]::-webkit-slider-thumb{
   #guide-toggle{transition:none}
   .card:active::before{transform:scale(0)}
 }
+
+/* ================= 设计层 v4：工房器具感 + 互动反馈 ================= */
+/* --- 视图切换与详情浮层过渡（只用 CSS 动画，绝不依赖 requestAnimationFrame：
+       后台标签页里 rAF 不触发，会导致元素永远停在初始态） --- */
+.view.on{animation:viewIn .26s cubic-bezier(.22,.7,.3,1) both}
+@keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#detail.on{animation:sheetUp .3s cubic-bezier(.22,.7,.3,1) both}
+@keyframes sheetUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.stats-row{animation:fadeIn .5s ease-out both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* --- 工坊：实时配方面板 --- */
+.st-recipe{
+  margin:0 0 14px;padding:11px 13px;border:1px solid var(--line);border-radius:5px;
+  background:linear-gradient(180deg,rgba(255,253,248,.92),rgba(247,241,230,.78));
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 2px 8px rgba(60,45,25,.05);
+}
+.st-recipe .rc-row{display:flex;flex-wrap:wrap;gap:5px 12px;align-items:baseline;margin-bottom:5px}
+.st-recipe .rc-k{font-size:10px;color:var(--ink-3);letter-spacing:.14em}
+.st-recipe .rc-row b{font-family:var(--serif);font-size:14.5px;color:var(--ink);letter-spacing:.05em;margin-right:4px}
+.st-recipe .rc-form{
+  font-size:11.5px;line-height:1.78;color:var(--ink-2);margin:7px 0 0;
+  padding-top:7px;border-top:1px dashed rgba(160,140,110,.35);
+}
+
+/* --- 工坊：配方预设 --- */
+.st-presets-wrap{margin:0 0 15px}
+.st-sub{
+  font-size:10.5px;letter-spacing:.18em;color:var(--ink-3);margin-bottom:8px;
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.st-sub em{font-style:normal;letter-spacing:.03em;font-size:10px;opacity:.8}
+.st-presets{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.st-presets::-webkit-scrollbar{display:none}
+.st-presets button{
+  flex:0 0 auto;padding:7px 13px;border:1px solid var(--line);border-radius:999px;
+  background:rgba(255,255,255,.6);color:var(--ink);font-size:12px;font-family:var(--serif);
+  letter-spacing:.06em;cursor:pointer;transition:all .18s ease;white-space:nowrap;
+}
+.st-presets button:hover{border-color:var(--red);color:var(--red)}
+.st-presets button:active{transform:scale(.96)}
+
+/* --- 工坊：母题缩略图网格（48 格，全部真实渲染） --- */
+.seg.thumbs{
+  grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;
+  max-height:246px;overflow-y:auto;padding:3px 2px 3px 1px;
+}
+.seg.thumbs button{
+  padding:3px 2px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  border-radius:5px;background:rgba(255,255,255,.5);overflow:hidden;
+}
+.seg.thumbs button canvas{width:100%;aspect-ratio:1/1;display:block;border-radius:3px}
+.seg.thumbs button span{
+  font-size:9px;line-height:1.15;letter-spacing:0;color:var(--ink-2);
+  max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
+.seg.thumbs button.on{background:var(--ink);border-color:var(--ink)}
+.seg.thumbs button.on span{color:#F3EDE1}
+
+/* --- 工坊：骨式示意 --- */
+.seg.bone button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 3px 6px;color:var(--ink-2)}
+.seg.bone button svg{display:block;opacity:.85}
+.seg.bone button span{font-size:10.5px;letter-spacing:.04em}
+.seg.bone button.on{color:#fff}
+.seg.bone button.on svg{opacity:1}
+
+/* --- 工坊：配色带色点 --- */
+.seg.pal button{display:flex;align-items:center;justify-content:center;gap:5px}
+.palsw{display:inline-flex;gap:2px}
+.palsw i{width:7px;height:7px;border-radius:50%;display:block;box-shadow:0 0 0 .5px rgba(0,0,0,.12)}
+.seg.pal button.on .palsw i{box-shadow:0 0 0 .5px rgba(255,255,255,.5)}
+
+/* --- 工坊：我的配方 --- */
+.st-saved{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:26px}
+.st-saved .st-empty{font-size:11px;color:var(--ink-3);line-height:1.7}
+.st-saved .sv{
+  display:inline-flex;align-items:center;gap:5px;padding:5px 8px 5px 11px;
+  border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.62);
+  font-size:11.5px;font-family:var(--serif);letter-spacing:.04em;color:var(--ink);cursor:pointer;
+}
+.st-saved .sv i{font-style:normal;font-size:9.5px;color:var(--ink-3)}
+.st-saved .sv b{font-weight:400;color:var(--ink-3);font-size:13px;line-height:1;padding:0 1px}
+.st-saved .sv:hover{border-color:var(--red)}
+.btn.slim{padding:7px 12px;font-size:12px;width:100%}
+.lb-note{font-style:normal;font-size:9.5px;letter-spacing:.04em;color:var(--ink-3);margin-left:6px}
+
+/* --- 工坊：导出尺寸 --- */
+.sel{
+  padding:8px 9px;border:1px solid var(--line);border-radius:4px;background:rgba(255,255,255,.7);
+  color:var(--ink);font-size:12px;font-family:var(--serif);letter-spacing:.04em;cursor:pointer;
+}
+
+/* --- 详情页：上下条导航 --- */
+#d-back{display:flex;justify-content:space-between;align-items:center}
+#d-back .bk-l{display:inline-flex;align-items:center;gap:5px}
+.d-nav{display:inline-flex;align-items:center;gap:6px}
+.d-nav button{
+  width:30px;height:30px;border:1px solid var(--line);border-radius:50%;
+  background:rgba(255,255,255,.7);color:var(--ink);font-size:17px;line-height:1;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;padding:0;
+}
+.d-nav button:active{transform:scale(.92)}
+.d-nav em{font-style:normal;font-size:10.5px;color:var(--ink-3);letter-spacing:.05em;min-width:44px;text-align:center}
+
+/* --- 详情页：相关纹样 --- */
+.rel-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+.rel-chips button{
+  padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.62);
+  font-size:12px;font-family:var(--serif);letter-spacing:.05em;color:var(--ink);cursor:pointer;
+}
+.rel-chips button:hover{border-color:var(--red);color:var(--red)}
+.rel-chips button:active{transform:scale(.96)}
+
+/* --- 图鉴：搜索清空与结果计数 --- */
+.search{position:relative}
+.q-clear{
+  position:absolute;right:9px;top:50%;transform:translateY(-50%);
+  width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.08);
+  color:var(--ink-2);font-size:15px;line-height:1;cursor:pointer;padding:0;
+  opacity:0;pointer-events:none;transition:opacity .18s ease;
+}
+.q-clear.show{opacity:1;pointer-events:auto}
+.q-count{font-size:11px;color:var(--ink-3);letter-spacing:.06em;margin:-4px 0 10px;min-height:14px}
+
+/* --- 全局轻提示 --- */
+.toast{
+  position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(8px);
+  background:rgba(34,30,26,.94);color:#F4EEE2;font-size:12.5px;letter-spacing:.05em;
+  padding:9px 17px;border-radius:999px;z-index:99;opacity:0;pointer-events:none;
+  animation:toastIn .22s ease-out forwards;box-shadow:0 6px 22px rgba(0,0,0,.24);max-width:82vw;text-align:center;
+}
+.toast.out{animation:toastOut .4s ease-in forwards}
+@keyframes toastIn{to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(-50%) translateY(-6px)}}
+
+@media (prefers-reduced-motion: reduce){
+  .view.on,#detail.on,.stats-row,.toast,.toast.out{animation:none !important}
+}
 </style>
 </head>
 <body>
@@ -532,8 +670,15 @@ input[type=range]::-webkit-slider-thumb{
 
     <section class="view" id="v-studio">
       <div class="stage"><canvas id="stage"></canvas></div>
+      <div class="st-recipe" id="st-recipe"></div>
+
+      <div class="st-presets-wrap">
+        <div class="st-sub">配方预设<em>一键套用一整套参数</em></div>
+        <div class="st-presets" id="st-presets"></div>
+      </div>
+
       <div class="ctrl">
-        <div class="lb"><span>母 题</span><em id="lb-motif">宝相花</em></div>
+        <div class="lb"><span>母 题<em class="lb-note" id="lb-motif-n">共 48 种</em></span><em id="lb-motif">宝相花</em></div>
         <div class="seg" id="s-motif"></div>
       </div>
       <div class="ctrl">
@@ -550,13 +695,30 @@ input[type=range]::-webkit-slider-thumb{
       </div>
       <div class="ctrl">
         <div class="lb"><span>配 色</span><em id="lb-p">丹青</em></div>
-        <div class="seg" id="s-pal"></div>
+        <div class="seg pal" id="s-pal"></div>
       </div>
+
+      <div class="ctrl">
+        <div class="lb"><span>底 质</span><em id="lb-bg">宣纸</em></div>
+        <div class="seg" id="s-bg" style="grid-template-columns:repeat(4,minmax(0,1fr))"></div>
+      </div>
+
+      <div class="ctrl">
+        <div class="lb"><span>我的配方</span><em id="lb-saved">0 / 8</em></div>
+        <div class="st-saved" id="st-saved"></div>
+        <button class="btn ghost slim" id="btn-save">＋ 收藏当前这套参数</button>
+      </div>
+
       <div class="actions">
+        <select class="sel" id="exp-size" aria-label="导出尺寸">
+          <option value="512">512 px</option>
+          <option value="1024" selected>1024 px</option>
+          <option value="2048">2048 px</option>
+        </select>
         <button class="btn" id="btn-png">导出 PNG</button>
-        <button class="btn ghost" id="btn-rnd">随机生成</button>
+        <button class="btn ghost" id="btn-rnd">随机漫游</button>
       </div>
-      <p class="hint">母题决定「画什么」，骨式决定「怎么排」。同一母题换一种骨式，就是从器物上的单只花变成织锦上的连续纹——这正是图案学的第一课。</p>
+      <p class="hint">母题决定「画什么」，骨式决定「怎么排」。同一母题换一种骨式，就是从器物上的单只花变成织锦上的连续纹——这正是图案学的第一课。左边每一格都是真实渲染的缩略图，点一下就能换。</p>
     </section>
 
     <section class="view" id="v-about">
@@ -614,8 +776,12 @@ input[type=range]::-webkit-slider-thumb{
 
 <div id="detail">
   <div class="back" id="d-back">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m14 6-6 6 6 6"/></svg>
-    返回图鉴
+    <span class="bk-l"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m14 6-6 6 6 6"/></svg>返回图鉴</span>
+    <span class="d-nav">
+      <button id="d-prev" aria-label="上一条">‹</button>
+      <em id="d-pos"></em>
+      <button id="d-next" aria-label="下一条">›</button>
+    </span>
   </div>
   <canvas class="d-hero" id="d-hero"></canvas>
   <div class="d-body" id="d-body"></div>
@@ -1371,7 +1537,7 @@ function renderMotif(canvas, motif, opts){
   var p = PALETTES[palKey] || PALETTES.danqing;
 
   if (opts.bg !== false){
-    ctx.fillStyle = p.bg;
+    ctx.fillStyle = opts.bgColor || p.bg;
     ctx.fillRect(0,0,W,H);
   }
 
@@ -3161,6 +3327,361 @@ var AUTHOR_NAME = '（提交前请填写姓名）';
     row.appendChild(btn);
   }
 })();
+
+/* ================= 创意工房 v2 + 互动层 =================
+   说明：本层刻意不使用 requestAnimationFrame —— 页面在后台标签页时 rAF 不触发，
+   会把元素永远留在初始态（缩略图空白就是这么来的）。所有动效走 CSS 或 setTimeout。 */
+
+function toast(msg){
+  /* 同一时刻只留一条，避免连点时叠在一起 */
+  [].slice.call(document.querySelectorAll('.toast')).forEach(function(o){
+    if (o.parentNode) o.parentNode.removeChild(o);
+  });
+  var t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.classList.add('out'); }, 1600);
+  setTimeout(function(){ if (t.parentNode) t.parentNode.removeChild(t); }, 2100);
+}
+
+/* ---------------- 工坊 ---------------- */
+
+var BGS = [
+  { id:'paper', name:'宣纸', color:null },
+  { id:'white', name:'素白', color:'#FFFFFF' },
+  { id:'sand',  name:'米黄', color:'#F2E8D5' },
+  { id:'clear', name:'透明', color:'#F5F5F2', clear:true }
+];
+studio.bg = 'paper';
+
+var PRESETS = [
+  { name:'唐风宝花',   motif:'baoxiang', bone:'radial',   palette:'mojin',   n:8,  density:40 },
+  { name:'宋式折枝',   motif:'zhezhi',   bone:'single',   palette:'danqing', n:6,  density:40 },
+  { name:'明清满铺',   motif:'mantang',  bone:'allover4', palette:'shiqing', n:8,  density:52 },
+  { name:'商周青铜',   motif:'taotie',   bone:'fitting',  palette:'zheshi',  n:6,  density:40 },
+  { name:'汉唐云气',   motif:'yunqi',    bone:'border2',  palette:'danqing', n:6,  density:36 },
+  { name:'丝路联珠',   motif:'lianzhu',  bone:'radial',   palette:'shiqing', n:12, density:40 },
+  { name:'元青花满池', motif:'manchi',   bone:'allover4', palette:'shiqing', n:8,  density:46 },
+  { name:'吉庆团寿',   motif:'shouzi',   bone:'radial',   palette:'mojin',   n:10, density:40 }
+];
+
+function boneSVG(b){
+  var g = '<svg viewBox="0 0 40 40" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">';
+  var i, a;
+  if (b === 'single'){ g += '<circle cx="20" cy="20" r="10"/>'; }
+  else if (b === 'fitting'){ g += '<rect x="7" y="7" width="26" height="26" rx="3"/><circle cx="20" cy="20" r="8"/>'; }
+  else if (b === 'radial'){
+    g += '<circle cx="20" cy="20" r="12"/><circle cx="20" cy="20" r="2.3" fill="currentColor" stroke="none"/>';
+    for (i=0;i<8;i++){
+      a = i * Math.PI / 4;
+      g += '<line x1="'+(20+2.6*Math.cos(a)).toFixed(1)+'" y1="'+(20+2.6*Math.sin(a)).toFixed(1)
+        +  '" x2="'+(20+11.4*Math.cos(a)).toFixed(1)+'" y2="'+(20+11.4*Math.sin(a)).toFixed(1)+'"/>';
+    }
+  }
+  else if (b === 'border2'){
+    g += '<path d="M3 20 Q11.5 9 20 20 T37 20"/><line x1="20" y1="6" x2="20" y2="34" stroke-dasharray="2 3"/>';
+  }
+  else if (b === 'allover4'){
+    g += '<rect x="5" y="5" width="30" height="30" rx="2"/><line x1="20" y1="5" x2="20" y2="35"/><line x1="5" y1="20" x2="35" y2="20"/>';
+  }
+  return g + '</svg>';
+}
+
+function paintThumbs(){
+  $$('#s-motif button').forEach(function(b){
+    var cv = b.querySelector('canvas'); if (!cv) return;
+    if (!cv.getBoundingClientRect().width) return;   /* 工坊隐藏时不画，切回来会重绘 */
+    var m = MOTIFS.filter(function(x){ return x.id === b.dataset.m; })[0];
+    if (!m) return;
+    try { renderMotif(cv, m, { bone:m.defaultBone, n:m.symN, petals:m.petals, palette:m.palette }); } catch(e){}
+  });
+}
+
+function renderRecipe(){
+  var el = $('#st-recipe'); if (!el) return;
+  var m = curMotif();
+  var bg = BGS.filter(function(x){ return x.id === studio.bg; })[0] || BGS[0];
+  var bn = boneCN(studio.bone);
+  el.innerHTML =
+      '<div class="rc-row">'
+    +   '<span class="rc-k">母题</span><b>' + m.name + '</b>'
+    +   '<span class="rc-k">骨式</span><b>' + bn + '</b>'
+    +   '<span class="rc-k">底质</span><b>' + bg.name + '</b>'
+    + '</div>'
+    + '<div class="rc-row">'
+    +   '<span class="rc-k">阶数</span><b>' + (studio.bone === 'radial' ? studio.n : '—') + '</b>'
+    +   '<span class="rc-k">密度</span>' + ((studio.bone === 'border2' || studio.bone === 'allover4') ? '<b>' + studio.density + '</b>' : '<b>—</b>')
+    +   '<span class="rc-k">配色</span><b>' + PALETTES[studio.palette].name + '</b>'
+    + '</div>'
+    + '<p class="rc-form">' + stripTags(m.form) + '</p>';
+}
+
+/* 统一刷新所有控件（预设、收藏、随机漫游都走这里） */
+function syncUI(){
+  var m = curMotif();
+  $('#lb-motif').textContent = m.name;
+  $('#lb-p').textContent = PALETTES[studio.palette].name;
+  var bg = BGS.filter(function(x){ return x.id === studio.bg; })[0] || BGS[0];
+  $('#lb-bg').textContent = bg.name;
+  $('#s-n').value = studio.n; $('#lb-n').textContent = studio.n;
+  $('#s-d').value = studio.density; $('#lb-d').textContent = studio.density;
+  $$('#s-motif button').forEach(function(x){ x.classList.toggle('on', x.dataset.m === studio.motif); });
+  $$('#s-pal button').forEach(function(x){ x.classList.toggle('on', x.dataset.p === studio.palette); });
+  $$('#s-bg button').forEach(function(x){ x.classList.toggle('on', x.dataset.g === studio.bg); });
+  $$('#s-bone button').forEach(function(x){ x.classList.toggle('on', x.dataset.b === studio.bone); });
+  var sel = $('#s-motif button.on');
+  if (sel && sel.scrollIntoView) { try { sel.scrollIntoView({ block:'nearest' }); } catch(e){} }
+  syncBone();
+  paintStage();
+}
+
+/* 工坊画布：支持底质 */
+var _paintStage0 = paintStage;
+paintStage = function(){
+  var m = curMotif();
+  var bg = BGS.filter(function(x){ return x.id === studio.bg; })[0] || BGS[0];
+  renderMotif($('#stage'), m, {
+    bone: studio.bone, n: studio.n, density: studio.density,
+    palette: studio.palette, petals: studio.petals,
+    bgColor: bg.color || undefined
+  });
+  renderRecipe();
+};
+
+/* 我的配方（存在浏览器本地，换设备不同步，但不会丢） */
+var SAVED = [];
+try { SAVED = JSON.parse(localStorage.getItem('wensheng_saved') || '[]') || []; } catch(e){ SAVED = []; }
+
+function savePersist(){
+  try { localStorage.setItem('wensheng_saved', JSON.stringify(SAVED)); } catch(e){}
+}
+
+function renderSaved(){
+  var box = $('#st-saved'); if (!box) return;
+  var cnt = $('#lb-saved'); if (cnt) cnt.textContent = SAVED.length + ' / 8';
+  if (!SAVED.length){
+    box.innerHTML = '<span class="st-empty">还没有收藏。调好一套参数后点下面的按钮存下来，下次直接调用。</span>';
+    return;
+  }
+  box.innerHTML = SAVED.map(function(r, i){
+    return '<button class="sv" data-i="' + i + '">' + r.name
+      + '<i>' + (PALETTES[r.palette] || {}).name + '</i><b data-del="' + i + '" title="删除">×</b></button>';
+  }).join('');
+}
+
+function applyRecipe(r){
+  var m = MOTIFS.filter(function(x){ return x.id === r.motif; })[0];
+  if (!m) return;
+  studio.motif = m.id;
+  studio.bone = (m.bones.indexOf(r.bone) >= 0) ? r.bone : m.defaultBone;
+  studio.palette = PALETTES[r.palette] ? r.palette : m.palette;
+  studio.bg = r.bg && BGS.filter(function(x){ return x.id === r.bg; })[0] ? r.bg : 'paper';
+  studio.petals = m.petals || 8;
+  studio.n = r.n || m.symN || 8;
+  studio.density = r.density || 40;
+  syncUI();
+}
+
+function initStudioV2(){
+  var grid = $('#s-motif'); if (!grid) return;
+
+  /* --- 母题：全部纹样，带真实缩略预览 --- */
+  grid.className = 'seg thumbs';
+  grid.innerHTML = MOTIFS.map(function(m){
+    return '<button data-m="' + m.id + '" class="thumb' + (m.id === studio.motif ? ' on' : '') + '" title="' + m.name + '">'
+      + '<canvas></canvas><span>' + m.name + '</span></button>';
+  }).join('');
+  var note = $('#lb-motif-n'); if (note) note.textContent = '共 ' + MOTIFS.length + ' 种';
+
+  /* --- 骨式：带排布示意 --- */
+  $('#s-bone').className = 'seg bone';
+  $('#s-bone').innerHTML = BONE_BTNS.map(function(p){
+    return '<button data-b="' + p[0] + '"' + (p[0] === studio.bone ? ' class="on"' : '') + '>'
+      + boneSVG(p[0]) + '<span>' + p[1] + '</span></button>';
+  }).join('');
+
+  /* --- 配色：带色点 --- */
+  $('#s-pal').innerHTML = Object.keys(PALETTES).map(function(k){
+    var p = PALETTES[k];
+    return '<button data-p="' + k + '"' + (k === studio.palette ? ' class="on"' : '') + '>'
+      + '<span class="palsw"><i style="background:' + p.a + '"></i><i style="background:' + p.b + '"></i><i style="background:' + p.c + '"></i></span>'
+      + p.name + '</button>';
+  }).join('');
+
+  /* --- 底质 --- */
+  $('#s-bg').innerHTML = BGS.map(function(g){
+    return '<button data-g="' + g.id + '"' + (g.id === studio.bg ? ' class="on"' : '') + '>' + g.name + '</button>';
+  }).join('');
+  $('#s-bg').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    studio.bg = b.dataset.g;
+    syncUI();
+  });
+
+  /* --- 配方预设 --- */
+  $('#st-presets').innerHTML = PRESETS.map(function(p, i){
+    return '<button data-i="' + i + '">' + p.name + '</button>';
+  }).join('');
+  $('#st-presets').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    var pr = PRESETS[+b.dataset.i]; if (!pr) return;
+    applyRecipe({ motif:pr.motif, bone:pr.bone, palette:pr.palette, n:pr.n, density:pr.density, bg:'paper' });
+    toast('已套用「' + pr.name + '」');
+  });
+
+  /* --- 收藏 --- */
+  $('#btn-save').onclick = function(){
+    var m = curMotif();
+    if (SAVED.length >= 8){ toast('最多存 8 套，先删掉一套吧'); return; }
+    SAVED.push({ name:m.name, motif:m.id, bone:studio.bone, palette:studio.palette,
+                 bg:studio.bg, n:studio.n, density:studio.density });
+    savePersist(); renderSaved();
+    toast('已收藏：' + m.name + ' · ' + boneCN(studio.bone));
+  };
+
+  $('#st-saved').addEventListener('click', function(e){
+    var del = e.target.closest('[data-del]');
+    if (del){
+      e.stopPropagation();
+      SAVED.splice(+del.dataset.del, 1);
+      savePersist(); renderSaved();
+      toast('已删除');
+      return;
+    }
+    var b = e.target.closest('.sv'); if (!b) return;
+    var r = SAVED[+b.dataset.i]; if (!r) return;
+    applyRecipe(r);
+    toast('已调用：' + r.name);
+  });
+
+  /* --- 导出：可选尺寸与透明底 --- */
+  $('#btn-png').onclick = function(){
+    var sel = $('#exp-size');
+    var S = sel ? (+sel.value || 1024) : 1024;
+    var out = document.createElement('canvas');
+    out.width = S; out.height = S;
+    var ctx = out.getContext('2d');
+    var m = curMotif();
+    var p = PALETTES[studio.palette];
+    var bg = BGS.filter(function(x){ return x.id === studio.bg; })[0] || BGS[0];
+    if (!bg.clear){ ctx.fillStyle = bg.color || p.bg; ctx.fillRect(0, 0, S, S); }
+    var fn = LAYOUTS[studio.bone] || LAYOUTS.fitting;
+    fn(ctx, S, S, m.unit, p, { n:studio.n, density:studio.density, petals:studio.petals });
+    var a = document.createElement('a');
+    a.download = '纹生-' + m.name + '-' + boneCN(studio.bone) + '-' + S + '.png';
+    a.href = out.toDataURL('image/png');
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    try { a.click(); } catch(e){}
+    setTimeout(function(){ if (a.parentNode) a.parentNode.removeChild(a); }, 1500);
+    toast('已导出 ' + S + '×' + S + ' PNG' + (bg.clear ? '（透明底）' : ''));
+  };
+
+  /* --- 随机漫游：在全部 48 条里游走 --- */
+  $('#btn-rnd').onclick = function(){
+    var bs = BONE_BTNS.map(function(x){ return x[0]; });
+    var ps = Object.keys(PALETTES);
+    var m = MOTIFS[Math.floor(Math.random() * MOTIFS.length)];
+    studio.motif = m.id;
+    studio.petals = m.petals || 8;
+    studio.bone = m.bones[Math.floor(Math.random() * m.bones.length)] || m.defaultBone;
+    studio.palette = ps[Math.floor(Math.random() * ps.length)];
+    studio.n = 3 + Math.floor(Math.random() * 14);
+    studio.density = 20 + Math.floor(Math.random() * 9) * 10;
+    syncUI();
+    toast('漫游到：' + m.name + ' · ' + boneCN(studio.bone));
+  };
+
+  renderSaved();
+  syncUI();
+}
+
+/* 进入工坊时重绘缩略图（工坊隐藏时尺寸为 0，画不了） */
+var _go0 = go;
+go = function(v){
+  var r = _go0.apply(null, arguments);
+  if (v === 'studio'){ paintThumbs(); renderRecipe(); }
+  return r;
+};
+
+/* ---------------- 详情页：上下条 + 相关纹样 ---------------- */
+var _openDetail0 = openDetail;
+openDetail = function(m){
+  _openDetail0.apply(null, arguments);
+
+  var idx = MOTIFS.map(function(x){ return x.id; }).indexOf(m.id);
+  var pos = $('#d-pos');
+  if (pos) pos.textContent = (idx + 1) + ' / ' + MOTIFS.length;
+
+  var prev = $('#d-prev'), next = $('#d-next');
+  if (prev) prev.onclick = function(e){ e.stopPropagation(); openDetail(MOTIFS[(idx - 1 + MOTIFS.length) % MOTIFS.length]); };
+  if (next) next.onclick = function(e){ e.stopPropagation(); openDetail(MOTIFS[(idx + 1) % MOTIFS.length]); };
+
+  var body = $('#d-body'); if (!body) return;
+  var old = body.querySelector('.relates'); if (old) old.parentNode.removeChild(old);
+
+  /* 相关度打分：同类属 > 同母题 > 同朝代，再算标签重叠。
+     只要求 unit 或 cat 严格相同的话，像如意云纹这种冷门条目会只剩一条相关。 */
+  var rel = MOTIFS.filter(function(x){ return x.id !== m.id; })
+    .map(function(x){
+      var sc = 0;
+      if (x.cat === m.cat) sc += 4;
+      if (x.unit === m.unit) sc += 3;
+      if (x.era === m.era) sc += 2;
+      var mt = m.tags || [], xt = x.tags || [];
+      for (var i = 0; i < mt.length; i++){ if (xt.indexOf(mt[i]) >= 0) sc += 1; }
+      return { m:x, s:sc };
+    })
+    .filter(function(o){ return o.s > 0; })
+    .sort(function(a, b){ return b.s - a.s; })
+    .slice(0, 6)
+    .map(function(o){ return o.m; });
+  if (!rel.length) return;
+
+  var box = document.createElement('div');
+  box.className = 'd-sec relates';
+  box.innerHTML = '<h3>相关纹样</h3><div class="rel-chips">'
+    + rel.map(function(x){ return '<button data-id="' + x.id + '">' + x.name + '</button>'; }).join('')
+    + '</div>';
+  body.appendChild(box);
+  box.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    var t = MOTIFS.filter(function(x){ return x.id === b.dataset.id; })[0];
+    if (t) openDetail(t);
+  });
+};
+
+/* ---------------- 图鉴：搜索清空与结果计数 ---------------- */
+(function(){
+  var q = $('#q'); if (!q || !q.parentNode) return;
+  var wrap = q.parentNode;
+  var clr = document.createElement('button');
+  clr.type = 'button'; clr.className = 'q-clear'; clr.setAttribute('aria-label', '清空搜索'); clr.textContent = '×';
+  wrap.appendChild(clr);
+
+  var cnt = document.createElement('div');
+  cnt.className = 'q-count';
+  if (wrap.parentNode) wrap.parentNode.insertBefore(cnt, wrap.nextSibling);
+
+  function update(){
+    var n = document.querySelectorAll('#grid .card').length;
+    var v = (q.value || '').trim();
+    clr.classList.toggle('show', !!v);
+    cnt.textContent = v ? ('「' + v + '」找到 ' + n + ' 条' + (n ? '' : '，换个词试试')) : '';
+  }
+  clr.addEventListener('click', function(){
+    q.value = '';
+    q.dispatchEvent(new Event('input', { bubbles:true }));
+    try { q.focus(); } catch(e){}
+    update();
+  });
+  q.addEventListener('input', function(){ setTimeout(update, 240); });
+  q.addEventListener('change', update);
+  update();
+})();
+
+/* 启动 */
+initStudioV2();
 </script>
 </body>
 </html>
