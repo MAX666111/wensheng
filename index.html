@@ -116,7 +116,7 @@ body{
 .card canvas{width:100%;height:100%;max-width:100%;display:block}
 .card .meta{padding:8px 10px 9px;border-top:1px solid var(--line-2)}
 .card .nm{font-family:var(--serif);font-size:14.5px;letter-spacing:.08em;line-height:1.2}
-.card .tag{font-size:10px;color:var(--ink-3);margin-top:3px;letter-spacing:.05em}
+.card .tag{font-size:11.5px;color:var(--ink-3);margin-top:3px;letter-spacing:.05em}
 
 /* ---------- 详情 ---------- */
 #detail{
@@ -363,7 +363,7 @@ input[type=range]::-webkit-slider-thumb{
   content:''; width:4px; height:4px; border-radius:50%;
   background:var(--red); opacity:.75; flex:0 0 auto;
 }
-.card .tag{font-size:10px; color:var(--ink-3); margin-top:4px; letter-spacing:.10em; padding-left:10px}
+.card .tag{font-size:11.5px; color:var(--ink-3); margin-top:4px; letter-spacing:.10em; padding-left:10px}
 @keyframes cardIn{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
 
 /* ---------- 底部标签栏 ---------- */
@@ -513,7 +513,7 @@ input[type=range]::-webkit-slider-thumb{
   box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 2px 8px rgba(60,45,25,.05);
 }
 .st-recipe .rc-row{display:flex;flex-wrap:wrap;gap:5px 12px;align-items:baseline;margin-bottom:5px}
-.st-recipe .rc-k{font-size:10px;color:var(--ink-3);letter-spacing:.14em}
+.st-recipe .rc-k{font-size:11.5px;color:var(--ink-3);letter-spacing:.14em}
 .st-recipe .rc-row b{font-family:var(--serif);font-size:14.5px;color:var(--ink);letter-spacing:.05em;margin-right:4px}
 .st-recipe .rc-form{
   font-size:11.5px;line-height:1.78;color:var(--ink-2);margin:7px 0 0;
@@ -526,7 +526,7 @@ input[type=range]::-webkit-slider-thumb{
   font-size:10.5px;letter-spacing:.18em;color:var(--ink-3);margin-bottom:8px;
   display:flex;justify-content:space-between;align-items:baseline;
 }
-.st-sub em{font-style:normal;letter-spacing:.03em;font-size:10px;opacity:.8}
+.st-sub em{font-style:normal;letter-spacing:.03em;font-size:11.5px;opacity:.8}
 .st-presets{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .st-presets::-webkit-scrollbar{display:none}
 .st-presets button{
@@ -548,7 +548,7 @@ input[type=range]::-webkit-slider-thumb{
 }
 .seg.thumbs button canvas{width:100%;aspect-ratio:1/1;display:block;border-radius:3px}
 .seg.thumbs button span{
-  font-size:9px;line-height:1.15;letter-spacing:0;color:var(--ink-2);
+  font-size:11.5px;line-height:1.15;letter-spacing:0;color:var(--ink-2);
   max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
 }
 .seg.thumbs button.on{background:var(--ink);border-color:var(--ink)}
@@ -633,6 +633,136 @@ input[type=range]::-webkit-slider-thumb{
 @media (prefers-reduced-motion: reduce){
   .view.on,#detail.on,.stats-row,.toast,.toast.out{animation:none !important}
 }
+
+/* ============ 设计层 v5：按客观测量修正（去渐变 · 去重投影 · 抬字号 · 浅边框） ============ */
+:root{
+  --paper:#F0EBE1; --paper-2:#E9E3D8; --paper-3:#DED6C7;
+  --ink:#23201C; --ink-2:#5C554A; --ink-3:#968B7A;
+  --line:rgba(35,32,28,.11); --line-2:rgba(35,32,28,.06);
+}
+/* 表面一律平坦：用色阶与极浅线区分，不靠渐变与投影 —— 装裱本来就是平的 */
+#app{ background:var(--paper); background-image:none; }
+.hdr{ background:var(--paper); }
+.card{ background:var(--paper-2); border-color:var(--line); box-shadow:none; }
+.card::after{ border-color:rgba(35,32,28,.07); }
+.card:active{ transform:scale(.985); box-shadow:none; }
+.card .meta{ border-top-color:transparent; }
+@media (hover:hover){
+  .card:hover{ transform:translateY(-2px); box-shadow:none; border-color:rgba(35,32,28,.22); }
+  .card:hover::after{ border-color:rgba(158,51,37,.38); }
+}
+/* 控件与面板的边框降到"耳语"级 */
+.seg button, .chip, .search, .src, .st-recipe, .rst, .q-count{
+  border-color:var(--line);
+}
+.seg button{border-color:rgba(35,32,28,.12)}
+/* 页眉那行小字：不再做微型大写字母间距标签 */
+.hdr .sub{ font-size:12px; letter-spacing:.02em; text-transform:none; color:var(--ink-3); }
+/* v5b-desktop-catalog */
+/* 桌面端：把手机条改成"图册"版面——加宽、四栏，不再让页面浮在黑洞里 */
+@media (min-width:980px){
+  #app{
+    max-width:980px; margin:26px auto; border-radius:6px;
+    box-shadow:none !important; border:1px solid rgba(35,32,28,.12);
+  }
+  .grid{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+  .hdr h1{ font-size:31px; }
+}
+/* 页眉副标与筛选标签：抬到可读字号、抬到合规对比度 */
+.hdr .sub{ font-size:12.5px; color:var(--ink-2) !important; letter-spacing:.01em; }
+.filter-label{ font-size:12px; color:var(--ink-2); letter-spacing:.14em; }
+.stats, .stats-row{ font-size:12.5px; color:var(--ink-2) !important; }
+/* v5c-solidhairline */
+/* 边框改为"实色浅线"：半透明线在渲染上很轻，但在对比度算法里仍按深墨计，
+   用实色浅调既保住装裱的细线感，也让面板不再像一格格黑框 */
+:root{ --line:#DCD5C7; --line-2:#E6E0D4; }
+.card{ border-color:#DCD5C7; }
+.card::after{ border-color:#E2DCCF; }
+.seg button, .chip, .search, .src, .st-recipe, .rst, .stage, .author-card, .sel{
+  border-color:#DCD5C7;
+}
+.seg.thumbs button{ border-color:#DCD5C7; }
+/* v5d-shadow */
+@media (min-width:720px) and (max-width:979px){
+  #app{ box-shadow:none; border:1px solid #DCD5C7; }
+}
+/* v6-desktop-rail */
+/* 桌面：题跋改作右侧边栏，正文与它并排——那块空带被真实内容填掉 */
+@media (min-width:980px){
+  #v-atlas{ position:relative; padding-right:186px; }
+  #v-atlas .colophon{
+    position:absolute; top:0; right:0; width:164px; height:auto;
+    margin:0; padding:6px 0 0 0;
+  }
+  #tabs{ max-width:980px; left:auto; }
+}
+/* 正文字号抬一档：目录卡与段落不再挤在 12px 以下 */
+.card .nm{ font-size:14px; }
+.card .tag{ font-size:12px; }
+.d-sec p, .d-sec li{ font-size:14px; }
+.src{ font-size:12.5px; }
+.bubble{ font-size:14.5px; }
+.chip{ font-size:12.5px; }
+.stats, .stats-row{ font-size:13px; }
+.rc-row{ font-size:13px; }
+/* v6b-rail-grid */
+/* 桌面改真两栏：正文铺满左栏，题跋成右栏——不再留一条空带 */
+@media (min-width:980px){
+  #v-atlas{
+    display:grid; grid-template-columns:minmax(0,1fr) 164px;
+    column-gap:22px; align-items:start; padding-right:0;
+  }
+  #v-atlas > .colophon{
+    grid-column:2; grid-row:1 / span 7; position:static; width:auto; height:auto; margin:0;
+  }
+  #v-atlas > .search, #v-atlas > .q-count, #v-atlas > .filter-label,
+  #v-atlas > #f-era, #v-atlas > #f-cat, #v-atlas > #grid{ grid-column:1; }
+}
+/* 纸色往骨白靠一点：仍是暖调，但不再像"黄奶油" */
+:root{ --paper:#EAE9E4; --paper-2:#E2E1DC; --paper-3:#D7D6D0; }
+/* 再抬一档字号：目录说明、标签、出处都到 13px */
+.card .tag{ font-size:13px; }
+.chip{ font-size:13px; }
+.src{ font-size:13px; }
+.filter-label{ font-size:13px; letter-spacing:.10em; }
+.q-count{ font-size:13px; }
+
+/* v7b 追问与动作按钮 */
+.bubble .follow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:9px;border-top:1px solid var(--line-2)}
+.fchip,.fact{font:inherit;font-size:12.5px;padding:5px 11px;border-radius:999px;background:transparent;
+  border:1px solid var(--line);color:var(--ink);cursor:pointer;transition:border-color .14s,background .14s,color .14s}
+.fchip:hover,.fact:hover{border-color:var(--ink-3)}
+.fchip:active{background:var(--paper-3)}
+.fact{border-color:var(--ink);font-weight:600}
+.fact:active{background:var(--ink);color:var(--paper-2)}
+.sug-hint{font-size:12.5px;color:var(--ink-2);margin:0 0 9px;line-height:1.5}
+@media (prefers-reduced-motion: reduce){ .fchip,.fact{transition:none} }
+/* v8 桌面右栏：把空白变成可读内容 */
+.rail-card{display:none}
+.rail-go{display:none}
+@media (min-width:980px){
+  #app{max-width:1060px}
+  .rail-card{display:block;margin:0 0 14px;padding:12px 13px;border:1px solid #E2DCCF;border-radius:4px;background:var(--paper-2)}
+  .rail-card h4{margin:0 0 7px;font-size:12.5px;font-weight:600;letter-spacing:.08em;color:var(--ink)}
+  .rail-card p{margin:0;font-size:12.5px;line-height:1.7;color:var(--ink-2)}
+  .rail-card b{color:var(--ink);font-weight:600}
+  .rail-go{display:inline-block;margin-top:2px;padding:8px 14px;border:1px solid var(--ink);border-radius:999px;
+    background:transparent;color:var(--ink);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+  .rail-go:active{background:var(--ink);color:var(--paper-2)}
+}
+@media (min-width:1200px){
+  #app{max-width:min(1340px,95vw)}
+  /* 题跋与右栏改到左侧书口，让图册网格一路铺到右缘（消除右侧死带） */
+  #v-atlas{grid-template-columns:190px minmax(0,1fr);column-gap:26px}
+  #v-atlas > .colophon{grid-column:1;grid-row:1 / span 7}
+  #v-atlas > .rail{grid-column:1;grid-row:8 / span 4}
+  #v-atlas > .search, #v-atlas > .q-count, #v-atlas > .filter-label,
+  #v-atlas > #f-era, #v-atlas > #f-cat, #v-atlas > #grid{grid-column:2}
+  .grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+  #tabs{max-width:min(1340px,95vw)}
+}
+@media (min-width:1600px){ .grid{grid-template-columns:repeat(6,minmax(0,1fr))} }
+@media (prefers-reduced-motion: reduce){ .rail-go{transition:none} }
 </style>
 </head>
 <body>
@@ -686,11 +816,11 @@ input[type=range]::-webkit-slider-thumb{
         <div class="seg" id="s-bone" style="grid-template-columns:repeat(5,minmax(0,1fr))"></div>
       </div>
       <div class="ctrl">
-        <div class="lb"><span>对称阶数 <i id="hint-n" style="font-style:normal;font-size:10px;color:#9A8F7E"></i></span><em id="lb-n">8</em></div>
+        <div class="lb"><span>对称阶数 <i id="hint-n" style="font-style:normal;font-size:11.5px;color:#9A8F7E"></i></span><em id="lb-n">8</em></div>
         <input type="range" id="s-n" min="3" max="16" step="1" value="8">
       </div>
       <div class="ctrl">
-        <div class="lb"><span>单 元 密 度 <i id="hint-d" style="font-style:normal;font-size:10px;color:#9A8F7E"></i></span><em id="lb-d">40</em></div>
+        <div class="lb"><span>单 元 密 度 <i id="hint-d" style="font-style:normal;font-size:11.5px;color:#9A8F7E"></i></span><em id="lb-d">40</em></div>
         <input type="range" id="s-d" min="10" max="100" step="2" value="40">
       </div>
       <div class="ctrl">
@@ -2607,12 +2737,34 @@ var INTENTS = [
   { id:'form',     kw:['骨式','怎么排','排列','连续','对称','构图','形式','法则','怎么组合'], label:'形式法则分析' },
   { id:'compare',  kw:['区别','不同','比较','差别','一样吗'], label:'多纹样对比' },
   { id:'make',     kw:['生成','创作','做一个','设计','画一个','导出'], label:'调用创作工具' },
-  { id:'list',     kw:['有哪些','有什么','推荐','介绍','列举','全部'], label:'列表推荐' }
+  { id:'list',     kw:['有哪些','有什么','推荐','介绍','列举','全部'], label:'列表推荐' },
+  { id:'source',   kw:['出处','出自','哪件','文物','馆藏','出土','哪里的','在哪件'], label:'查证出处' },
+  { id:'thing',    kw:['瓷器','织锦','青铜','漆器','织物','服装','建筑','瓦当','铜镜','玉器','家具','陶器','刺绣'], label:'按器物检索' },
+  { id:'wish',     kw:['代表长寿','代表富贵','代表吉祥','代表平安','代表多子','辟邪','象征长寿','寓意长寿','什么纹样代表'], label:'按寓意反查' },
+  { id:'trail',    kw:['演变','发展','源流','从哪来','怎么来的','前后','脉络'], label:'查演变脉络' },
+  { id:'quiz',     kw:['考考我','测验','出题','测试一下','考一考'], label:'出题测验' }
 ];
 
-var ERA_TEXT = {'新石器':'新石器时代','商周':'商周','汉':'汉代','魏晋':'魏晋',
-                '南北朝':'南北朝','唐':'唐代','宋':'宋代','明清':'明清两代'};
+/* 出题测验的临时状态 */
+var QUIZ = { active:false, m:null };
+
+/* 器物词 → 在 carrier 里怎么找 */
+var THING_WORDS = ['瓷器','织锦','青铜','漆器','织物','服装','建筑','瓦当','铜镜','玉器','家具','陶器','刺绣','丝绸','壁画'];
+/* 吉祥语 → 在 meaning 里怎么找 */
+var WISH_WORDS = ['长寿','富贵','吉祥','平安','多子','权力','辟邪','丰收','爱情','清廉','团圆','功名'];
+
+var ERA_TEXT = {'新石器':'新石器时代','商周':'商周','春秋战国':'春秋战国时期','汉':'汉代','魏晋':'魏晋',
+                '南北朝':'南北朝','唐':'唐代','宋':'宋代','元':'元代','明清':'明清两代'};
 function eraText(e){ return ERA_TEXT[e] || e; }
+/* 绘制单元（母题）的中文说法：代码里是英文 id，面向用户时要讲人话 */
+var UNIT_CN = {rosette:'团花（圆形适合）',vine:'缠枝卷草',meander:'回旋折线',cloud:'云头',
+  wave:'水波江崖',lattice:'几何格律',fish:'鱼形',honeysuckle:'忍冬卷草',wan:'万字折线',
+  taotie:'兽面',kuilong:'夔龙',phoenix:'凤鸟',sishen:'四神',zhuyu:'茱萸叉形',lianzhu:'联珠圆环',
+  juancao:'卷草',lingyang:'团窠花环',mantang:'池水荷花',yunjian:'云头环绕',bajixiang:'八宝',
+  anbaxian:'暗八仙法器',bingmei:'冰裂梅花',denglong:'灯笼',zhangfu:'十二章图符',fangsheng:'菱胜',
+  qiequ:'窃曲',panchi:'蟠螭交缠',tuanlong:'盘龙',qilin:'麒麟',bianfu:'蝙蝠',shouzi:'团寿',
+  lianqian:'连钱',luohua:'落花流水',putao:'葡萄卷藤',hudie:'蝴蝶',bogu:'博古器物',feiyu:'飞鱼'};
+function unitCN(u){ return UNIT_CN[u] || u; }
 
 /* ---------------- 说法归一：同义词、简称、常见误写 ----------------
    用户很少写标准全名。先把口语说法映射成知识库标准名拼回查询串，
@@ -2854,13 +3006,33 @@ function answer(q){
     return {
       text:'我是「纹生」，一个帮你读懂中国传统纹样的小助手。\n\n'
         + '我能做三件事：\n'
-        + '① 查纹样——按朝代、类属检索 16 条纹样的母题、骨式与寓意\n'
+        + '① 查纹样——按朝代、类属、器物、寓意检索 ' + MOTIFS.length + ' 条纹样的母题、骨式与寓意\n'
         + '② 讲法则——拆解它是怎么排的（单独 / 适合 / 二方连续 / 四方连续 / 放射对称）\n'
         + '③ 帮你创作——把母题带进工坊，换骨式、调配色、导出 PNG\n\n'
         + '可以直接问我，比如下面这些。',
       trace:'<b>① 意图识别</b>　问候/能力询问<br><b>② 应答</b>　返回能力说明，不触发检索'
     };
   }
+  // 测验作答：优先于一切检索
+  var pick = q.match(/^我选[：:、]?\s*(.+?)\s*$/);
+  if (pick && QUIZ.active && QUIZ.m){
+    var right = QUIZ.m.name;
+    var said = pick[1];
+    var okFlag = (said === right) || (said.indexOf(right) >= 0);
+    var mm = QUIZ.m;
+    QUIZ.active = false;
+    return {
+      text: (okFlag ? '答对了。' : '不对，正确答案是【' + right + '】。') + '\n\n'
+        + '【' + right + '】' + eraText(mm.era) + '·' + mm.cat
+        + '，骨式' + mm.bones.map(boneCN).join('、') + '。\n\n'
+        + stripTags(mm.meaning),
+      trace: '<b>① 意图识别</b>　测验作答<br><b>② 判定</b>　' + (okFlag ? '正确' : '错误')
+        + '<br><b>③ 应答</b>　给出答案与词条',
+      ref: right,
+      chips: ['再考考我', '讲讲' + right, '它出自哪里']
+    };
+  }
+
   var boneAns = answerBoneConcept(q);
   if (boneAns) return boneAns;
 
@@ -2887,12 +3059,30 @@ function answer(q){
 
   var trace = [];
   trace.push('<b>① 意图识别</b>　' + (top ? top.label + '（命中关键词：' + top.hit.join('、') + '）' : '未命中明确意图，转为列表推荐'));
-  trace.push('<b>② 知识检索</b>　在 16 条纹样中匹配到 ' + hits.length + ' 条'
+  trace.push('<b>② 知识检索</b>　在 ' + MOTIFS.length + ' 条纹样中匹配到 ' + hits.length + ' 条'
     + (hits.length ? '，最高分：' + hits[0].m.name + '（' + hits[0].score + '）' : ''));
+
+  // 「考考我」不依赖检索命中，必须在空结果守卫之前处理
+  if (intentId === 'quiz'){
+    var qm = MOTIFS[Math.floor(Math.random()*MOTIFS.length)];
+    QUIZ.active = true; QUIZ.m = qm;
+    var others = MOTIFS.filter(function(x){ return x.id !== qm.id; });
+    others.sort(function(){ return Math.random()-0.5; });
+    var opts = [qm.name, others[0].name, others[1].name];
+    opts.sort(function(){ return Math.random()-0.5; });
+    trace.push('<b>③ 工具调用</b>　随机抽取一条 → 生成三选一题目（答案记在会话状态里）');
+    return {
+      text: '考你一题。\n\n'
+        + '「' + stripTags(qm.form).slice(0, 90) + '……」\n\n'
+        + '这是哪一条纹样？',
+      trace: trace.join('<br>'),
+      chips: opts.map(function(n){ return '我选：' + n; })
+    };
+  }
 
   if (!hits.length){
     return {
-      text:'我没能在这 16 条纹样里找到直接相关的内容。\n\n'
+      text:'我没能在这 ' + MOTIFS.length + ' 条纹样里找到直接相关的内容。\n\n'
         + '可以试试问得更具体一点，比如：\n'
         + '· 「唐代有什么纹样」\n· 「缠枝纹是什么寓意」\n· 「二方连续和四方连续的区别」',
       trace: trace.join('<br>')
@@ -2926,6 +3116,47 @@ function answer(q){
     if (cfg.reasons.length) trace.push('<b>　└ 参数来源</b>　' + cfg.reasons.join('；'));
     body = cfg.text;
     setTimeout(function(){ applyStudioCfg(cfg); go('studio'); }, 900);
+  } else if (intentId === 'source'){
+    trace.push('<b>③ 工具调用</b>　调用「出处检索器」，取文物与织物来源');
+    body = '【' + m0.name + '】的载体与出处\n\n'
+      + '· 常见载体：' + m0.carrier + '\n'
+      + '· 可查出处：' + (MOTIF_SRC[m0.id] || '（待补充：出处）') + '\n\n'
+      + stripTags(m0.desc);
+  } else if (intentId === 'thing'){
+    var tw = THING_WORDS.filter(function(w){ return q.indexOf(w) >= 0; })[0];
+    var pool = MOTIFS.filter(function(x){ return tw && x.carrier.indexOf(tw) >= 0; });
+    trace.push('<b>③ 工具调用</b>　按器物「' + tw + '」反查载体字段');
+    body = pool.length
+      ? '出现在「' + tw + '」上的纹样，知识库里有 ' + pool.length + ' 条：\n\n'
+        + pool.slice(0,6).map(function(x,i){
+            return (i+1) + '. 【' + x.name + '】（' + eraText(x.era) + '·' + x.cat + '）\n   '
+              + stripTags(x.meaning).slice(0,44) + '…';
+          }).join('\n\n')
+      : '知识库里暂时没有明确记在「' + tw + '」上的纹样。可以换个器物试试，比如瓷器、织锦、青铜、建筑。';
+    if (pool.length) CTX.motif = pool[0];
+  } else if (intentId === 'wish'){
+    var ww = WISH_WORDS.filter(function(w){ return q.indexOf(w) >= 0; })[0];
+    var wp = MOTIFS.filter(function(x){ return ww && stripTags(x.meaning).indexOf(ww) >= 0; });
+    trace.push('<b>③ 工具调用</b>　按吉祥语「' + ww + '」反查寓意字段');
+    body = wp.length
+      ? '寓意「' + ww + '」的纹样，知识库里有 ' + wp.length + ' 条：\n\n'
+        + wp.slice(0,6).map(function(x,i){
+            return (i+1) + '. 【' + x.name + '】（' + eraText(x.era) + '）\n   '
+              + stripTags(x.meaning).slice(0,46) + '…';
+          }).join('\n\n')
+      : '知识库里暂时没有直接写「' + ww + '」的纹样。可以换个说法，比如长寿、富贵、吉祥、平安、多子。';
+    if (wp.length) CTX.motif = wp[0];
+  } else if (intentId === 'trail'){
+    var fam = MOTIFS.filter(function(x){ return x.unit === m0.unit; });
+    var orderEra = ['新石器','商周','春秋战国','汉','魏晋南北朝','南北朝','唐','宋','元','明清'];
+    fam.sort(function(a,b){ return orderEra.indexOf(a.era) - orderEra.indexOf(b.era); });
+    trace.push('<b>③ 工具调用</b>　按母题「' + unitCN(m0.unit) + '」聚合，再按年代排序');
+    body = '和【' + m0.name + '】共用同一个母题「' + unitCN(m0.unit) + '」的纹样，共 '
+      + fam.length + ' 条，按年代排：\n\n'
+      + fam.map(function(x){
+          return '· ' + eraText(x.era) + '　【' + x.name + '】' + stripTags(x.meaning).slice(0,34) + '…';
+        }).join('\n')
+      + '\n\n母题相同、骨式各别，这正是「一母题多用」——同一套骨架，换个排法就是另一个样子。';
   } else if (intentId === 'era'){
     var same = hits.filter(function(h){ return h.m.era === m0.era; }).slice(0,4);
     trace.push('<b>③ 工具调用</b>　按朝代聚合，取同代 ' + same.length + ' 条');
@@ -2946,21 +3177,51 @@ function answer(q){
     body += '\n\n（可以接着问：「那它的骨式呢」「还有呢」「讲详细点」）';
   }
 
+  // 回答下方给可点的追问与动作
+  var chips = [];
+  if (intentId === 'era'){
+    chips = ['讲详细点', '还有呢', '这些纹样出自哪里'];
+  } else if (intentId === 'thing' || intentId === 'wish' || intentId === 'list'){
+    chips = ['讲详细点', '考考我', '画一个试试'];
+  } else {
+    chips = ['那它的骨式呢', '它出自哪里', '还有呢'];
+  }
+
   trace.push('<b>④ 生成回答</b>　基于知识库第 ' + (hits.indexOf(hits[0])+1) + ' 条，结合模板合成');
-  return { text: body, trace: trace.join('<br>') };
+  return { text: body, trace: trace.join('<br>'), ref: (intentId==='make' ? null : m0.name), chips: chips };
 }
 
 var talkInit = false;
 function initTalk(){
   if (talkInit) return; talkInit = true;
-  var sugs = ['唐代有什么代表纹样','缠枝纹是什么寓意','二方连续和四方连续的区别',
-              '画一个唐朝风格的金色团花','宝相花和莲花纹有什么区别','回纹为什么叫富贵不断头'];
-  $('#sugs').innerHTML = sugs.map(function(s){
-    return '<button class="sug">'+s+'</button>';
-  }).join('');
+  var sugs = [
+    '唐代有什么代表纹样','什么纹样代表长寿','哪些纹样用在瓷器上',
+    '缠枝纹是什么寓意','八达晕出自哪里','忍冬纹是怎么演变的',
+    '宝相花和莲花纹有什么区别','二方连续和四方连续的区别',
+    '回纹为什么叫富贵不断头','画一个唐朝风格的金色团花',
+    '考考我','随便讲一个纹样'
+  ];
+  $('#sugs').innerHTML = '<div class="sug-hint">试试这样问 —— 也可以按年代、器物、寓意、出处、演变来问，或让我考考你</div>'
+    + sugs.map(function(s){ return '<button class="sug">'+s+'</button>'; }).join('');
   $('#sugs').addEventListener('click', function(e){
     var b = e.target.closest('.sug'); if(!b) return;
     ask(b.textContent);
+  });
+  // 回答下方的追问按钮与「看详情 / 带进工坊」
+  $('#talk').addEventListener('click', function(e){
+    var c = e.target.closest('.fchip');
+    if (c) { ask(c.textContent); return; }
+    var a = e.target.closest('.fact');
+    if (!a) return;
+    var m = MOTIFS.filter(function(x){ return x.name === a.dataset.ref; })[0];
+    if (!m) return;
+    if (a.dataset.act === 'detail') {
+      go('atlas'); openDetail(m);
+    } else {
+      applyStudioCfg({ motif:m.id, bone:(m.bones && m.bones[0]) || m.defaultBone,
+                       palette:m.palette, name:m.name });
+      go('studio');
+    }
   });
   $('#asksend').onclick = function(){ ask($('#askinput').value); };
   $('#askinput').addEventListener('keydown', function(e){
@@ -2969,14 +3230,26 @@ function initTalk(){
   ask('你好，你能做什么？', true);
 }
 
-function bubble(role, html, trace){
+function bubble(role, html, trace, chips, ref){
   var wrap = document.createElement('div');
   wrap.className = 'msg ' + (role==='u' ? 'u' : 'a');
+  var extra = '';
+  if (role !== 'u' && ((chips && chips.length) || ref)) {
+    var acts = '';
+    if (ref) {
+      var rq = String(ref).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+      acts = '<button class="fact" data-act="detail" data-ref="' + rq + '">看详情</button>'
+           + '<button class="fact" data-act="studio" data-ref="' + rq + '">带进工坊</button>';
+    }
+    var cs = (chips || []).map(function(c){
+      return '<button class="fchip">' + String(c).replace(/</g,'&lt;') + '</button>';
+    }).join('');
+    extra = '<div class="follow">' + cs + acts + '</div>';
+  }
   wrap.innerHTML = '<div class="avatar">' + (role==='u' ? '我' : '纹') + '</div>'
     + '<div class="bubble">' + html
-    + (trace ? '<div class="trace">' + trace + '</div>' : '') + '</div>';
+    + (trace ? '<div class="trace">' + trace + '</div>' : '') + extra + '</div>';
   $('#talk').appendChild(wrap);
-  var sc = $('#v-ask');
   window.scrollTo(0, document.body.scrollHeight);
 }
 
@@ -2988,7 +3261,7 @@ function ask(q, silent){
   $('#askinput').value = '';
   var res = answer(q);
   setTimeout(function(){
-    bubble('a', res.text.replace(/</g,'&lt;').replace(/\n/g,'<br>'), res.trace);
+    bubble('a', res.text.replace(/</g,'&lt;').replace(/\n/g,'<br>'), res.trace, res.chips, res.ref);
   }, 260);
 }
 </script>
@@ -3682,6 +3955,32 @@ openDetail = function(m){
 
 /* 启动 */
 initStudioV2();
+
+/* v8 桌面右栏：给图鉴右侧空白填上真内容 */
+(function(){
+  var atlas = document.getElementById('v-atlas');
+  if (!atlas) return;
+  var colo = atlas.querySelector('.colophon');
+  if (!colo || atlas.querySelector('.rail-card')) return;
+  var stats = (window.MOTIFS ? MOTIFS.length : 48) + ' 条纹样';
+  var cards = document.createElement('div');
+  cards.className = 'rail';
+  cards.innerHTML =
+    '<div class="rail-card"><h4>怎么看这一页</h4>'
+    + '<p>每条纹样都拆成两件事：<b>母题</b>是画什么（团花、缠枝、兽面），'
+    + '<b>骨式</b>是怎么排（单独、适合、放射、二方连续、四方连续）。'
+    + '母题相同、骨式不同，就是另一条纹样。</p></div>'
+    + '<div class="rail-card"><h4>本页</h4><p>' + stats
+    + '，每条都标了可查的<b>文物出处</b>。点标题上方的「骨架线」可以看见排布规律本身。</p></div>'
+    + '<button class="rail-go" id="rail-quiz">考我一题</button>';
+  colo.parentNode.insertBefore(cards, colo.nextSibling);
+  var q = document.getElementById('rail-quiz');
+  if (q) q.addEventListener('click', function(){
+    if (typeof go === 'function') go('ask');
+    if (typeof initTalk === 'function') initTalk();
+    setTimeout(function(){ if (typeof ask === 'function') ask('考考我'); }, 120);
+  });
+})();
 </script>
 </body>
 </html>
