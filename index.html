@@ -437,6 +437,64 @@ input[type=range]::-webkit-slider-thumb{
   .card, .bubble{animation:none !important}
   .card:hover{transform:none}
 }
+
+/* ============ 设计层 v3 —— 题跋 · 立轴 · 骨架可视 ============ */
+.colophon{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 0 2px}
+.colophon-txt{
+  writing-mode:vertical-rl; font-family:var(--serif); font-size:15px;
+  letter-spacing:.34em; line-height:1.9; color:var(--ink-2); padding-top:4px;
+  border-right:1px solid var(--line); padding-right:10px; margin-right:auto;
+}
+.seal{
+  flex:0 0 auto; width:40px; height:40px; margin-top:2px; border-radius:3px;
+  background:var(--red); color:#F7F1E6; font-family:var(--serif);
+  font-size:13px; line-height:1.05; letter-spacing:0;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  box-shadow:0 1px 0 rgba(0,0,0,.18), inset 0 0 0 2px rgba(255,255,255,.16);
+  transform:rotate(-1.5deg);
+}
+.rule-meander{
+  height:8px; margin:2px 0 4px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='8'><path d='M1 7V1h6v4H4V3h1' fill='none' stroke='%23B8935A' stroke-width='.9' opacity='.5'/></svg>");
+  background-repeat:repeat-x; background-size:16px 8px; opacity:.85;
+}
+.stats-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.stats-row .stats{margin:0}
+#guide-toggle{
+  flex:0 0 auto; font:inherit; font-size:11px; letter-spacing:.14em;
+  color:var(--ink-2); background:transparent; border:1px solid var(--line);
+  border-radius:999px; padding:4px 11px; cursor:pointer; transition:all .2s ease;
+}
+#guide-toggle.on{background:var(--red); color:#F7F1E6; border-color:var(--red)}
+#guide-toggle:active{transform:scale(.95)}
+
+#detail canvas{
+  border-radius:2px;
+  box-shadow:0 0 0 1px rgba(42,36,30,.28),
+             0 0 0 6px #EFE7D6,
+             0 0 0 7px rgba(42,36,30,.16),
+             0 8px 22px -12px rgba(42,36,30,.55);
+  margin:10px 2px 16px;
+}
+
+.card{position:relative; overflow:hidden}
+.card::before{
+  content:''; position:absolute; left:50%; top:42%; width:12px; height:12px;
+  margin:-6px 0 0 -6px; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(168,59,44,.22), rgba(168,59,44,0) 70%);
+  transform:scale(0); opacity:0; transition:transform .5s ease, opacity .5s ease;
+}
+.card:active::before{transform:scale(30); opacity:1; transition:none}
+
+.d-title{position:relative; padding-left:14px}
+.d-title::before{
+  content:''; position:absolute; left:0; top:6px; bottom:6px; width:3px;
+  background:var(--red); border-radius:2px; opacity:.85;
+}
+@media (prefers-reduced-motion: reduce){
+  #guide-toggle{transition:none}
+  .card:active::before{transform:scale(0)}
+}
 </style>
 </head>
 <body>
@@ -1261,8 +1319,44 @@ var LAYOUTS = {
   }
 };
 
+/* 骨架线开关：把"骨式"这个抽象概念直接画出来 */
+var showGuides = false;
+
+function drawGuides(ctx, W, H, bone, n){
+  var cx=W/2, cy=H/2, R=Math.min(W,H)/2*0.86;
+  ctx.save();
+  ctx.strokeStyle='rgba(168,59,44,.38)';
+  ctx.lineWidth=1;
+  ctx.setLineDash([3,4]);
+  var i, a, x, y;
+  if (bone === 'radial'){
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+    var k = n || 8;
+    for (i=0;i<k;i++){
+      a = i*Math.PI*2/k;
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.lineTo(cx+Math.cos(a)*R, cy+Math.sin(a)*R); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(cx,cy,2.6,0,Math.PI*2);
+    ctx.fillStyle='rgba(168,59,44,.65)'; ctx.fill();
+  } else if (bone === 'border2'){
+    ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
+    for (x=0;x<=W+0.5;x+=W/3){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  } else if (bone === 'allover4'){
+    for (x=0;x<=W+0.5;x+=W/3){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for (y=0;y<=H+0.5;y+=H/3){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  } else {
+    ctx.strokeRect(1,1,W-2,H-2);
+    ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function renderMotif(canvas, motif, opts){
   opts = opts || {};
+  if (opts.guides === undefined) opts.guides = showGuides;
   var dpr = Math.min(window.devicePixelRatio||2, 2);
   var rect = canvas.getBoundingClientRect();
   var W = Math.max(60, Math.round(rect.width));
@@ -1289,6 +1383,7 @@ function renderMotif(canvas, motif, opts){
     petals: opts.petals || motif.petals || 8
   };
   fn(ctx, W, H, motif.unit || 'rosette', p, o);
+  if (opts.guides) drawGuides(ctx, W, H, bone, o.n);
   return canvas;
 }
 </script>
@@ -1620,6 +1715,467 @@ MOTIFS.push(
 }
 );
 
+/* ============================================================
+   第三批绘制单元（14 个）
+   ============================================================ */
+
+UNITS.zhangfu = function(ctx,r,p){
+  // 十二章：日、月、星辰、山 四章并置
+  ctx.save(); ctx.translate(-r*0.40,-r*0.34);
+  ctx.beginPath(); ctx.arc(0,0,r*0.20,0,Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill(); ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+  ctx.beginPath(); ctx.arc(r*0.05,-r*0.04,r*0.075,0,Math.PI*2); ctx.fillStyle=p.ink; ctx.fill();
+  ctx.restore();
+  ctx.save(); ctx.translate(r*0.40,-r*0.34);
+  ctx.beginPath(); ctx.arc(0,0,r*0.20,0,Math.PI*2);
+  ctx.fillStyle=p.b; ctx.fill(); ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-r*0.06,r*0.02,r*0.055,0,Math.PI*2); ctx.fillStyle=p.c; ctx.fill();
+  ctx.restore();
+  for (var i=0;i<3;i++){
+    ctx.beginPath(); ctx.arc((i-1)*r*0.22, r*0.06, r*0.055, 0, Math.PI*2);
+    ctx.fillStyle=p.c; ctx.fill(); ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.moveTo(-r*0.62, r*0.62); ctx.lineTo(-r*0.38, r*0.26); ctx.lineTo(-r*0.16, r*0.62);
+  ctx.moveTo(-r*0.40, r*0.62); ctx.lineTo(0, r*0.22); ctx.lineTo(r*0.40, r*0.62);
+  ctx.moveTo(r*0.16, r*0.62); ctx.lineTo(r*0.60, r*0.28);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1,r*0.045); ctx.lineJoin='round'; ctx.stroke();
+};
+
+UNITS.fangsheng = function(ctx,r,p){
+  // 方胜：两个菱形交叠成套
+  function rhomb(cx,cy,sc,fill){
+    ctx.beginPath();
+    ctx.moveTo(cx, cy-r*sc); ctx.lineTo(cx+r*sc*0.82, cy);
+    ctx.lineTo(cx, cy+r*sc); ctx.lineTo(cx-r*sc*0.82, cy);
+    ctx.closePath();
+    ctx.fillStyle=fill; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.022); ctx.stroke();
+  }
+  rhomb(-r*0.26,0,0.42,p.a);
+  rhomb( r*0.26,0,0.42,p.b);
+  ctx.beginPath();
+  ctx.moveTo(0,-r*0.30); ctx.lineTo(0,r*0.30);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1,r*0.035); ctx.stroke();
+};
+
+UNITS.qiequ = function(ctx,r,p){
+  // 窃曲：S 形卷曲加目纹，西周中晚期青铜器常见
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  for (var s2=-1;s2<=1;s2+=2){
+    ctx.save(); ctx.scale(s2,1);
+    ctx.beginPath();
+    ctx.moveTo(0, r*0.34);
+    ctx.bezierCurveTo(r*0.62, r*0.28, r*0.52,-r*0.42, r*0.04,-r*0.30);
+    ctx.bezierCurveTo(-r*0.24,-r*0.22, -r*0.18, r*0.10, r*0.06, r*0.04);
+    ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.3,r*0.085); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(0,-r*0.02,r*0.11,0,Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill(); ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,-r*0.02,r*0.04,0,Math.PI*2); ctx.fillStyle=p.ink; ctx.fill();
+};
+
+UNITS.panchi = function(ctx,r,p){
+  // 蟠螭：两条螭龙交缠
+  ctx.lineCap='round';
+  for (var k=0;k<2;k++){
+    ctx.save(); ctx.rotate(k*Math.PI/2);
+    ctx.beginPath();
+    ctx.moveTo(-r*0.10, r*0.86);
+    ctx.bezierCurveTo(r*0.52, r*0.50, -r*0.44, r*0.10, r*0.06,-r*0.26);
+    ctx.bezierCurveTo(r*0.30,-r*0.44, r*0.16,-r*0.72, -r*0.10,-r*0.80);
+    ctx.strokeStyle=k? p.c : p.b; ctx.lineWidth=Math.max(1.3,r*0.075);
+    ctx.globalAlpha=0.92; ctx.stroke(); ctx.globalAlpha=1;
+    ctx.beginPath(); ctx.arc(-r*0.10,-r*0.80, r*0.10, 0, Math.PI*2);
+    ctx.fillStyle=k? p.c : p.b; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.014); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(0,0,r*0.12,0,Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill(); ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+};
+
+UNITS.tuanlong = function(ctx,r,p){
+  // 团龙：圆形内盘龙
+  ctx.beginPath(); ctx.arc(0,0,r*0.94,0,Math.PI*2);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1.2,r*0.05); ctx.stroke();
+  ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(-r*0.52, r*0.18);
+  ctx.bezierCurveTo(-r*0.20, r*0.62, r*0.56, r*0.30, r*0.40,-r*0.14);
+  ctx.bezierCurveTo(r*0.28,-r*0.46, -r*0.14,-r*0.40, -r*0.10,-r*0.12);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.6,r*0.10); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-r*0.46, r*0.20, r*0.20, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill(); ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-r*0.52, r*0.14, r*0.055, 0, Math.PI*2); ctx.fillStyle=p.ink; ctx.fill();
+  for (var k=0;k<4;k++){
+    ctx.save(); ctx.rotate(k*Math.PI/2 + 0.6);
+    ctx.beginPath(); ctx.moveTo(r*0.30,0); ctx.lineTo(r*0.52,-r*0.16); ctx.lineTo(r*0.44,r*0.10);
+    ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(0.8,r*0.03); ctx.stroke(); ctx.restore();
+  }
+};
+
+UNITS.qilin = function(ctx,r,p){
+  // 麒麟：独角、鳞身、牛尾、蹄
+  ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.ellipse(r*0.04, r*0.06, r*0.36, r*0.22, -0.22, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.globalAlpha=0.92; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.020); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-r*0.40,-r*0.22, r*0.18, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.44,-r*0.38); ctx.lineTo(-r*0.52,-r*0.66); ctx.lineTo(-r*0.36,-r*0.40);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1,r*0.04); ctx.stroke();
+  for (var i=0;i<4;i++){
+    ctx.beginPath(); ctx.moveTo(-r*0.06+i*r*0.13, r*0.02); ctx.lineTo(-r*0.06+i*r*0.13, r*0.28);
+    ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.8,r*0.028); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.moveTo(r*0.38, r*0.04);
+  ctx.quadraticCurveTo(r*0.72,-r*0.10, r*0.62,-r*0.40);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1,r*0.038); ctx.stroke();
+};
+
+UNITS.bianfu = function(ctx,r,p){
+  // 蝙蝠：展翅，取"福"
+  ctx.beginPath();
+  ctx.moveTo(0,-r*0.10);
+  ctx.bezierCurveTo(-r*0.30,-r*0.56, -r*0.94,-r*0.34, -r*0.86, r*0.16);
+  ctx.bezierCurveTo(-r*0.60, r*0.02, -r*0.36, r*0.10, 0, r*0.30);
+  ctx.bezierCurveTo(r*0.36, r*0.10, r*0.60, r*0.02, r*0.86, r*0.16);
+  ctx.bezierCurveTo(r*0.94,-r*0.34, r*0.30,-r*0.56, 0,-r*0.10);
+  ctx.closePath();
+  ctx.fillStyle=p.a; ctx.globalAlpha=0.90; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.022); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,-r*0.12, r*0.13, 0, Math.PI*2);
+  ctx.fillStyle=p.c; ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.07,-r*0.22); ctx.lineTo(-r*0.12,-r*0.34);
+  ctx.moveTo(r*0.07,-r*0.22); ctx.lineTo(r*0.12,-r*0.34);
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.022); ctx.stroke();
+};
+
+UNITS.shouzi = function(ctx,r,p){
+  // 团寿：篆意寿字，圆中盘曲
+  ctx.strokeStyle=p.a; ctx.lineWidth=Math.max(1.4,r*0.070);
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  var s2=r*0.46;
+  ctx.beginPath();
+  for (var k=0;k<4;k++){
+    ctx.save(); ctx.rotate(k*Math.PI/2);
+    ctx.moveTo(0,-s2);
+    ctx.lineTo(s2*0.86,-s2);
+    ctx.lineTo(s2*0.86,-s2*0.20);
+    ctx.lineTo(s2*0.30,-s2*0.20);
+    ctx.lineTo(s2*0.30,-s2*0.70);
+    ctx.restore();
+    ctx.beginPath();
+  }
+  ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,r*0.92,0,Math.PI*2);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1,r*0.035); ctx.stroke();
+};
+
+UNITS.lianqian = function(ctx,r,p){
+  // 连钱：圆钱相扣，方孔
+  var R=r*0.30;
+  var pts=[[0,0],[R*1.72,0],[-R*1.72,0],[R*0.86,R*1.50],[-R*0.86,R*1.50],
+           [R*0.86,-R*1.50],[-R*0.86,-R*1.50]];
+  pts.forEach(function(q,i){
+    ctx.beginPath(); ctx.arc(q[0],q[1],R,0,Math.PI*2);
+    ctx.fillStyle= i%2 ? p.b : p.a; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+    ctx.beginPath(); ctx.rect(q[0]-R*0.30, q[1]-R*0.30, R*0.60, R*0.60);
+    ctx.fillStyle=p.bg2 || p.c; ctx.fill();
+    ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.5,r*0.014); ctx.stroke();
+  });
+};
+
+UNITS.luohua = function(ctx,r,p){
+  // 落花流水：水波之上漂散花瓣
+  ctx.strokeStyle=p.b; ctx.globalAlpha=0.55; ctx.lineWidth=Math.max(0.9,r*0.035);
+  for (var w=0;w<3;w++){
+    var y=r*(0.10+w*0.30);
+    ctx.beginPath();
+    for (var x=-r; x<r; x+=r*0.5){
+      ctx.quadraticCurveTo(x+r*0.125, y-r*0.07, x+r*0.25, y);
+      ctx.quadraticCurveTo(x+r*0.375, y+r*0.07, x+r*0.5, y);
+    }
+    ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  [[-0.44,-0.34,0.4],[-0.06,-0.50,-0.3],[0.40,-0.26,0.8],[0.16,-0.06,-0.6],[-0.30,0.04,0.2]].forEach(function(q,i){
+    ctx.save(); ctx.translate(q[0]*r, q[1]*r); ctx.rotate(q[2]);
+    for (var k=0;k<5;k++){
+      ctx.save(); ctx.rotate(k*Math.PI*2/5);
+      ctx.beginPath(); ctx.ellipse(0,-r*0.062, r*0.042, r*0.055, 0, 0, Math.PI*2);
+      ctx.fillStyle= i%2 ? p.a : p.c; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+      ctx.restore();
+    }
+    ctx.restore();
+  });
+};
+
+UNITS.putao = function(ctx,r,p){
+  // 葡萄：卷藤 + 果串 + 叶
+  ctx.lineCap='round';
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.2,r*0.060);
+  ctx.beginPath();
+  ctx.moveTo(-r*0.90,-r*0.40);
+  ctx.bezierCurveTo(-r*0.30,-r*0.86, r*0.40,-r*0.30, r*0.28, r*0.16);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-r*0.20,-r*0.62);
+  ctx.bezierCurveTo(r*0.10,-r*0.86, r*0.46,-r*0.72, r*0.40,-r*0.50);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.8,r*0.032); ctx.stroke();
+  var rows=[[-0.10,0.06],[0.16,0.20],[-0.02,0.36],[0.22,0.50],[-0.08,0.62]];
+  rows.forEach(function(q){
+    ctx.beginPath(); ctx.arc(q[0]*r, q[1]*r, r*0.115, 0, Math.PI*2);
+    ctx.fillStyle=p.a; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.45,r*0.014); ctx.stroke();
+  });
+  ctx.beginPath();
+  ctx.moveTo(-r*0.86,-r*0.30);
+  ctx.quadraticCurveTo(-r*0.62,-r*0.62, -r*0.34,-r*0.38);
+  ctx.quadraticCurveTo(-r*0.60,-r*0.06, -r*0.86,-r*0.30);
+  ctx.fillStyle=p.b; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+};
+
+UNITS.hudie = function(ctx,r,p){
+  // 蝴蝶：四翅
+  [[-1,1],[-1,-1],[1,1],[1,-1]].forEach(function(sg,i){
+    ctx.save(); ctx.scale(sg[0],sg[1]);
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.bezierCurveTo(r*0.30,-r*0.16, r*0.86,-r*0.66, r*0.62,-r*0.10);
+    ctx.bezierCurveTo(r*0.52, r*0.06, r*0.20, r*0.04, 0,0);
+    ctx.fillStyle= i<2 ? p.a : p.c; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+    ctx.restore();
+  });
+  ctx.beginPath(); ctx.moveTo(0,-r*0.34); ctx.lineTo(0,r*0.34);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1,r*0.038); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,-r*0.36, r*0.06, 0, Math.PI*2); ctx.fillStyle=p.b; ctx.fill();
+};
+
+UNITS.bogu = function(ctx,r,p){
+  // 博古：瓶与炉并置
+  ctx.beginPath();
+  ctx.moveTo(-r*0.30,-r*0.54);
+  ctx.bezierCurveTo(-r*0.62,-r*0.30, -r*0.58, r*0.46, -r*0.20, r*0.52);
+  ctx.lineTo(-r*0.02, r*0.52);
+  ctx.bezierCurveTo(-r*0.20, r*0.10, -r*0.16,-r*0.30, -r*0.06,-r*0.54);
+  ctx.closePath();
+  ctx.fillStyle=p.b; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(r*0.18,r*0.52); ctx.lineTo(r*0.18,r*0.16);
+  ctx.lineTo(r*0.10,r*0.02); ctx.lineTo(r*0.10,-r*0.18);
+  ctx.lineTo(r*0.52,-r*0.18); ctx.lineTo(r*0.52,r*0.02);
+  ctx.lineTo(r*0.44,r*0.16); ctx.lineTo(r*0.44,r*0.52);
+  ctx.closePath();
+  ctx.fillStyle=p.a; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(r*0.24,-r*0.22); ctx.quadraticCurveTo(r*0.31,-r*0.44, r*0.38,-r*0.22);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.8,r*0.028); ctx.stroke();
+};
+
+UNITS.feiyu = function(ctx,r,p){
+  // 飞鱼：鱼身生翼，明代赐服纹样
+  ctx.beginPath();
+  ctx.ellipse(0, r*0.10, r*0.44, r*0.20, 0, 0, Math.PI*2);
+  ctx.fillStyle=p.b; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.020); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-r*0.42, r*0.10); ctx.lineTo(-r*0.78, r*0.34); ctx.lineTo(-r*0.80,-r*0.04);
+  ctx.closePath(); ctx.fillStyle=p.c; ctx.fill(); ctx.strokeStyle=p.ink;
+  ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+  [-1,1].forEach(function(s2){
+    ctx.save(); ctx.scale(s2,1);
+    ctx.beginPath();
+    ctx.moveTo(r*0.06, r*0.00);
+    ctx.bezierCurveTo(r*0.34,-r*0.44, r*0.66,-r*0.56, r*0.58,-r*0.10);
+    ctx.bezierCurveTo(r*0.54, r*0.06, r*0.28, r*0.10, r*0.06, r*0.00);
+    ctx.fillStyle=p.a; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.014); ctx.stroke();
+    ctx.restore();
+  });
+  ctx.beginPath(); ctx.arc(r*0.38, r*0.04, r*0.045, 0, Math.PI*2); ctx.fillStyle=p.ink; ctx.fill();
+};
+
+MOTIFS.push(
+{
+  id:'zhangfu', name:'十二章纹', alias:'十二章、十二纹章',
+  era:'明清', cat:'宗教', unit:'zhangfu',
+  bones:['allover4','fitting','border2'], defaultBone:'allover4', palette:'mojin', symN:0, petals:0,
+  carrier:'帝王礼服与吉服（龙袍）',
+  form:'十二种纹样分区排布：清制<b>日、月、星辰、山、龙、华虫、黼、黻在衣，宗彝、藻、火、粉米在裳</b>，各依固定位置，不随意挪动。',
+  meaning:'每一章各有取义：日月星辰取其照临昭明，山取兴云雨，龙取善变化，华虫取文章耿介，宗彝取威猛忠孝，藻取文，火取炎上，粉取洁白，米取滋养，黼取决断，黻取善恶相背。',
+  desc:'十二章是中国帝制时代最严格的<b>等级纹样</b>，始于传说中的舜禹时代。《尚书·益稷》载舜与禹论君臣之道：“予欲观古人之象，日、月、星辰、山、龙、华虫作会，宗彝、藻、火、粉米、黼、黻、絺绣，以五采彰施于五色作服。”它把天文、地理、生物、神灵收进一件衣服，是“以纹明制”的极致。',
+  tags:['明清','龙袍','等级','礼制','十二章']
+},
+{
+  id:'buzi', name:'补子纹', alias:'补服、胸背',
+  era:'明清', cat:'动物', unit:'phoenix',
+  bones:['fitting','single'], defaultBone:'fitting', palette:'shiqing', symN:0, petals:0,
+  carrier:'明清官服胸前与背后的方形补子',
+  form:'方形轮廓内一只主纹居中，周围配红日、彩云、海水江崖；文官用<b>飞禽</b>，武官用<b>走兽</b>，品级不同则鸟兽不同。',
+  meaning:'以鸟兽定尊卑。文官禽鸟寓意勤劳和平，武官猛兽寓意威武卫安。',
+  desc:'明制文官：一品仙鹤、二锦鸡、三孔雀、四云雁、五白鹇、六鹭鸶、七鸂鶒、八黄鹂、九鹌鹑，杂职练雀，风宪官用獬豸；武官：一二品狮子，三四品虎豹，五品熊罴，六七品彪，八品犀牛，九品海马。清制承明而调整：文官一品鹤至九品练雀，武官一品麒麟、二品狮、三品豹、四品虎、五品熊、六品彪、七八品犀牛、九品海马。研究者指出，<b>明补多双禽、清补多单禽</b>，明武官多单兽——同一制度，两种审美。',
+  tags:['明清','官服','品级','飞禽走兽','补子']
+},
+{
+  id:'fangsheng', name:'方胜纹', alias:'同心方胜',
+  era:'元', cat:'几何', unit:'fangsheng',
+  bones:['single','border2','allover4'], defaultBone:'single', palette:'danqing', symN:0, petals:0,
+  carrier:'元明清织绣、首饰、建筑彩画',
+  form:'两个菱形交叠相扣，形成“胜”形；单元反复则成二方连续或四方连续。',
+  meaning:'结构交织紧扣，故又称“同心方胜”，象征心连心、同心同德、同舟共济。',
+  desc:'方胜本是首饰名，后其形被抽象为纹样。它的巧妙处在于：<b>只用两个菱形，靠交叠就造出了“联结”的语义</b>——这是几何纹样表达抽象概念的一种高效做法。故宫藏黑漆描金山水纹方胜式盘，即取方胜为器形。',
+  tags:['元明清','几何','同心','交叠','首饰']
+},
+{
+  id:'qiequ', name:'窃曲纹', alias:'窃曲',
+  era:'商周', cat:'几何', unit:'qiequ',
+  bones:['border2','single','allover4'], defaultBone:'border2', palette:'shiqing', symN:0, petals:0,
+  carrier:'西周中晚期青铜器（鼎、簋）',
+  form:'以两端卷曲的“S”形或“∽”形线条为单元，中置目纹，多作<b>二方连续</b>环绕器身。',
+  meaning:'由兽面纹解体而来，象征意义随器主而变，更多承担装饰与等级的标识功能。',
+  desc:'窃曲纹是西周中晚期取代兽面纹成为主纹的几何纹样。它的出现标志着一个转折：<b>从“画一个神兽”转向“用一个符号”</b>。线条被抽象化、连续化，更适合环绕器身铺展。',
+  tags:['西周','青铜','抽象','二方连续','S形']
+},
+{
+  id:'panchi', name:'蟠螭纹', alias:'蟠螭',
+  era:'春秋战国', cat:'动物', unit:'panchi',
+  bones:['allover4','radial','fitting'], defaultBone:'allover4', palette:'shiqing', symN:4, petals:0,
+  carrier:'春秋战国青铜器、玉器',
+  form:'多条螭龙蟠曲交缠，首尾互衔，密不透风地铺满器表。',
+  meaning:'螭为无角之龙。蟠曲交缠象征生生不息、绵延不绝。',
+  desc:'蟠螭纹盛行于春秋战国，是青铜器装饰由“单元排列”走向<b>“满铺缠绕”</b>的代表。它不再依赖边框，而是让纹样自己编织成面——这种“无缝”观念一直延续到后世的织锦与建筑彩画。',
+  tags:['春秋战国','青铜','蟠曲','满铺','龙']
+},
+{
+  id:'panhui', name:'蟠虺纹', alias:'蟠虺、蛇纹',
+  era:'春秋战国', cat:'动物', unit:'panchi',
+  bones:['allover4','border2'], defaultBone:'allover4', palette:'zheshi', symN:4, petals:0,
+  carrier:'春秋战国青铜器',
+  form:'以细小的蛇形（虺）为单位，密集蟠曲排列，单元比蟠螭更小更密。',
+  meaning:'虺为小蛇。密集蟠曲寓繁衍不息。',
+  desc:'蟠虺与蟠螭常同器并存，区别在<b>尺度</b>：螭大而虺小。蟠虺纹把单元缩到极小、数量推到极多，靠密度而非单个造型取胜——这是纹样史上“以量造势”的早期范例。',
+  tags:['春秋战国','青铜','蛇','密集','满铺']
+},
+{
+  id:'tuanlong', name:'团龙纹', alias:'团龙',
+  era:'明清', cat:'动物', unit:'tuanlong',
+  bones:['radial','fitting'], defaultBone:'radial', palette:'mojin', symN:0, petals:0,
+  carrier:'明清龙袍、织锦、瓷器',
+  form:'圆形团窠内盘一条龙，龙身呈“S”形回旋，首尾呼应；<b>圆形适合纹样</b>。',
+  meaning:'龙为帝王象征，团龙寓“圆满”“九五之尊”。',
+  desc:'团龙把最有威势的题材收进最规整的圆形里，靠<b>限制</b>反而强化了气势——龙身必须盘曲才能填满圆，而盘曲本身就是力量的表现。清代龙袍前胸后背各一盘金团龙，是这种构图最典型的用法。',
+  tags:['明清','龙袍','团窠','圆形','皇权']
+},
+{
+  id:'qilin', name:'麒麟纹', alias:'麒麟',
+  era:'明清', cat:'动物', unit:'qilin',
+  bones:['single','fitting','allover4'], defaultBone:'single', palette:'zheshi', symN:0, petals:0,
+  carrier:'清代武一品补子、民间织绣与瓷器',
+  form:'独角、鹿身、牛尾、马蹄，常作单体侧身。',
+  meaning:'麒麟为仁兽，象征祥瑞、太平与子嗣（麒麟送子）。',
+  desc:'清代武官一品补子绣麒麟，与文官一品的仙鹤相对——<b>一文一武，一禽一兽</b>，制度本身就在用纹样讲秩序。民间则取“麒麟送子”，把同一形象转用到婚育祝颂上。',
+  tags:['明清','祥瑞','补子','仁兽','送子']
+},
+{
+  id:'bianfu', name:'蝙蝠纹', alias:'蝠纹、五福捧寿',
+  era:'明清', cat:'动物', unit:'bianfu',
+  bones:['allover4','radial','fitting'], defaultBone:'allover4', palette:'zheshi', symN:4, petals:0,
+  carrier:'明清瓷器、织绣、家具',
+  form:'展翅蝙蝠为单位，常五只环绕一“寿”字，或与云纹、桃纹组合。',
+  meaning:'蝠谐音“福”，五蝠即“五福”；与寿字组合为“五福捧寿”。',
+  desc:'蝙蝠是<b>谐音表意</b>最典型的例子：形象本身并不美，靠“蝠—福”的读音获得了吉祥地位。这种“以音取义”的手法在明清极为普遍，也让纹样获得了超越造型的表意能力。',
+  tags:['明清','谐音','福','五福捧寿','吉祥']
+},
+{
+  id:'shouzi', name:'寿字纹', alias:'团寿、长寿字',
+  era:'明清', cat:'几何', unit:'shouzi',
+  bones:['radial','allover4','fitting'], defaultBone:'radial', palette:'danqing', symN:8, petals:0,
+  carrier:'明清织绣、瓷器、建筑装修',
+  form:'把“寿”字作几何化、对称化处理，团成圆形，称“团寿”；可变体成长条形“长寿”。',
+  meaning:'直取长寿之意，是祝寿场合的固定纹样。',
+  desc:'寿字纹把<b>文字变成图案</b>：笔画被拉直、对称化、团成圆形，使一个字既能单独成图，又能无限排列。它标志着汉字进入了装饰体系——此后的“囍”“卍”“福”都走同一条路。',
+  tags:['明清','文字','祝寿','对称','团寿']
+},
+{
+  id:'lianqian', name:'连钱纹', alias:'钱纹、古钱纹',
+  era:'汉', cat:'几何', unit:'lianqian',
+  bones:['allover4','border2'], defaultBone:'allover4', palette:'zheshi', symN:0, petals:0,
+  carrier:'汉至明清织锦、瓷器、建筑',
+  form:'圆形钱币相互套扣，中留方孔，横向纵向连续不断。',
+  meaning:'钱象征富贵；“钱”与“全”谐音，连钱寓“富贵双全”“财源不断”。',
+  desc:'连钱纹的单元就是一枚<b>方孔圆钱</b>——把流通货币直接搬进纹样。它的结构很聪明：圆与圆相扣，天然形成四方连续，不需要额外骨架。',
+  tags:['汉','货币','富贵','相扣','四方连续']
+},
+{
+  id:'luohua', name:'落花流水纹', alias:'落花流水、曲水纹',
+  era:'明清', cat:'植物', unit:'luohua',
+  bones:['allover4','border2'], defaultBone:'allover4', palette:'danqing', symN:0, petals:5,
+  carrier:'明代织锦、瓷器',
+  form:'细密水波为地，其上散落花瓣，波动花静，形成动静对比。',
+  meaning:'取“落花有意，流水无情”的诗意，也寓时光流转。',
+  desc:'落花流水纹把<b>时间</b>画进了纹样：水在流、花在落，同一个画面里同时存在两种运动。这是中国纹样中少见的“叙事性”构图——它不表吉祥，而表意境。',
+  tags:['明清','诗意','水波','花瓣','意境']
+},
+{
+  id:'putao', name:'葡萄纹', alias:'海马葡萄、葡萄',
+  era:'唐', cat:'植物', unit:'putao',
+  bones:['allover4','border2','single'], defaultBone:'allover4', palette:'shiqing', symN:0, petals:0,
+  carrier:'唐代海马葡萄镜、织锦',
+  form:'卷藤生发，果实成串垂挂，叶片翻卷；多作四方连续。',
+  meaning:'葡萄多籽，寓“多子多福”；又因来自西域，带异域珍奇之意。',
+  desc:'葡萄纹随丝绸之路传入，唐代极为流行，<b>海马葡萄镜</b>是最著名的载体——镜背外区常以葡萄枝蔓环绕，内区置海兽。它是“外来物种进入本土纹样体系”的清晰样本。',
+  tags:['唐','丝路','铜镜','多子','外来']
+},
+{
+  id:'hudie', name:'蝴蝶纹', alias:'蝶纹、瓜蝶',
+  era:'宋', cat:'动物', unit:'hudie',
+  bones:['allover4','single','radial'], defaultBone:'allover4', palette:'danqing', symN:0, petals:0,
+  carrier:'宋至明清织绣、瓷器、绘画',
+  form:'四翅对称展开，触角细长；可单飞，也可与花卉组合成“花蝶”。',
+  meaning:'蝶谐音“耋”（八十岁），寓长寿；与瓜组合为“瓜蝶绵绵”，寓子孙绵延。',
+  desc:'蝴蝶纹在宋代随花鸟画兴盛而精细起来，明清则大量用于织绣。它的价值在于<b>轻盈</b>——在一众厚重吉祥纹样中，蝶纹提供了罕见的轻快感。',
+  tags:['宋','谐音','长寿','花蝶','轻盈']
+},
+{
+  id:'bogu', name:'博古纹', alias:'博古、博古图',
+  era:'明清', cat:'器物', unit:'bogu',
+  bones:['allover4','single','fitting'], defaultBone:'allover4', palette:'zheshi', symN:0, petals:0,
+  carrier:'明清瓷器、织绣、木雕',
+  form:'瓶、炉、鼎、书卷、如意等器物错落并置，可加花卉点缀。',
+  meaning:'“博古”取“博通古物”之意，寓清雅、文气与家道殷实。',
+  desc:'博古纹得名于北宋《宣和博古图》。它把<b>收藏品本身</b>变成纹样——画的不是自然物，而是器物。这在中国纹样史上很特别：它是文人趣味进入日用装饰的直接证据。',
+  tags:['明清','文人','器物','清雅','博古图']
+},
+{
+  id:'feiyu', name:'飞鱼纹', alias:'飞鱼服',
+  era:'明清', cat:'动物', unit:'feiyu',
+  bones:['single','fitting'], defaultBone:'single', palette:'shiqing', symN:0, petals:0,
+  carrier:'明代赐服“飞鱼服”',
+  form:'鱼身生双翼、有首有尾，常作单体侧身，配云水。',
+  meaning:'飞鱼为神话之兽，赐服者得之，象征皇帝特赐的荣宠。',
+  desc:'飞鱼服是明代<b>赐服</b>之一，非品官常服，而由皇帝特赐给有功之臣与亲信。纹样本身是“鱼+翼”的拼合神兽，说明明代神兽体系已高度符号化——重要的不是它像什么，而是它代表谁。',
+  tags:['明','赐服','神兽','荣宠','飞鱼服']
+},
+{
+  id:'juban', name:'菊瓣纹', alias:'菊花纹、菊瓣',
+  era:'宋', cat:'植物', unit:'rosette',
+  bones:['radial','fitting','allover4'], defaultBone:'radial', palette:'zheshi', symN:16, petals:16,
+  carrier:'宋代瓷器、织绣',
+  form:'细长花瓣作多阶放射排列，瓣数多而密，层层套叠。',
+  meaning:'菊傲霜而开，象征高洁与长寿；重阳赏菊的习俗使其深入人心。',
+  desc:'菊瓣纹靠<b>瓣数</b>取胜：十六出乃至更多，密到几乎看不出单瓣，只剩放射的节奏。宋代瓷器上常见这种处理，它把一朵花抽象成了纯粹的秩序感。',
+  tags:['宋','菊花','放射','多瓣','高洁']
+}
+);
+
 /* 文物出处：一句话交代这条纹样在哪个实物上可以见到 */
 var MOTIF_SRC = {
   baoxiang:'敦煌莫高窟唐代壁画、唐代金银器与织锦',
@@ -1652,7 +2208,24 @@ var MOTIF_SRC = {
   anbaxian:'明清瓷器、织绣与木雕',
   bingmei:'清代康熙至光绪青花瓷器',
   piqiuhua:'清代雍正至乾隆瓷器、宫廷家具',
-  denglong:'宋代蜀锦、明清织绣与瓷器'
+  denglong:'宋代蜀锦、明清织绣与瓷器',
+  zhangfu:'故宫博物院藏清代龙袍（十二章纹）',
+  buzi:'故宫博物院藏明清补服；佳士得中国古代官阶纹章图录',
+  fangsheng:'故宫博物院藏黑漆描金山水纹方胜式盘',
+  qiequ:'西周中晚期青铜器（鼎、簋）',
+  panchi:'春秋战国青铜器',
+  panhui:'春秋战国青铜器',
+  tuanlong:'明清龙袍与织锦',
+  qilin:'清代武一品补子、民间织绣',
+  bianfu:'明清瓷器与织绣',
+  shouzi:'明清织绣与瓷器',
+  lianqian:'汉至明清织锦、瓷器',
+  luohua:'明代织锦与瓷器',
+  putao:'唐代海马葡萄镜',
+  hudie:'宋至明清织绣、瓷器',
+  bogu:'明清瓷器与织绣',
+  feiyu:'明代赐服飞鱼服',
+  juban:'宋代瓷器与织绣',
 };
 </script>
 
@@ -1667,7 +2240,7 @@ var state = { era:'全部', cat:'全部', q:'', cur:null };
 /* ---------------- 图鉴 ---------------- */
 function eras(){
   var s = {}; MOTIFS.forEach(function(m){ s[m.era]=1; });
-  var order = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','元','明清'];
+  var order = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','元','明清','春秋战国'];
   // 固定顺序里没有的朝代也要出现，否则新增纹样会筛不到
   var known = order.filter(function(e){ return s[e]; });
   var rest  = Object.keys(s).filter(function(e){ return order.indexOf(e) < 0; });
@@ -2052,7 +2625,7 @@ var BONE_WORDS = [
 var ERA_MOTIF = { '唐':'baoxiang', '宋':'zhezhi', '明清':'haishui',
                   '南北朝':'lianhua', '汉':'yunqi', '商周':'yunlei',
                   '新石器':'yuwen', '魏晋南北朝':'rendong' };
-var ERA_KEYS = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','明清'];
+var ERA_KEYS = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','元','明清','春秋战国','春秋战国'];
 
 function parseMake(q, fallback){
   var reasons = [], target = findMotifInText(q), palette = null, bone = null, i, j, e;
@@ -2474,10 +3047,7 @@ $('#q').addEventListener('input', function(){
 
 // 窗口尺寸变化时重绘（桌面端缩放）
 var rz = null;
-document.addEventListener('visibilitychange', function(){
-  if (document.visibilityState === 'visible') {
-    var atlas = document.getElementById('v-atlas');
-    if (atlas && atlas.classList.contains('on')) /* 页头展示体量：让"内容多"这件事一眼可见 */
+/* 页头展示体量：让"内容多"这件事一眼可见 */
 (function(){
   var h = document.querySelector('.hdr');
   if (!h || h.querySelector('.stats')) return;
@@ -2491,14 +3061,18 @@ document.addEventListener('visibilitychange', function(){
   h.appendChild(box);
 })();
 
-renderGrid();
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'visible') {
+    var _atlas = document.getElementById('v-atlas');
+    if (_atlas && _atlas.classList.contains('on')) renderGrid();
   }
 });
 
 window.addEventListener('resize', function(){
   clearTimeout(rz);
   rz = setTimeout(function(){
-    renderGrid(); paintStage();
+    
+renderGrid(); paintStage();
     if (state.cur && $('#detail').classList.contains('on')){
       renderMotif($('#d-hero'), state.cur, {bone:state.cur.defaultBone, n:state.cur.symN, petals:state.cur.petals, palette:state.cur.palette});
     }
@@ -2550,6 +3124,42 @@ var AUTHOR_NAME = '（提交前请填写姓名）';
 (function(){
   var el = document.getElementById('author');
   if (el) el.textContent = AUTHOR_NAME;
+})();
+/* ---------- 设计层 v3：题跋、回纹分隔、骨架开关 ---------- */
+(function(){
+  var va = document.getElementById('v-atlas');
+  if (va){
+    var col = document.createElement('div');
+    col.className = 'colophon';
+    col.innerHTML = '<div class="colophon-txt">观器知纹　因纹见制</div><div class="seal">纹<br>生</div>';
+    va.insertBefore(col, va.firstChild);
+    var hdr = document.querySelector('.hdr');
+    if (hdr && hdr.parentNode){
+      var band = document.createElement('div');
+      band.className = 'rule-meander';
+      hdr.parentNode.insertBefore(band, hdr.nextSibling);
+    }
+  }
+  var stats = document.querySelector('.stats');
+  if (stats && stats.parentNode){
+    var row = document.createElement('div');
+    row.className = 'stats-row';
+    stats.parentNode.insertBefore(row, stats);
+    row.appendChild(stats);
+    var btn = document.createElement('button');
+    btn.id = 'guide-toggle'; btn.type = 'button'; btn.textContent = '骨架';
+    btn.setAttribute('aria-label', '显示纹样的骨式骨架线');
+    btn.addEventListener('click', function(){
+      showGuides = !showGuides;
+      btn.classList.toggle('on', showGuides);
+      renderGrid();
+      var stu = document.getElementById('v-studio');
+      if (stu && stu.classList.contains('on')) paintStage();
+      var det = document.getElementById('detail');
+      if (det && det.classList.contains('on')) openDetail(CTX.motif || MOTIFS[0]);
+    });
+    row.appendChild(btn);
+  }
 })();
 </script>
 </body>
