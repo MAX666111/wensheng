@@ -822,6 +822,80 @@ input[type=range]::-webkit-slider-thumb{
 .stage{ position:relative; }
 .stage canvas{ transition:transform .18s ease; transform-origin:center center; }
 @media (prefers-reduced-motion: reduce){ .stage canvas{ transition:none; } }
+
+/* ==== v11 detail enlargement ==== */
+#detail{ background-image:none; background:var(--paper); }
+#detail canvas{ box-shadow:none; border-radius:0; margin:0; }
+.hero-bar{
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  padding:9px 14px; background:var(--paper); border-bottom:1px solid var(--line-2);
+}
+.hero-bar .hb-hint{ font-size:12px; color:var(--ink-3); margin-left:auto; letter-spacing:.02em }
+.hero-bar .hb-now{ font-family:var(--serif); font-size:13px; color:var(--cinnabar); letter-spacing:.06em; min-width:44px }
+.zbtn{
+  font:inherit; font-size:12.5px; padding:4px 11px; border:1px solid var(--line);
+  background:transparent; color:var(--ink-2); border-radius:999px; cursor:pointer;
+}
+.zbtn:hover{ border-color:var(--ink-3); color:var(--ink) }
+.zbtn.on{ background:var(--cinnabar); border-color:var(--cinnabar); color:#F7F1E6 }
+.zbtn:active{ transform:scale(.95) }
+.hero-wrap{
+  position:relative; width:100%; aspect-ratio:1/1; overflow:hidden;
+  background:var(--paper-2); border-bottom:1px solid var(--line-2);
+  touch-action:none; cursor:grab; user-select:none;
+}
+.hero-wrap.grabbing{ cursor:grabbing }
+.hero-wrap canvas{
+  position:absolute; left:0; top:0; width:100%; height:100%; display:block;
+  transform-origin:center center; will-change:transform;
+}
+@media (min-width:900px){
+  #detail{ max-width:720px }
+  .hero-bar{ position:sticky; top:43px; z-index:2 }
+}
+.tipbar{
+  display:flex; align-items:center; gap:10px; margin:0 0 12px;
+  padding:10px 12px; font-size:12.5px; line-height:1.65; color:var(--ink-2);
+  background:var(--paper-c, #F2EFE8); border-left:3px solid var(--cinnabar);
+  border-radius:0 3px 3px 0;
+}
+.tipbar b{ color:var(--cinnabar); font-weight:600 }
+.tipbar button{
+  font:inherit; font-size:12px; white-space:nowrap; margin-left:auto;
+  padding:4px 10px; border:1px solid var(--line); background:transparent;
+  color:var(--ink-2); border-radius:999px; cursor:pointer;
+}
+.tipbar button:hover{ border-color:var(--ink-3); color:var(--ink) }
+.g-empty{ grid-column:1/-1; padding:34px 8px 38px; text-align:center }
+.g-empty p{ margin:0 0 6px; font-family:var(--serif); font-size:15px; color:var(--ink-2); letter-spacing:.06em }
+.g-empty .ge-sub{ font-family:inherit; font-size:12.5px; color:var(--ink-3); letter-spacing:0; line-height:1.7 }
+.ge-btn{
+  font:inherit; font-size:12.5px; margin-top:12px; padding:6px 16px; cursor:pointer;
+  border:1px solid var(--cinnabar); color:var(--cinnabar); background:transparent; border-radius:999px;
+}
+.ge-btn:hover{ background:var(--cinnabar); color:#F7F1E6 }
+:focus{ outline:none }
+:focus-visible{ outline:2px solid var(--cinnabar); outline-offset:2px; border-radius:3px }
+@media (prefers-reduced-motion: reduce){
+  .zbtn{ transition:none }
+  .hero-wrap canvas{ transition:none !important }
+}
+/* ==== v11b: 详情浮层真正居中 ====
+   v4 的 sheetUp 动画 fill-mode:both 会在结束后把 transform 锁成 none，
+   于是 #detail 上原有的 translateX(-50%) 被覆盖，浮层从 left:50% 起向右排、
+   在桌面上整体偏右半个宽度。改用 left/right + margin:auto 做居中，
+   动画结束时 transform:none 就不再与定位冲突。 */
+#detail{ left:0; right:0; margin-left:auto; margin-right:auto; transform:none; }
+@media (min-width:900px){ #detail{ max-width:760px } }
+
+
+/* v11: 问纹「正在想」指示 */
+.thinking .bubble{ display:flex; gap:5px; align-items:center; padding:12px 15px }
+.thinking .dot{ width:5px; height:5px; border-radius:50%; background:var(--ink-3); animation:blink 1.05s infinite }
+.thinking .dot:nth-child(2){ animation-delay:.18s }
+.thinking .dot:nth-child(3){ animation-delay:.36s }
+@keyframes blink{ 0%,60%,100%{opacity:.22} 30%{opacity:1} }
+@media (prefers-reduced-motion: reduce){ .thinking .dot{ animation:none; opacity:.5 } }
 </style>
 </head>
 <body>
@@ -978,7 +1052,15 @@ input[type=range]::-webkit-slider-thumb{
       <button id="d-next" aria-label="下一条">›</button>
     </span>
   </div>
-  <canvas class="d-hero" id="d-hero"></canvas>
+  <div class="hero-bar" id="hero-bar">
+    <button class="zbtn" data-z="1.2">适应</button>
+    <button class="zbtn" data-z="2">2×</button>
+    <button class="zbtn" data-z="3">3×</button>
+    <button class="zbtn" id="hero-reset">复位</button>
+    <span class="hb-now" id="hv-z">1.2×</span>
+    <span class="hb-hint">拖动平移 · 滚轮缩放 · 双击复位</span>
+  </div>
+  <div class="hero-wrap" id="hero-wrap"><canvas class="d-hero" id="d-hero"></canvas></div>
   <div class="d-body" id="d-body"></div>
 </div>
 
@@ -1587,9 +1669,392 @@ UNITS.denglong = function(ctx,r,p){
   });
 };
 
+
+/* ============================================================
+   细节层（v10）：母题专属细描 + 通用「双钩」内描
+   目标：让纹样在放大后经得起看——花瓣有脉、鳞甲有片、
+   云头有钩、卷草有尖，而不是一块平涂色块加一圈描边。
+   ============================================================ */
+var RENDER_DETAIL = true;
+
+var UNIT_DETAIL = {
+
+  /* 团花 / 宝相花 / 皮球花：花瓣中脉 + 侧脉 + 内层轮廓 + 宝珠花心 */
+  rosette: function(ctx, r, p, petals){
+    petals = petals || 8;
+    var lw = Math.max(0.45, r*0.0095);
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = p.ink;
+    ctx.lineWidth = lw;
+    for (var ring=0; ring<3; ring++){
+      var pr = r*(1 - ring*0.26);
+      for (var i=0;i<petals;i++){
+        var a = (i*Math.PI*2)/petals + (ring*Math.PI)/petals;
+        ctx.save(); ctx.rotate(a);
+        // 中脉：自瓣基直抵瓣尖
+        ctx.globalAlpha = 0.55;
+        ctx.beginPath();
+        ctx.moveTo(0, -pr*0.24); ctx.lineTo(0, -pr*0.92);
+        ctx.stroke();
+        // 侧脉三对
+        ctx.globalAlpha = 0.38;
+        for (var v=1; v<=3; v++){
+          var t = v/4;
+          for (var sgn=-1; sgn<=1; sgn+=2){
+            ctx.beginPath();
+            ctx.moveTo(0, -pr*(0.24 + 0.68*t));
+            ctx.quadraticCurveTo(sgn*pr*0.10, -pr*(0.30 + 0.68*t),
+                                 sgn*pr*0.135, -pr*(0.36 + 0.62*t));
+            ctx.stroke();
+          }
+        }
+        // 内层轮廓
+        ctx.globalAlpha = 0.42;
+        ctx.beginPath();
+        ctx.ellipse(0, -pr*0.58, pr*0.085, pr*0.205, 0, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+    // 宝珠花心：外圈 + 八颗珠 + 内环
+    ctx.globalAlpha = 0.5;
+    ctx.beginPath(); ctx.arc(0,0,r*0.245,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha = 0.45;
+    ctx.beginPath(); ctx.arc(0,0,r*0.075,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle = p.ink; ctx.globalAlpha = 0.42;
+    for (var k=0;k<8;k++){
+      var ang = k*Math.PI/4 + Math.PI/8;
+      ctx.beginPath();
+      ctx.arc(Math.cos(ang)*r*0.115, Math.sin(ang)*r*0.115, r*0.027, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  },
+
+  /* 缠枝纹：叶中脉 + 侧脉 + 小果 */
+  vine: function(ctx, r, p){
+    ctx.lineCap='round'; ctx.strokeStyle=p.ink;
+    ctx.lineWidth = Math.max(0.35, r*0.0095); ctx.globalAlpha = 0.45;
+    var leaves=[[-0.60,0.22,0.55],[-0.05,0.30,0.15],[0.30,-0.30,-0.55]];
+    for (var k=0;k<leaves.length;k++){
+      ctx.save(); ctx.translate(leaves[k][0]*r, leaves[k][1]*r); ctx.rotate(leaves[k][2]);
+      ctx.beginPath(); ctx.moveTo(0, r*0.25); ctx.lineTo(0, -r*0.25); ctx.stroke();
+      for (var sgn=-1; sgn<=1; sgn+=2){
+        for (var t=1; t<=2; t++){
+          ctx.beginPath();
+          ctx.moveTo(0, r*(0.19 - 0.25*t));
+          ctx.quadraticCurveTo(sgn*r*0.13, r*(0.13 - 0.25*t), sgn*r*0.155, r*(0.01 - 0.25*t));
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+    ctx.globalAlpha = 0.42;
+    var berries=[[-0.34,-0.10],[0.06,0.44]];
+    for (var b=0;b<berries.length;b++){
+      ctx.beginPath(); ctx.arc(berries[b][0]*r, berries[b][1]*r, r*0.045, 0, Math.PI*2); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  },
+
+  /* 回纹：四角节点珠 */
+  meander: function(ctx, r, p){
+    var s = r*0.62;
+    ctx.fillStyle = p.ink; ctx.globalAlpha = 0.42;
+    var pts=[[-s,-s],[s,-s],[s,s],[-s,s]];
+    for (var i=0;i<pts.length;i++){
+      ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], Math.max(0.8, r*0.028), 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  },
+
+  /* 云纹：云头内卷钩 + 尖底内线 */
+  cloud: function(ctx, r, p){
+    ctx.lineCap='round'; ctx.strokeStyle=p.ink;
+    ctx.lineWidth = Math.max(0.45, r*0.011);
+    var lobes=[[-0.42,0.06,0.155],[0,-0.18,0.215],[0.42,0.06,0.155]];
+    for (var i=0;i<lobes.length;i++){
+      var cx=lobes[i][0]*r, cy=lobes[i][1]*r, rr=lobes[i][2]*r;
+      ctx.globalAlpha = 0.46;
+      ctx.beginPath(); ctx.arc(cx, cy, rr, Math.PI*0.92, Math.PI*2.08); ctx.stroke();
+      ctx.globalAlpha = 0.32;
+      ctx.beginPath(); ctx.arc(cx, cy, rr*0.52, Math.PI*1.15, Math.PI*2.35); ctx.stroke();
+    }
+    ctx.globalAlpha = 0.40;
+    ctx.beginPath();
+    ctx.moveTo(-r*0.17, r*0.28); ctx.lineTo(0, r*0.55); ctx.lineTo(r*0.17, r*0.28);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  },
+
+  /* 海水江崖：每道水波上再加一道细浪，山崖加皴线 */
+  wave: function(ctx, r, p){
+    ctx.lineCap='round';
+    var yf=[0.26,0.50,0.74], ampf=[0.30,0.24,0.16];
+    for (var bi=0; bi<3; bi++){
+      var y=r*yf[bi], amp=r*ampf[bi], step=r*0.34;
+      ctx.strokeStyle = p.c; ctx.lineWidth = Math.max(0.4, r*0.010);
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath();
+      for (var x=-r*1.05; x<r*1.05; x+=step){
+        ctx.moveTo(x+step*0.20, y-amp*1.30);
+        ctx.quadraticCurveTo(x+step*0.50, y-amp*1.80, x+step*0.80, y-amp*1.30);
+      }
+      ctx.stroke();
+    }
+    ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.34;
+    ctx.lineWidth = Math.max(0.4, r*0.0095);
+    for (var i=-2;i<=2;i++){
+      ctx.beginPath();
+      ctx.moveTo(i*r*0.075, r*0.28);
+      ctx.lineTo(i*r*0.125, r*0.84);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  },
+
+  /* 几何格律：八顶点节点珠 */
+  lattice: function(ctx, r, p){
+    var s = r*0.66;
+    ctx.fillStyle = p.ink; ctx.globalAlpha = 0.42;
+    for (var i=0;i<8;i++){
+      var a = (i*Math.PI)/4 + Math.PI/8;
+      ctx.beginPath();
+      ctx.arc(Math.cos(a)*s, Math.sin(a)*s, Math.max(0.7, r*0.023), 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  },
+
+  /* 鱼纹：鳞片 + 鳍条 + 背鳍 */
+  fish: function(ctx, r, p){
+    ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.38, r*0.010);
+    ctx.globalAlpha = 0.42;
+    var A=r*0.62, B=r*0.30;
+    for (var i=-2;i<=2;i++){
+      for (var j=-1;j<=1;j++){
+        var cx=i*r*0.155, cy=j*r*0.125;
+        if ((cx*cx)/(A*A) + (cy*cy)/(B*B) > 0.80) continue;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r*0.068, Math.PI*0.18, Math.PI*0.82);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 0.45;
+    for (var k=0;k<3;k++){
+      ctx.beginPath();
+      ctx.moveTo(r*0.60, 0);
+      ctx.lineTo(r*0.88, -r*0.24 + k*r*0.24);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(-r*0.10,-r*0.28);
+    ctx.quadraticCurveTo(0,-r*0.46, r*0.20,-r*0.26);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  },
+
+  /* 忍冬纹：三片棕叶的叶脉 */
+  honeysuckle: function(ctx, r, p){
+    ctx.lineCap='round'; ctx.strokeStyle=p.ink;
+    ctx.lineWidth = Math.max(0.35, r*0.0085); ctx.globalAlpha = 0.45;
+    ctx.save(); ctx.translate(0, -r*0.02);
+    for (var i=-1;i<=1;i++){
+      ctx.save(); ctx.rotate(i*0.52);
+      ctx.beginPath(); ctx.moveTo(0, r*0.02); ctx.lineTo(0, -r*0.44); ctx.stroke();
+      for (var sgn=-1; sgn<=1; sgn+=2){
+        ctx.beginPath();
+        ctx.moveTo(0, -r*0.15);
+        ctx.quadraticCurveTo(sgn*r*0.085, -r*0.27, sgn*r*0.045, -r*0.40);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
+  },
+
+  /* 万字纹：四角节点珠 */
+  wan: function(ctx, r, p){
+    var s = r*0.62;
+    ctx.fillStyle = p.ink; ctx.globalAlpha = 0.40;
+    var pts=[[-s,-s],[s,-s],[s,s],[-s,s]];
+    for (var i=0;i<pts.length;i++){
+      ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], Math.max(0.7, r*0.022), 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  },
+
+  /* 兽面纹：雷纹地 + 眼球高光 */
+  taotie: function(ctx, r, p){
+    ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.38, r*0.0095);
+    ctx.globalAlpha = 0.32; ctx.lineJoin='miter';
+    for (var i=-1;i<=1;i+=2){
+      ctx.beginPath();
+      ctx.moveTo(i*r*0.20, -r*0.16);
+      ctx.lineTo(i*r*0.34, -r*0.16);
+      ctx.lineTo(i*r*0.34, r*0.02);
+      ctx.lineTo(i*r*0.20, r*0.02);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(i*r*0.12, r*0.12);
+      ctx.lineTo(i*r*0.24, r*0.12);
+      ctx.lineTo(i*r*0.24, r*0.28);
+      ctx.stroke();
+    }
+    ctx.fillStyle = p.c; ctx.globalAlpha = 0.55;
+    for (var s=-1; s<=1; s+=2){
+      ctx.beginPath(); ctx.arc(s*r*0.295, -r*0.135, r*0.033, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  },
+
+  /* 夔龙纹：体鳞 + 眼珠高光 */
+  kuilong: function(ctx, r, p){
+    ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.35, r*0.0085);
+    ctx.globalAlpha = 0.34;
+    for (var i=0;i<5;i++){
+      ctx.beginPath();
+      ctx.arc(-r*0.22 + i*r*0.215, r*0.08 - i*r*0.028, r*0.062, Math.PI*1.12, Math.PI*1.88);
+      ctx.stroke();
+    }
+    ctx.fillStyle = p.c; ctx.globalAlpha = 0.55;
+    ctx.beginPath(); ctx.arc(-r*0.665, r*0.005, r*0.027, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+  },
+
+  /* 凤纹：三条尾羽的羽枝 */
+  phoenix: function(ctx, r, p){
+    ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.35, r*0.0085);
+    ctx.globalAlpha = 0.38; ctx.lineCap='round';
+    for (var i=0;i<3;i++){
+      for (var t=0;t<7;t++){
+        var u = 0.12 + t*0.13;
+        var bx = r*(0.06 + u*0.94), by = r*(0.02 + u*(0.32 + i*0.16));
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(bx - r*0.055, by - r*0.085);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 0.5; ctx.fillStyle = p.c;
+    ctx.beginPath(); ctx.arc(-r*0.46,-r*0.54, r*0.055, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+  },
+
+  /* 联珠纹：每颗珠加轮廓与高光 + 双环 */
+  lianzhu: function(ctx, r, p){
+    var R=r*0.86, nn=22, br=r*0.085;
+    ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.32, r*0.008);
+    ctx.globalAlpha = 0.42;
+    for (var i=0;i<nn;i++){
+      var a=i/nn*Math.PI*2, cx=Math.cos(a)*R, cy=Math.sin(a)*R;
+      ctx.beginPath(); ctx.arc(cx, cy, br, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx-br*0.28, cy-br*0.28, br*0.28, 0, Math.PI*2); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(0,0,R*0.88,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,R*0.70,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  },
+
+  /* 卷草纹：叶脉 + 尖端小螺旋 */
+  juancao: function(ctx, r, p){
+    ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.38, r*0.010);
+    ctx.globalAlpha = 0.44; ctx.lineCap='round';
+    var q=[[-0.76,0.06,-1.9],[-0.24,0.16,1.2],[0.30,-0.12,-1.4],[0.76,0.06,1.5]];
+    for (var k=0;k<q.length;k++){
+      ctx.save(); ctx.translate(q[k][0]*r, q[k][1]*r); ctx.rotate(q[k][2]);
+      for (var sgn=-1; sgn<=1; sgn+=2){
+        ctx.beginPath();
+        ctx.moveTo(0, -r*0.10);
+        ctx.quadraticCurveTo(sgn*r*0.135, -r*0.36, 0, -r*0.56);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    ctx.globalAlpha = 0.40;
+    ctx.beginPath(); ctx.arc(r*0.52, -r*0.34, r*0.088, 0, Math.PI*1.65); ctx.stroke();
+    ctx.globalAlpha = 1;
+  },
+
+  /* 团窠联珠对兽：外环细线 + 珠间刻线 */
+  lingyang: function(ctx, r, p){
+    var R=r*0.84;
+    ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.3, r*0.0075);
+    ctx.globalAlpha = 0.38;
+    for (var i=0;i<14;i++){
+      var a=i/14*Math.PI*2;
+      ctx.save(); ctx.translate(Math.cos(a)*R, Math.sin(a)*R); ctx.rotate(a+Math.PI/2);
+      ctx.beginPath(); ctx.moveTo(0, -r*0.125); ctx.lineTo(0, r*0.125); ctx.stroke();
+      ctx.restore();
+    }
+    ctx.beginPath(); ctx.arc(0,0,R*0.87,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,R*0.55,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  },
+
+  /* 四神纹：外环 + 四向弧线 */
+  sishen: function(ctx, r, p){
+    ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.38, r*0.009);
+    ctx.globalAlpha = 0.36;
+    ctx.beginPath(); ctx.arc(0,0,r*0.80,0,Math.PI*2); ctx.stroke();
+    for (var i=0;i<4;i++){
+      ctx.save(); ctx.rotate(i*Math.PI/2);
+      ctx.beginPath();
+      ctx.moveTo(-r*0.40, r*0.30);
+      ctx.quadraticCurveTo(0, r*0.52, r*0.40, r*0.30);
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  },
+
+  /* 茱萸纹：果实高光 */
+  zhuyu: function(ctx, r, p){
+    ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.32, r*0.008);
+    ctx.globalAlpha = 0.42;
+    for (var i=0;i<4;i++){
+      ctx.save(); ctx.rotate(i*Math.PI/2 + Math.PI/4);
+      var pts=[[-0.22,-0.78],[0.22,-0.78],[0,-0.80]];
+      for (var k=0;k<pts.length;k++){
+        ctx.beginPath();
+        ctx.arc(pts[k][0]*r - r*0.022, pts[k][1]*r - r*0.022, r*0.026, 0, Math.PI*2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
+};
+
+/* 通用「双钩」：把同一母题按 0.70 内缩重画一遍，只留线、线宽减半。
+   任何母题都自动获得一层内轮廓，不必逐个改写。 */
+function drawInsetLine(ctx, u, r, p, petals){
+  ctx.save();
+  ctx.scale(0.70, 0.70);
+  var realStroke = ctx.stroke;
+  ctx.stroke = function(){
+    var prev = this.lineWidth;
+    this.lineWidth = Math.max(0.30, prev*0.5);
+    realStroke.call(this);
+    this.lineWidth = prev;
+  };
+  ctx.fill = function(){};
+  ctx.fillRect = function(){};
+  try { u(ctx, r, p, petals); } catch(e){}
+  delete ctx.stroke;
+  delete ctx.fill;
+  delete ctx.fillRect;
+  ctx.restore();
+}
+
 function drawUnit(ctx, unitId, r, p, petals){
   var u = UNITS[unitId] || UNITS.rosette;
   try { u(ctx, r, p, petals); } catch(e){}
+  if (!RENDER_DETAIL) return;
+  var dfn = UNIT_DETAIL[unitId];
+  if (dfn){ try { dfn(ctx, r, p, petals); } catch(e){} }
+  try { drawInsetLine(ctx, u, r, p, petals); } catch(e){}
 }
 
 var LAYOUTS = {
@@ -1743,6 +2208,7 @@ function renderMotif(canvas, motif, opts){
     density: opts.density || 40,
     petals: opts.petals || motif.petals || 8
   };
+  RENDER_DETAIL = (opts.detail !== false);
   fn(ctx, W, H, motif.unit || 'rosette', p, o);
   if (opts.guides) drawGuides(ctx, W, H, bone, o.n);
   return canvas;
@@ -2677,11 +3143,13 @@ function renderGrid(){
   var list = filtered();
   var g = $('#grid');
   if (!list.length){
-    g.innerHTML = '<div style="grid-column:1/-1;padding:36px 0;text-align:center;color:var(--ink-3);font-size:13px">没有匹配的纹样，换个词试试</div>';
+    g.innerHTML = '<div class="g-empty"><p>没有匹配的纹样</p>'
+      + '<p class="ge-sub">试试只按朝代、或只按类属来筛，也可以换个词——比如「团花」「回纹」「莲花」。</p>'
+      + '<button class="ge-btn" id="ge-reset">清除全部筛选</button></div>';
     return;
   }
   g.innerHTML = list.map(function(m){
-    return '<div class="card" data-id="'+m.id+'" style="--cc:'+catColor(m.cat)+'">'
+    return '<div class="card" data-id="'+m.id+'" style="--cc:'+catColor(m.cat)+'" role="button" tabindex="0" aria-label="'+m.name+'，'+m.era+'，'+m.cat+'，查看细节">'
       + '<i class="catbar"></i>'
       + '<div class="cv-wrap"><canvas data-mid="'+m.id+'"></canvas></div>'
       + '<div class="meta"><div class="nm">'+m.name+'</div>'
@@ -2721,13 +3189,63 @@ function boneCN(b){
           border2:'二方连续', allover4:'四方连续'}[b] || b;
 }
 
+/* ==== v11 detail hero: zoom / pan / reset ==== */
+var HV = { z:1.2, tx:0, ty:0, base:1.2, min:1, max:4 };
+
+function hvApply(){
+  var cv = $('#d-hero'); if (!cv) return;
+  cv.style.transform = 'translate(' + HV.tx + 'px,' + HV.ty + 'px) scale(' + HV.z + ')';
+  [].forEach.call(document.querySelectorAll('.zbtn[data-z]'), function(b){
+    b.classList.toggle('on', Math.abs(parseFloat(b.dataset.z) - HV.z) < 0.02);
+  });
+  var zl = $('#hv-z');
+  if (zl) zl.textContent = (Math.round(HV.z * 100) / 100) + '×';
+}
+
+function drawHero(){
+  var cv = $('#d-hero');
+  if (!cv || !state.cur) return;
+  /* renderMotif 用 getBoundingClientRect 量尺寸，而该矩形是「已被 CSS 缩放后」的，
+     会与持久在元素上的 transform 形成正反馈：每重绘一次 backing store 就再涨一档。
+     量尺寸前先把自身 transform 摘掉，量完再交回 hvApply 统一设置。 */
+  var prev = cv.style.transform;
+  cv.style.transform = 'none';
+  var base = window.devicePixelRatio || 2;
+  var w0 = Math.max(60, cv.clientWidth || 300);
+  var dpr = Math.min(4, base * HV.z, 2600 / w0);
+  renderMotif(cv, state.cur, {
+    bone: state.cur.defaultBone, n: state.cur.symN,
+    petals: state.cur.petals, palette: state.cur.palette, dpr: dpr
+  });
+  cv.style.transform = prev;
+  hvApply();
+}
+
+function heroReset(){ HV.z = HV.base; HV.tx = 0; HV.ty = 0; hvApply(); }
+
+/* anchor-preserving zoom: screen = center + t + z*u */
+function heroZoomAt(px, py, z2){
+  var wrap = $('#hero-wrap'); if (!wrap) return;
+  z2 = Math.max(HV.min, Math.min(HV.max, z2));
+  if (Math.abs(z2 - HV.z) < 0.001) return;
+  var r = wrap.getBoundingClientRect();
+  var ax = px - r.width / 2, ay = py - r.height / 2;
+  var k = z2 / HV.z;
+  HV.tx = ax - k * (ax - HV.tx);
+  HV.ty = ay - k * (ay - HV.ty);
+  HV.z = z2;
+  drawHero();
+}
+
+
 function openDetail(m){
   state.cur = m;
   var d = $('#detail');
   d.classList.add('on');
   d.scrollTop = 0;
   var hero = $('#d-hero');
-  renderMotif(hero, m, {bone:m.defaultBone, n:m.symN, petals:m.petals, palette:m.palette});
+  HV.tx = 0; HV.ty = 0; HV.z = HV.base;
+  drawHero();
 
   var p = PALETTES[m.palette] || PALETTES.danqing;
   var sw = [
@@ -3358,7 +3876,15 @@ function ask(q, silent){
   else bubble('u', '你好');
   $('#askinput').value = '';
   var res = answer(q);
+  /* 先放一个「正在想」气泡再换成答案：260ms 的空白会让页面看起来没反应 */
+  var think = document.createElement('div');
+  think.className = 'msg a thinking';
+  think.innerHTML = '<div class="avatar">纹</div><div class="bubble">'
+    + '<span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+  var talk = $('#talk');
+  if (talk){ talk.appendChild(think); window.scrollTo(0, document.body.scrollHeight); }
   setTimeout(function(){
+    if (think.parentNode) think.parentNode.removeChild(think);
     bubble('a', res.text.replace(/</g,'&lt;').replace(/\n/g,'<br>'), res.trace, res.chips, res.ref);
   }, 260);
 }
@@ -3615,7 +4141,7 @@ window.addEventListener('resize', function(){
     
 renderGrid(); paintStage();
     if (state.cur && $('#detail').classList.contains('on')){
-      renderMotif($('#d-hero'), state.cur, {bone:state.cur.defaultBone, n:state.cur.symN, petals:state.cur.petals, palette:state.cur.palette});
+      drawHero();
     }
   }, 220);
 });
@@ -3714,6 +4240,7 @@ function toast(msg){
   });
   var t = document.createElement('div');
   t.className = 'toast'; t.textContent = msg;
+  t.setAttribute('role','status'); t.setAttribute('aria-live','polite');
   document.body.appendChild(t);
   setTimeout(function(){ t.classList.add('out'); }, 1600);
   setTimeout(function(){ if (t.parentNode) t.parentNode.removeChild(t); }, 2100);
@@ -4100,6 +4627,111 @@ initStudioV2();
     });
     paintStage();
   });
+})();
+
+/* ==== v11 interaction & hints ==== */
+(function(){
+  var wrap = $('#hero-wrap');
+  if (wrap){
+    var drag = null;
+    wrap.addEventListener('pointerdown', function(e){
+      drag = { x:e.clientX, y:e.clientY, ox:HV.tx, oy:HV.ty };
+      wrap.classList.add('grabbing');
+      try { wrap.setPointerCapture(e.pointerId); } catch(err){}
+    });
+    wrap.addEventListener('pointermove', function(e){
+      if (!drag) return;
+      HV.tx = drag.ox + (e.clientX - drag.x);
+      HV.ty = drag.oy + (e.clientY - drag.y);
+      hvApply();
+    });
+    function endDrag(e){
+      if (!drag) return;
+      drag = null; wrap.classList.remove('grabbing');
+      try { wrap.releasePointerCapture(e.pointerId); } catch(err){}
+    }
+    wrap.addEventListener('pointerup', endDrag);
+    wrap.addEventListener('pointercancel', endDrag);
+    wrap.addEventListener('wheel', function(e){
+      e.preventDefault();
+      var r = wrap.getBoundingClientRect();
+      heroZoomAt(e.clientX - r.left, e.clientY - r.top, HV.z * (e.deltaY < 0 ? 1.14 : 1/1.14));
+    }, { passive:false });
+    wrap.addEventListener('dblclick', function(){ heroReset(); toast('已复位到 ' + HV.base + '×'); });
+
+    [].forEach.call(document.querySelectorAll('.zbtn[data-z]'), function(b){
+      b.addEventListener('click', function(){
+        var z = parseFloat(b.dataset.z);
+        var r = wrap.getBoundingClientRect();
+        if (z <= HV.z){ HV.tx = 0; HV.ty = 0; HV.z = z; drawHero(); }
+        else heroZoomAt(r.width/2, r.height/2, z);
+        toast(z === HV.base ? '已回到适应大小' : ('放大到 ' + z + '×（可拖动平移）'));
+      });
+    });
+    var rz = $('#hero-reset');
+    if (rz) rz.addEventListener('click', function(){ heroReset(); toast('已复位：居中，' + HV.base + '×'); });
+  }
+
+  var g = $('#grid');
+  if (g){
+    g.addEventListener('keydown', function(e){
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var c = e.target && e.target.closest ? e.target.closest('.card') : null;
+      if (!c) return;
+      e.preventDefault();
+      var m = findById(c.dataset.id);
+      if (m) openDetail(m);
+    });
+    g.addEventListener('click', function(e){
+      if (!e.target || e.target.id !== 'ge-reset') return;
+      [].forEach.call(document.querySelectorAll('#v-atlas .chip'), function(c){
+        if ((c.dataset.era || c.dataset.cat) === '全部' && !c.classList.contains('on')) c.click();
+      });
+      /* 搜索词存在 state.q 里、由防抖定时器写入，清空输入框并不会清掉 state.q，
+         必须显式复位，否则「清除筛选」会留下一个看不见的搜索条件。 */
+      state.era = '全部'; state.cat = '全部'; state.q = '';
+      var inp = $('#q'); if (inp) inp.value = '';
+      renderGrid();
+      toast('已清除筛选，回到全部 48 条');
+    });
+  }
+
+  var KEY = 'wensheng_tipped_v11';
+  var seen = false;
+  try { seen = localStorage.getItem(KEY) === '1'; } catch(e){}
+  if (!seen && g && g.parentNode){
+    var bar = document.createElement('div');
+    bar.className = 'tipbar';
+    bar.innerHTML = '<span>点任意纹样看细节；详情页里可以 <b>拖动平移</b>、<b>滚轮缩放</b>、双击复位。问纹页还能按器物、寓意、出处、演变来提问。</span>'
+      + '<button id="tip-x" aria-label="不再提示">知道了</button>';
+    g.parentNode.insertBefore(bar, g);
+    bar.querySelector('#tip-x').addEventListener('click', function(){
+      try { localStorage.setItem(KEY, '1'); } catch(e){}
+      bar.parentNode.removeChild(bar);
+    });
+  }
+
+  document.addEventListener('keydown', function(e){
+    var d = $('#detail');
+    if (!d || !d.classList.contains('on')) return;
+    if (e.key === 'Escape'){ var b = $('#d-back'); if (b) b.click(); return; }
+    if (e.key === 'ArrowLeft'){ var pv = $('#d-prev'); if (pv) pv.click(); return; }
+    if (e.key === 'ArrowRight'){ var nx = $('#d-next'); if (nx) nx.click(); }
+  });
+})();
+
+/* ==== v11: 关于页补一段「怎么用」 ==== */
+(function(){
+  var ab = document.getElementById('v-about');
+  if (!ab) return;
+  var d = document.createElement('div');
+  d.style.cssText = 'margin-top:18px;font-size:13px;line-height:1.95;color:var(--ink-2)';
+  d.innerHTML = '<b style="color:var(--ink)">怎么用</b><br>'
+    + '· 图鉴：点任意纹样打开细节。<br>'
+    + '· 细节页：按钮或滚轮缩放，按住拖动平移，双击或「复位」回到适应大小；Esc 返回，← → 翻上一条下一条。<br>'
+    + '· 问纹：可以按朝代、类属、器物、寓意、出处、演变来提问，也可以说「考考我」；回答下面的按钮能直接追问，或把纹样带进工坊。<br>'
+    + '· 工坊：选母题与骨式、换配色与底质，可导出 PNG 或存成配方。';
+  ab.appendChild(d);
 })();
 </script>
 </body>
