@@ -637,7 +637,7 @@ input[type=range]::-webkit-slider-thumb{
 /* ============ 设计层 v5：按客观测量修正（去渐变 · 去重投影 · 抬字号 · 浅边框） ============ */
 :root{
   --paper:#F0EBE1; --paper-2:#E9E3D8; --paper-3:#DED6C7;
-  --ink:#23201C; --ink-2:#5C554A; --ink-3:#968B7A;
+  --ink:#23201C; --ink-2:#5C554A; --ink-3:#6A6252;
   --line:rgba(35,32,28,.11); --line-2:rgba(35,32,28,.06);
 }
 /* 表面一律平坦：用色阶与极浅线区分，不靠渐变与投影 —— 装裱本来就是平的 */
@@ -896,6 +896,132 @@ input[type=range]::-webkit-slider-thumb{
 .thinking .dot:nth-child(3){ animation-delay:.36s }
 @keyframes blink{ 0%,60%,100%{opacity:.22} 30%{opacity:1} }
 @media (prefers-reduced-motion: reduce){ .thinking .dot{ animation:none; opacity:.5 } }
+
+/* ================= v13a：修三处实测到的缺陷 ================= */
+
+/* ① 页头内容整排被推到右边
+   根因：v9 为了加装裱首线写了 `.hdr::before{display:block;width:100%}`，
+   在 flex 容器里 display:block 的伪元素会变成真正的 flex 子项，
+   它拿走 823px 自由空间，标题/印章/统计只能挤在右端。
+   改成绝对定位后它退回装饰层，不参与 flex 分配。 */
+.hdr::before{
+  content:''; position:absolute; left:0; right:0; top:0;
+  height:4px; width:auto; display:block;
+  background:var(--cinnabar);
+}
+.hdr{ padding-top:calc(22px + env(safe-area-inset-top)); }
+
+/* ② 底部导航整条左移出屏
+   根因：@media(min-width:980px) 里写了 left:auto，但基准规则上的
+   transform:translateX(-50%) 没被清掉，整条又左移半个宽度（实测 -658px）。
+   桌面改为左右贴边 + margin:auto 居中。 */
+@media (min-width:980px){
+  #tabs{ left:0; right:0; margin-left:auto; margin-right:auto; transform:none; }
+}
+
+/* ③ 小字对比度不足（impeccable detect 实测 2.2–3.2:1）
+   --ink-3 承载了 16 处正文级小字，原 #6A6252 在纸面只有 2.76:1。
+   压到 #6A6252 后纸面 4.96:1、卡片面 5.25:1，过 AA。 */
+:root{ --ink-3:#6A6252; }
+
+/* ================= v13b：工坊桌面双栏 + 触控目标 + 对比度 ================= */
+
+/* ① 工坊在桌面上是竖着的一长条（实测总高 5991px）：
+   canvas 1282px 方块在最上面，母题/配色/底质全在它下方 3500px 起，
+   调一次参数要上下滚一个屏幕。改成左图右控件的两栏，图 sticky 跟随。 */
+@media (min-width:980px){
+  #v-studio{ display:grid; grid-template-columns:minmax(0,1fr) 396px;
+             column-gap:28px; align-items:start; }
+  #v-studio > .stage{ grid-column:1; grid-row:1 / span 3;
+                      position:sticky; top:16px; margin-bottom:0; }
+  #v-studio > .zoom-row{ grid-column:1; grid-row:4; margin-bottom:14px; }
+  #v-studio > .st-sub { grid-column:1; grid-row:5; }
+  #v-studio > .st-presets-wrap{ grid-column:2; grid-row:1; }
+  #v-studio > .ctrl,
+  #v-studio > .actions,
+  #v-studio > .hint{ grid-column:2; }
+  #v-studio > .st-recipe{ grid-column:1; grid-row:6; margin-top:14px; }
+  #v-studio > .hint{ margin-top:14px; }
+}
+
+/* ② 触控目标偏小：实测 .zo 26px、配方按钮 31px、收藏按钮 31px，
+   移动端建议 ≥44px。小屏统一抬高（只加高度，不改视觉语言）。 */
+@media (max-width:979px){
+  #v-studio .zo{ min-height:40px; padding:0 14px; display:inline-flex;
+                 align-items:center; justify-content:center; }
+  #v-studio .st-presets button,
+  #v-studio .btn.slim{ min-height:44px; }
+  #zoom-row{ flex-wrap:wrap; row-gap:8px; }
+}
+/* 桌面上指针精细，28px 可接受，但也给一个舒适下限 */
+#v-studio .zo{ min-height:28px; }
+#v-studio .st-presets button{ min-height:31px; }
+
+/* ③ 两处内联硬编码的低对比度小字（#9A8F7E 在纸面约 2.9:1） */
+#hint-n, #hint-d{ color:var(--ink-3) !important; }
+
+/* v13c：把 v13b 的显式 grid-row 换掉——跨行会让右栏被拉伸。
+   改用 dense 自动流：左栏三块连续占 col1，右栏各块自动补到 col2 的空位。 */
+@media (min-width:980px){
+  #v-studio{ grid-auto-flow:row dense; }
+  #v-studio > .stage{ grid-row:auto; }
+  #v-studio > .zoom-row{ grid-row:auto; margin-bottom:14px; }
+  #v-studio > .st-recipe{ grid-row:auto; margin-top:0; }
+  #v-studio > .st-presets-wrap{ grid-row:auto; }
+}
+
+/* ================= v13d：视图切换根本没生效 =================
+   根因：`#v-atlas{display:grid}`（v6b-rail-grid 的媒体查询）与
+   `#v-studio{display:grid}`（v13b）都是 **id 选择器**，
+   特异性高于 `.view{display:none}` 这条 class 规则，
+   于是非当前视图照样 display:grid/block —— 实测切到工坊时，
+   上面仍压着 3386px 的图鉴，工坊主图被顶到 y=3543。
+   视图可见性必须由 .on 唯一决定，这里用 !important 把语义钉死。 */
+.view:not(.on){ display:none !important; }
+#detail:not(.on){ display:none !important; }
+
+/* v13e：工坊左右两栏共用 grid 行高，导致右栏第一块下面空出 800px。
+   改为两个独立列容器，各自竖排，互不影响行高。 */
+@media (min-width:980px){
+  #v-studio{ display:grid; grid-template-columns:minmax(0,1fr) 396px;
+             column-gap:28px; align-items:start; grid-auto-flow:row; }
+  #v-studio > .st-main{ grid-column:1; min-width:0; }
+  #v-studio > .st-side{ grid-column:2; min-width:0; }
+  #v-studio > .st-main > .stage{ position:sticky; top:12px; margin-bottom:14px; }
+  #v-studio > .st-main > .st-recipe{ margin-top:14px; }
+}
+/* 小屏：两栏容器退化成普通的竖排块 */
+.st-main > *:first-child{ margin-top:0 }
+
+/* ================= v13f：手机首屏被左书口挤掉 =================
+   实测 390px 宽时，第一张卡片要到 y≈764 才出现——首屏 844px 里
+   一条纹样都看不到。元凶是左书口：竖排「观器知纹／因纹见制」
+   占掉一整块 240px 高、右侧全是空白。
+   手机上把它收起，把右栏也排到最后，让搜索框紧贴页头。 */
+@media (max-width:979px){
+  #v-atlas{ display:flex; flex-direction:column; }
+  #v-atlas > .colophon{ display:none; }
+  #v-atlas > .rail{ order:99; margin-top:20px; padding-top:18px;
+                    border-top:1px solid var(--line); }
+  .stats-row{ font-size:11.5px; line-height:1.5; }
+  .stats-row > *{ font-size:11.5px; }
+  .hdr .sub{ font-size:10.5px; letter-spacing:.18em; }
+}
+/* 极窄屏：统计只留最关键的三个数字，别撑成三行 */
+@media (max-width:430px){
+  .stats-row{ max-width:150px; }
+  .stats-row .st-item:nth-child(n+4){ display:none; }
+}
+
+/* v13g：手机页头——统计原本被挤成 5 行竖排，改成换行到第二行横排 */
+@media (max-width:600px){
+  .hdr{ flex-wrap:wrap; row-gap:6px; }
+  .hdr > .stats-row{
+    flex-basis:100%; max-width:none; display:flex; flex-wrap:wrap;
+    gap:0 12px; font-size:11px; line-height:1.6; text-align:left;
+  }
+  .hdr > .stats-row > *{ font-size:11px; }
+}
 </style>
 </head>
 <body>
@@ -2048,6 +2174,567 @@ function drawInsetLine(ctx, u, r, p, petals){
   ctx.restore();
 }
 
+/* ===== v12 · D1：补齐 20 个母题的专属细描 =====
+   坐标约定与对应 UNITS 函数一致：原点居中，y 负为上，单位半径 r。
+   一律只用细线（线宽 ~0.3–0.4px 量级）与少量点饰，不改任何填充逻辑。 */
+
+UNIT_DETAIL.mantang = function(ctx, r, p){
+  ctx.lineCap = 'round';
+  // 池水三圈细波
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.28; ctx.lineWidth = Math.max(0.35, r*0.012);
+  for (var i=1;i<=3;i++){ ctx.beginPath(); ctx.arc(0, r*0.30, r*(0.14+i*0.15), Math.PI*1.08, Math.PI*1.92); ctx.stroke(); }
+  // 岸边水草
+  ctx.beginPath(); ctx.moveTo(-r*0.52, r*0.86); ctx.quadraticCurveTo(-r*0.46, r*0.72, -r*0.50, r*0.60); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo( r*0.46, r*0.86); ctx.quadraticCurveTo( r*0.40, r*0.74,  r*0.44, r*0.62); ctx.stroke();
+  ctx.globalAlpha = 1;
+  // 荷叶脉络（与 mantang 里 translate(0.34r,-0.18r) 一致）
+  ctx.save(); ctx.translate(r*0.34, -r*0.18);
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.40; ctx.lineWidth = Math.max(0.35, r*0.010);
+  for (var k=0;k<7;k++){
+    var a = -Math.PI*0.88 + k*(Math.PI*0.76/6);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(a)*r*0.28, Math.sin(a)*r*0.28); ctx.stroke();
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+};
+
+UNIT_DETAIL.yunjian = function(ctx, r, p){
+  var pos = [[0,-0.34],[0,0.34],[-0.34,0],[0.34,0]];
+  // 每个如意云头的内轮廓：上弧 + 下弧
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.34; ctx.lineWidth = Math.max(0.35, r*0.011);
+  pos.forEach(function(q){
+    var cx=q[0]*r, cy=q[1]*r;
+    ctx.beginPath(); ctx.arc(cx, cy, r*0.085, Math.PI*1.15, Math.PI*1.85); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, r*0.050, Math.PI*0.15, Math.PI*0.85); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+  // 云头外侧露珠
+  ctx.globalAlpha = 0.55; ctx.fillStyle = p.c;
+  pos.forEach(function(q){
+    ctx.beginPath(); ctx.arc(q[0]*r*1.52, q[1]*r*1.52, r*0.024, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  // 中心宝珠内圈
+  ctx.globalAlpha = 0.45; ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.35, r*0.011);
+  ctx.beginPath(); ctx.arc(0,0, r*0.085, 0, Math.PI*2); ctx.stroke();
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.bajixiang = function(ctx, r, p){
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.38; ctx.lineWidth = Math.max(0.35, r*0.011);
+  // 左上 方胜：内层小菱
+  ctx.save(); ctx.translate(-r*0.52, -r*0.50);
+  ctx.beginPath(); ctx.moveTo(0,-r*0.10); ctx.lineTo(r*0.08,0); ctx.lineTo(0,r*0.10); ctx.lineTo(-r*0.08,0);
+  ctx.closePath(); ctx.stroke(); ctx.restore();
+  // 右上 法轮：辐条
+  ctx.save(); ctx.translate(r*0.52, -r*0.50); ctx.globalAlpha = 0.45;
+  for (var i=0;i<8;i++){
+    var a = i*Math.PI/4;
+    ctx.beginPath(); ctx.moveTo(Math.cos(a)*r*0.055, Math.sin(a)*r*0.055);
+    ctx.lineTo(Math.cos(a)*r*0.110, Math.sin(a)*r*0.110); ctx.stroke();
+  }
+  ctx.restore();
+  // 左下 伞盖：缘褶
+  ctx.save(); ctx.translate(-r*0.52, r*0.50); ctx.globalAlpha = 0.42;
+  for (var j=-2;j<=2;j++){
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(j*r*0.055, r*0.075); ctx.stroke();
+  }
+  ctx.restore();
+  // 右下 莲：花瓣中脉
+  ctx.save(); ctx.translate(r*0.52, r*0.50); ctx.globalAlpha = 0.42;
+  for (var k=0;k<5;k++){
+    var b = -Math.PI/2 + (k-2)*0.55;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(b)*r*0.130, Math.sin(b)*r*0.130); ctx.stroke();
+  }
+  ctx.restore();
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.anbaxian = function(ctx, r, p){
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.42; ctx.lineWidth = Math.max(0.35, r*0.011);
+  var s = [[-0.52,-0.50],[0.52,-0.50],[-0.52,0.50],[0.52,0.50]];
+  s.forEach(function(q,i){
+    ctx.save(); ctx.translate(q[0]*r, q[1]*r);
+    if (i===0){                       // 葫芦/宝珠
+      ctx.beginPath(); ctx.arc(0,-r*0.03, r*0.055, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, r*0.07, r*0.075, 0, Math.PI*2); ctx.stroke();
+    } else if (i===1){                // 扇
+      for (var k=0;k<3;k++){
+        ctx.beginPath(); ctx.moveTo(-r*0.09, r*0.05+k*r*0.05); ctx.lineTo(r*0.09, r*0.05+k*r*0.05); ctx.stroke();
+      }
+    } else if (i===2){                // 剑/笛
+      ctx.beginPath(); ctx.moveTo(-r*0.10,0); ctx.lineTo(r*0.10,0); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,-r*0.10, r*0.035, 0, Math.PI*2); ctx.stroke();
+    } else {                          // 花篮/笏板
+      ctx.beginPath(); ctx.moveTo(-r*0.09,-r*0.04); ctx.lineTo(r*0.09,-r*0.04); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, r*0.06, r*0.045, 0, Math.PI); ctx.stroke();
+    }
+    ctx.restore();
+  });
+  ctx.globalAlpha = 1;
+  // 八仙飘带
+  ctx.globalAlpha = 0.28;
+  ctx.beginPath(); ctx.moveTo(-r*0.72,-r*0.20); ctx.quadraticCurveTo(-r*0.30,-r*0.34, 0,-r*0.12);
+  ctx.quadraticCurveTo(r*0.30,-r*0.34, r*0.72,-r*0.20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.72, r*0.20); ctx.quadraticCurveTo(-r*0.30, r*0.34, 0, r*0.12);
+  ctx.quadraticCurveTo(r*0.30, r*0.34, r*0.72, r*0.20); ctx.stroke();
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.bingmei = function(ctx, r, p){
+  ctx.lineCap = 'round';
+  // 冰裂二级细纹：在既有折线中点加短垂线
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.26; ctx.lineWidth = Math.max(0.30, r*0.009);
+  var pts = [[-0.58,-0.42],[-0.18,-0.66],[0.30,-0.54],[0.62,-0.16],[0.38,0.34],[-0.04,0.56],[-0.46,0.30],[-0.68,-0.06],[0.02,-0.02]];
+  for (var i=0;i<pts.length;i++){
+    for (var j=i+1;j<pts.length;j++){
+      var dx=(pts[j][0]-pts[i][0])*r, dy=(pts[j][1]-pts[i][1])*r, d=Math.sqrt(dx*dx+dy*dy);
+      if (d < r*0.34){
+        var mx=(pts[i][0]+pts[j][0])*0.5*r, my=(pts[i][1]+pts[j][1])*0.5*r;
+        var nx=-dy/d*r*0.045, ny=dx/d*r*0.045;
+        ctx.beginPath(); ctx.moveTo(mx+nx, my+ny); ctx.lineTo(mx-nx, my-ny); ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  // 梅花：五瓣中脉 + 花蕊
+  var fl = [[-0.30,-0.26,1.00],[0.28,-0.20,0.86],[-0.12,0.30,1.12],[0.34,0.30,0.92]];
+  fl.forEach(function(f){
+    ctx.save(); ctx.translate(f[0]*r, f[1]*r); ctx.scale(f[2], f[2]);
+    ctx.globalAlpha = 0.50; ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.32, r*0.010);
+    for (var k=0;k<5;k++){
+      var a = -Math.PI/2 + k*Math.PI*2/5;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(a)*r*0.072, Math.sin(a)*r*0.072); ctx.stroke();
+    }
+    ctx.globalAlpha = 0.75; ctx.fillStyle = p.c;
+    for (var m=0;m<5;m++){
+      var b = -Math.PI/2 + m*Math.PI*2/5;
+      ctx.beginPath(); ctx.arc(Math.cos(b)*r*0.032, Math.sin(b)*r*0.032, r*0.010, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+  });
+};
+
+UNIT_DETAIL.denglong = function(ctx, r, p){
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.34; ctx.lineWidth = Math.max(0.32, r*0.010);
+  // 灯笼身竖棱
+  for (var i=-2;i<=2;i++){
+    var x = i*r*0.13;
+    ctx.beginPath(); ctx.moveTo(x,-r*0.20); ctx.quadraticCurveTo(x*1.35, r*0.06, x, r*0.30); ctx.stroke();
+  }
+  // 上下横梁
+  ctx.globalAlpha = 0.42;
+  ctx.beginPath(); ctx.moveTo(-r*0.30,-r*0.20); ctx.quadraticCurveTo(0,-r*0.27, r*0.30,-r*0.20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.30, r*0.30); ctx.quadraticCurveTo(0, r*0.37, r*0.30, r*0.30); ctx.stroke();
+  // 流苏细丝
+  ctx.globalAlpha = 0.38;
+  for (var k=-1;k<=1;k++){
+    ctx.beginPath(); ctx.moveTo(k*r*0.09, r*0.34);
+    ctx.quadraticCurveTo(k*r*0.13, r*0.56, k*r*0.06, r*0.74); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  // 蜜蜂（灯笼锦必有的谐音元素：灯 + 蜂 = 丰登）
+  [[-0.56,-0.62,1],[0.54,-0.58,-1]].forEach(function(q){
+    ctx.save(); ctx.translate(q[0]*r, q[1]*r); ctx.rotate(q[2]*0.35);
+    ctx.fillStyle = p.a; ctx.globalAlpha = 0.85;
+    ctx.beginPath(); ctx.ellipse(0,0, r*0.062, r*0.040, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.45; ctx.lineWidth = Math.max(0.30, r*0.009);
+    ctx.beginPath(); ctx.moveTo(-r*0.012,-r*0.040); ctx.lineTo(-r*0.012, r*0.040); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( r*0.014,-r*0.036); ctx.lineTo( r*0.014, r*0.036); ctx.stroke();
+    ctx.globalAlpha = 0.55; ctx.beginPath();
+    ctx.ellipse(-r*0.020,-r*0.058, r*0.050, r*0.026, -0.5, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse( r*0.020,-r*0.058, r*0.050, r*0.026,  0.5, 0, Math.PI*2); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.restore();
+  });
+};
+
+UNIT_DETAIL.zhangfu = function(ctx, r, p){
+  ctx.lineCap = 'round';
+  // 日：光芒八道
+  ctx.save(); ctx.translate(-r*0.40,-r*0.34);
+  ctx.strokeStyle = p.c; ctx.globalAlpha = 0.65; ctx.lineWidth = Math.max(0.40, r*0.013);
+  for (var i=0;i<8;i++){
+    var a = i*Math.PI/4;
+    ctx.beginPath(); ctx.moveTo(Math.cos(a)*r*0.215, Math.sin(a)*r*0.215);
+    ctx.lineTo(Math.cos(a)*r*0.285, Math.sin(a)*r*0.285); ctx.stroke();
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+  // 月：内弧（弯月）
+  ctx.save(); ctx.translate(r*0.40,-r*0.34);
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.40; ctx.lineWidth = Math.max(0.35, r*0.011);
+  ctx.beginPath(); ctx.arc(-r*0.03,-r*0.02, r*0.135, Math.PI*0.35, Math.PI*1.30); ctx.stroke();
+  ctx.globalAlpha = 1; ctx.restore();
+  // 星辰：四点星芒
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.55; ctx.lineWidth = Math.max(0.35, r*0.010);
+  for (var k=0;k<3;k++){
+    var cx=(k-1)*r*0.22, cy=r*0.06;
+    for (var m=0;m<4;m++){
+      var b = m*Math.PI/2 + Math.PI/4;
+      ctx.beginPath(); ctx.moveTo(cx+Math.cos(b)*r*0.058, cy+Math.sin(b)*r*0.058);
+      ctx.lineTo(cx+Math.cos(b)*r*0.086, cy+Math.sin(b)*r*0.086); ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+  // 山：皴线
+  ctx.globalAlpha = 0.38;
+  [[-0.50,0.44,-0.24,0.30],[0.06,0.30,-0.02,0.50],[-0.30,0.50,-0.12,0.34],[0.30,0.40,0.14,0.56]]
+  .forEach(function(q){
+    ctx.beginPath(); ctx.moveTo(q[0]*r, q[1]*r); ctx.lineTo(q[2]*r, q[3]*r); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.fangsheng = function(ctx, r, p){
+  function inner(cx, cy, sc){
+    ctx.beginPath();
+    ctx.moveTo(cx, cy-r*sc); ctx.lineTo(cx+r*sc*0.82, cy);
+    ctx.lineTo(cx, cy+r*sc); ctx.lineTo(cx-r*sc*0.82, cy); ctx.closePath(); ctx.stroke();
+  }
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.38; ctx.lineWidth = Math.max(0.32, r*0.010);
+  inner(-r*0.26, 0, 0.30); inner(-r*0.26, 0, 0.16);
+  inner( r*0.26, 0, 0.30); inner( r*0.26, 0, 0.16);
+  ctx.globalAlpha = 1;
+  // 角点珠
+  ctx.globalAlpha = 0.62; ctx.fillStyle = p.c;
+  [[-0.26,-0.42],[-0.26,0.42],[0.26,-0.42],[0.26,0.42],[0,-0.30],[0,0.30]].forEach(function(q){
+    ctx.beginPath(); ctx.arc(q[0]*r, q[1]*r, r*0.019, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.qiequ = function(ctx, r, p){
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  // 沿主 S 曲线的内侧平行线
+  ctx.strokeStyle = p.c; ctx.globalAlpha = 0.50; ctx.lineWidth = Math.max(0.35, r*0.012);
+  for (var s2=-1;s2<=1;s2+=2){
+    ctx.save(); ctx.scale(s2,1);
+    ctx.beginPath();
+    ctx.moveTo(r*0.03, r*0.26);
+    ctx.bezierCurveTo(r*0.46, r*0.22, r*0.40,-r*0.30, r*0.05,-r*0.22);
+    ctx.stroke(); ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+  // 目纹外圈
+  ctx.globalAlpha = 0.55; ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.32, r*0.010);
+  ctx.beginPath(); ctx.arc(0,-r*0.02, r*0.075, 0, Math.PI*2); ctx.stroke();
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.panchi = function(ctx, r, p){
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.34; ctx.lineWidth = Math.max(0.30, r*0.009);
+  // 两条螭龙身上的鳞纹（沿各自旋转后的轨迹）
+  for (var k=0;k<2;k++){
+    ctx.save(); ctx.rotate(k*Math.PI/2);
+    for (var i=0;i<7;i++){
+      var t = i/6;
+      var y = r*(0.78 - t*1.50);
+      var x = r*(Math.sin(t*4.4)*0.26);
+      ctx.beginPath(); ctx.arc(x, y, r*0.038, Math.PI*0.15, Math.PI*1.05); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+  // 龙首眼珠高光
+  ctx.globalAlpha = 0.70; ctx.fillStyle = p.c;
+  for (var m=0;m<2;m++){
+    ctx.save(); ctx.rotate(m*Math.PI/2);
+    ctx.beginPath(); ctx.arc(-r*0.10,-r*0.80, r*0.030, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+  // 四向爪
+  ctx.globalAlpha = 0.55; ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.32, r*0.010);
+  for (var n=0;n<4;n++){
+    var a = n*Math.PI/2 + 0.78;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a)*r*0.14, Math.sin(a)*r*0.14);
+    ctx.quadraticCurveTo(Math.cos(a)*r*0.28, Math.sin(a)*r*0.28,
+                         Math.cos(a+0.4)*r*0.32, Math.sin(a+0.4)*r*0.32);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.tuanlong = function(ctx, r, p){
+  ctx.lineCap = 'round';
+  // 龙身鳞
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.30; ctx.lineWidth = Math.max(0.30, r*0.009);
+  for (var i=0;i<10;i++){
+    var t = i/9;
+    var x = -r*0.52 + t*1.00*r;
+    var y = r*0.18 - Math.sin(t*Math.PI)*r*0.42;
+    ctx.beginPath(); ctx.arc(x, y, r*0.045, Math.PI*0.20, Math.PI*1.10); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  // 角、须
+  ctx.globalAlpha = 0.60; ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.35, r*0.012);
+  ctx.beginPath(); ctx.moveTo(-r*0.54, r*0.02); ctx.quadraticCurveTo(-r*0.66,-r*0.16,-r*0.58,-r*0.28); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.40,-r*0.30); ctx.quadraticCurveTo(-r*0.22,-r*0.44,-r*0.06,-r*0.34); ctx.stroke();
+  ctx.globalAlpha = 1;
+  // 眼
+  ctx.globalAlpha = 0.75; ctx.fillStyle = p.c;
+  ctx.beginPath(); ctx.arc(-r*0.52, r*0.14, r*0.028, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+  // 四爪
+  ctx.globalAlpha = 0.55; ctx.strokeStyle = p.a; ctx.lineWidth = Math.max(0.35, r*0.012);
+  for (var k=0;k<4;k++){
+    ctx.save(); ctx.rotate(k*Math.PI/2 + 0.6);
+    for (var j=0;j<3;j++){
+      ctx.beginPath(); ctx.moveTo(r*0.50, r*0.02);
+      ctx.lineTo(r*0.60, r*(-0.02 + j*0.045)); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.qilin = function(ctx, r, p){
+  // 身鳞
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.30; ctx.lineWidth = Math.max(0.30, r*0.009);
+  for (var i=0;i<3;i++){
+    for (var j=0;j<4;j++){
+      ctx.beginPath();
+      ctx.arc(-r*0.14 + i*r*0.16, -r*0.06 + j*r*0.09, r*0.040, Math.PI*0.15, Math.PI*1.05);
+      ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+  // 蹄
+  ctx.globalAlpha = 0.55; ctx.lineWidth = Math.max(0.35, r*0.011);
+  for (var k=0;k<4;k++){
+    ctx.beginPath(); ctx.moveTo(-r*0.06+k*r*0.13, r*0.28);
+    ctx.lineTo(-r*0.06+k*r*0.13, r*0.34); ctx.stroke();
+  }
+  // 鬃毛
+  ctx.globalAlpha = 0.45;
+  ctx.beginPath(); ctx.moveTo(-r*0.40,-r*0.40); ctx.quadraticCurveTo(-r*0.28,-r*0.54,-r*0.16,-r*0.42); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.34,-r*0.44); ctx.quadraticCurveTo(-r*0.24,-r*0.58,-r*0.12,-r*0.46); ctx.stroke();
+  ctx.globalAlpha = 1;
+  // 眼
+  ctx.globalAlpha = 0.80; ctx.fillStyle = p.ink;
+  ctx.beginPath(); ctx.arc(-r*0.44,-r*0.24, r*0.028, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.bianfu = function(ctx, r, p){
+  // 翅膜脉络：由肩向翼尖放射
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.32; ctx.lineWidth = Math.max(0.30, r*0.009);
+  [-1,1].forEach(function(s2){
+    ctx.save(); ctx.scale(s2,1);
+    for (var k=0;k<4;k++){
+      var ex = -r*0.86 + k*r*0.20, ey = r*0.16 - k*r*0.06;
+      ctx.beginPath(); ctx.moveTo(0,-r*0.06);
+      ctx.quadraticCurveTo(r*0.30, r*0.02, ex, ey); ctx.stroke();
+    }
+    ctx.restore();
+  });
+  ctx.globalAlpha = 1;
+  // 体毛
+  ctx.globalAlpha = 0.45; ctx.lineWidth = Math.max(0.32, r*0.010);
+  for (var i=0;i<5;i++){
+    ctx.beginPath(); ctx.arc(0,-r*0.12, r*(0.05+i*0.028), Math.PI*0.20, Math.PI*0.80); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  // 双眼
+  ctx.globalAlpha = 0.75; ctx.fillStyle = p.ink;
+  ctx.beginPath(); ctx.arc(-r*0.04,-r*0.14, r*0.020, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( r*0.04,-r*0.14, r*0.020, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.shouzi = function(ctx, r, p){
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.34; ctx.lineWidth = Math.max(0.32, r*0.010);
+  var s2 = r*0.46;
+  // 篆书横画收笔与折角补笔
+  for (var k=0;k<4;k++){
+    ctx.save(); ctx.rotate(k*Math.PI/2);
+    ctx.beginPath(); ctx.moveTo(s2*0.80,-s2*1.02); ctx.lineTo(s2*0.92,-s2*0.96); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(s2*0.80,-s2*0.26); ctx.lineTo(s2*0.90,-s2*0.20); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+  // 外圈匀布小珠
+  ctx.globalAlpha = 0.45; ctx.fillStyle = p.c;
+  for (var m=0;m<8;m++){
+    var a = m*Math.PI/4;
+    ctx.beginPath(); ctx.arc(Math.cos(a)*r*0.72, Math.sin(a)*r*0.72, r*0.022, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.lianqian = function(ctx, r, p){
+  var R = r*0.30;
+  var pts = [[0,0],[R*1.72,0],[-R*1.72,0],[R*0.86,R*1.50],[-R*0.86,R*1.50],[R*0.86,-R*1.50],[-R*0.86,-R*1.50]];
+  // 每枚钱的内郭
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.35; ctx.lineWidth = Math.max(0.32, r*0.010);
+  pts.forEach(function(q){
+    ctx.beginPath(); ctx.arc(q[0], q[1], R*0.82, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(q[0], q[1], R*0.50, 0, Math.PI*2); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+  // 相邻钱之间的连缀线
+  ctx.globalAlpha = 0.24;
+  for (var i=0;i<pts.length;i++){
+    for (var j=i+1;j<pts.length;j++){
+      var dx = pts[j][0]-pts[i][0], dy = pts[j][1]-pts[i][1];
+      if (Math.sqrt(dx*dx+dy*dy) < R*2.2){
+        ctx.beginPath(); ctx.moveTo(pts[i][0], pts[i][1]); ctx.lineTo(pts[j][0], pts[j][1]); ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.luohua = function(ctx, r, p){
+  ctx.lineCap = 'round';
+  // 每道水波上加细浪
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.26; ctx.lineWidth = Math.max(0.30, r*0.009);
+  for (var w=0;w<3;w++){
+    var y = r*(0.10 + w*0.30);
+    for (var x=-r; x<r; x+=r*0.5){
+      ctx.beginPath(); ctx.moveTo(x+r*0.06, y-r*0.02);
+      ctx.quadraticCurveTo(x+r*0.125, y-r*0.09, x+r*0.19, y-r*0.02); ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+  // 花瓣中脉 + 花蕊
+  var fl = [[-0.44,-0.34,0.4],[-0.06,-0.50,-0.3],[0.40,-0.26,0.8],[0.16,-0.06,-0.6],[-0.30,0.04,0.2]];
+  ctx.globalAlpha = 0.42; ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.30, r*0.009);
+  fl.forEach(function(q){
+    ctx.save(); ctx.translate(q[0]*r, q[1]*r); ctx.rotate(q[2]);
+    for (var k=0;k<5;k++){
+      ctx.save(); ctx.rotate(k*Math.PI*2/5);
+      ctx.beginPath(); ctx.moveTo(0,-r*0.030); ctx.lineTo(0,-r*0.105); ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
+  });
+  ctx.globalAlpha = 0.62; ctx.fillStyle = p.c;
+  fl.forEach(function(q){
+    ctx.beginPath(); ctx.arc(q[0]*r, q[1]*r, r*0.014, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.putao = function(ctx, r, p){
+  ctx.lineCap = 'round';
+  // 果粒高光
+  var rows = [[-0.10,0.06],[0.16,0.20],[-0.02,0.36],[0.22,0.50],[-0.08,0.62]];
+  ctx.globalAlpha = 0.55; ctx.fillStyle = p.c;
+  rows.forEach(function(q){
+    ctx.beginPath(); ctx.arc(q[0]*r - r*0.035, q[1]*r - r*0.040, r*0.030, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  // 双卷须
+  ctx.globalAlpha = 0.55; ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.32, r*0.011);
+  ctx.beginPath(); ctx.moveTo(r*0.30, r*0.20);
+  ctx.bezierCurveTo(r*0.62, r*0.10, r*0.74, r*0.42, r*0.52, r*0.44);
+  ctx.bezierCurveTo(r*0.40, r*0.45, r*0.42, r*0.30, r*0.54, r*0.30); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.20,-r*0.62);
+  ctx.bezierCurveTo(-r*0.44,-r*0.74,-r*0.52,-r*0.56,-r*0.36,-r*0.50);
+  ctx.bezierCurveTo(-r*0.26,-r*0.46,-r*0.24,-r*0.58,-r*0.34,-r*0.58); ctx.stroke();
+  ctx.globalAlpha = 1;
+  // 叶脉
+  ctx.globalAlpha = 0.40; ctx.lineWidth = Math.max(0.30, r*0.009);
+  ctx.beginPath(); ctx.moveTo(-r*0.84,-r*0.30); ctx.quadraticCurveTo(-r*0.60,-r*0.44,-r*0.36,-r*0.36); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.70,-r*0.38); ctx.lineTo(-r*0.66,-r*0.22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.56,-r*0.38); ctx.lineTo(-r*0.50,-r*0.20); ctx.stroke();
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.hudie = function(ctx, r, p){
+  ctx.lineCap = 'round';
+  // 四翅翅脉
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.30; ctx.lineWidth = Math.max(0.30, r*0.009);
+  [[-1,1],[-1,-1],[1,1],[1,-1]].forEach(function(sg){
+    ctx.save(); ctx.scale(sg[0], sg[1]);
+    for (var k=0;k<3;k++){
+      var a = -Math.PI*0.62 + k*Math.PI*0.22;
+      ctx.beginPath(); ctx.moveTo(0,0);
+      ctx.quadraticCurveTo(Math.cos(a)*r*0.50, Math.sin(a)*r*0.42,
+                           Math.cos(a)*r*0.62, Math.sin(a)*r*0.16);
+      ctx.stroke();
+    }
+    ctx.restore();
+  });
+  ctx.globalAlpha = 1;
+  // 翅斑
+  ctx.globalAlpha = 0.55; ctx.fillStyle = p.c;
+  [[-0.46,-0.24],[0.46,-0.24],[-0.40,0.18],[0.40,0.18]].forEach(function(q){
+    ctx.beginPath(); ctx.arc(q[0]*r, q[1]*r, r*0.036, 0, Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  // 触角
+  ctx.globalAlpha = 0.60; ctx.strokeStyle = p.ink; ctx.lineWidth = Math.max(0.32, r*0.010);
+  ctx.beginPath(); ctx.moveTo(-r*0.03,-r*0.40); ctx.quadraticCurveTo(-r*0.20,-r*0.62,-r*0.30,-r*0.56); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo( r*0.03,-r*0.40); ctx.quadraticCurveTo( r*0.20,-r*0.62, r*0.30,-r*0.56); ctx.stroke();
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.bogu = function(ctx, r, p){
+  ctx.lineCap = 'round';
+  // 瓶身开片
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.24; ctx.lineWidth = Math.max(0.30, r*0.008);
+  var vp = [[-0.38,-0.40],[-0.46,-0.10],[-0.36,0.16],[-0.42,0.40],[-0.20,0.48],[-0.10,0.20],[-0.18,-0.20],[-0.08,-0.44],[-0.30,0.02]];
+  for (var i=0;i<vp.length;i++){
+    for (var j=i+1;j<vp.length;j++){
+      var dx=(vp[j][0]-vp[i][0])*r, dy=(vp[j][1]-vp[i][1])*r;
+      if (Math.sqrt(dx*dx+dy*dy) < r*0.24){
+        ctx.beginPath(); ctx.moveTo(vp[i][0]*r, vp[i][1]*r); ctx.lineTo(vp[j][0]*r, vp[j][1]*r); ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  // 炉双耳与器足
+  ctx.globalAlpha = 0.50; ctx.lineWidth = Math.max(0.32, r*0.010);
+  ctx.beginPath(); ctx.moveTo(r*0.04,-r*0.20); ctx.quadraticCurveTo(-r*0.04,-r*0.34, r*0.04,-r*0.30); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(r*0.50,-r*0.20); ctx.quadraticCurveTo( r*0.58,-r*0.34, r*0.50,-r*0.30); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(r*0.16, r*0.52); ctx.lineTo(r*0.14, r*0.62); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(r*0.46, r*0.52); ctx.lineTo(r*0.48, r*0.62); ctx.stroke();
+  ctx.globalAlpha = 1;
+  // 折枝叶脉
+  ctx.globalAlpha = 0.42; ctx.lineWidth = Math.max(0.30, r*0.009);
+  ctx.beginPath(); ctx.moveTo(r*0.31,-r*0.23); ctx.lineTo(r*0.24,-r*0.36); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(r*0.31,-r*0.23); ctx.lineTo(r*0.40,-r*0.34); ctx.stroke();
+  ctx.globalAlpha = 1;
+};
+
+UNIT_DETAIL.feiyu = function(ctx, r, p){
+  // 鱼身鳞
+  ctx.strokeStyle = p.ink; ctx.globalAlpha = 0.30; ctx.lineWidth = Math.max(0.30, r*0.009);
+  for (var i=0;i<5;i++){
+    for (var j=0;j<2;j++){
+      ctx.beginPath();
+      ctx.arc(-r*0.26 + i*r*0.13, r*0.02 + j*r*0.10, r*0.046, Math.PI*0.15, Math.PI*1.05);
+      ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+  // 尾鳍条
+  ctx.globalAlpha = 0.45; ctx.lineWidth = Math.max(0.32, r*0.010);
+  for (var k=0;k<3;k++){
+    ctx.beginPath(); ctx.moveTo(-r*0.44, r*0.10);
+    ctx.lineTo(-r*0.74, r*(0.02 + k*0.14)); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  // 双翼羽枝
+  ctx.globalAlpha = 0.40;
+  [-1,1].forEach(function(s2){
+    ctx.save(); ctx.scale(s2,1);
+    for (var m=0;m<3;m++){
+      ctx.beginPath(); ctx.moveTo(r*0.10,-r*0.04);
+      ctx.quadraticCurveTo(r*0.34,-r*(0.26+m*0.08), r*0.54,-r*(0.12+m*0.02));
+      ctx.stroke();
+    }
+    ctx.restore();
+  });
+  ctx.globalAlpha = 1;
+  // 腮线
+  ctx.globalAlpha = 0.50;
+  ctx.beginPath(); ctx.moveTo(r*0.26,-r*0.14); ctx.quadraticCurveTo(r*0.30, r*0.04, r*0.24, r*0.18); ctx.stroke();
+  ctx.globalAlpha = 1;
+};
+
 function drawUnit(ctx, unitId, r, p, petals){
   var u = UNITS[unitId] || UNITS.rosette;
   try { u(ctx, r, p, petals); } catch(e){}
@@ -2223,6 +2910,199 @@ function renderMotif(canvas, motif, opts){
    bones    —— 该母题可用的骨式（怎么排）
    form     —— 形式法则拆解（对称 / 连续 / 节奏）
    ============================================================ */
+
+/* ================= v14 新增六个母题 ================= */
+UNITS.banana = function(ctx,r,p){
+  // 蕉叶：尖顶长三角形，中脉为轴，两侧羽状侧脉
+  ctx.beginPath();
+  ctx.moveTo(0,-r*0.92);
+  ctx.bezierCurveTo(r*0.34,-r*0.52, r*0.30, r*0.30, 0, r*0.88);
+  ctx.bezierCurveTo(-r*0.30, r*0.30, -r*0.34,-r*0.52, 0,-r*0.92);
+  ctx.closePath();
+  ctx.fillStyle=p.a; ctx.globalAlpha=0.92; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.022); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,-r*0.86); ctx.lineTo(0, r*0.84);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.8,r*0.026); ctx.stroke();
+  for (var i=0;i<6;i++){
+    var y=-r*0.66 + i*r*0.26;
+    var half = r*0.26*(1 - Math.abs(y)/(r*0.95)*0.55);
+    ctx.beginPath();
+    ctx.moveTo(0,y); ctx.quadraticCurveTo(half*0.6, y+r*0.10, half, y+r*0.18);
+    ctx.moveTo(0,y); ctx.quadraticCurveTo(-half*0.6, y+r*0.10, -half, y+r*0.18);
+    ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke();
+  }
+};
+
+UNITS.chrys = function(ctx,r,p){
+  // 菊花：两层细长舌瓣，逐层缩小并错位
+  var n=12;
+  for (var layer=0; layer<2; layer++){
+    var len=r*(layer?0.66:0.92), wid=r*(layer?0.072:0.056), off=layer?Math.PI/n:0;
+    for (var i=0;i<n;i++){
+      ctx.save(); ctx.rotate(off + i*Math.PI*2/n);
+      ctx.beginPath();
+      ctx.moveTo(0,-r*0.10);
+      ctx.quadraticCurveTo(wid*1.7,-len*0.55, 0,-len);
+      ctx.quadraticCurveTo(-wid*1.7,-len*0.55, 0,-r*0.10);
+      ctx.closePath();
+      ctx.fillStyle=layer?p.b:p.a;
+      ctx.globalAlpha=layer?0.95:0.85; ctx.fill(); ctx.globalAlpha=1;
+      ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.014); ctx.stroke();
+      ctx.restore();
+    }
+  }
+  ctx.beginPath(); ctx.arc(0,0,r*0.17,0,Math.PI*2);
+  ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.018); ctx.stroke();
+  for (var k=0;k<8;k++){
+    var b=k*Math.PI/4;
+    ctx.beginPath(); ctx.arc(Math.cos(b)*r*0.085, Math.sin(b)*r*0.085, r*0.020, 0, Math.PI*2);
+    ctx.fillStyle=p.ink; ctx.globalAlpha=0.55; ctx.fill(); ctx.globalAlpha=1;
+  }
+};
+
+UNITS.pomegranate = function(ctx,r,p){
+  // 石榴：圆果 + 五裂萼 + 剖开的一角露籽
+  function body(){
+    ctx.beginPath();
+    ctx.moveTo(0,-r*0.34);
+    ctx.bezierCurveTo(r*0.56,-r*0.68, r*0.76, r*0.10, r*0.34, r*0.62);
+    ctx.bezierCurveTo(r*0.12, r*0.88, -r*0.12, r*0.88, -r*0.34, r*0.62);
+    ctx.bezierCurveTo(-r*0.76, r*0.10, -r*0.56,-r*0.68, 0,-r*0.34);
+    ctx.closePath();
+  }
+  body(); ctx.fillStyle=p.a; ctx.globalAlpha=0.94; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.020); ctx.stroke();
+  // 右侧剖口：弧形开口内铺籽
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(r*0.30,-r*0.20);
+  ctx.quadraticCurveTo(r*0.66, r*0.16, r*0.22, r*0.66);
+  ctx.quadraticCurveTo(r*0.10, r*0.20, r*0.30,-r*0.20);
+  ctx.closePath();
+  ctx.fillStyle=p.c; ctx.globalAlpha=0.55; ctx.fill(); ctx.globalAlpha=1;
+  ctx.clip();
+  for (var j=0;j<9;j++){
+    var cx=r*(0.30+0.06*(j%3)), cy=r*(-0.12+0.18*Math.floor(j/3));
+    ctx.beginPath(); ctx.arc(cx,cy,r*0.045,0,Math.PI*2);
+    ctx.fillStyle=j%2?p.b:p.c; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.35,r*0.010); ctx.stroke();
+  }
+  ctx.restore();
+  body(); ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.020); ctx.stroke();
+  // 顶冠五裂
+  ctx.beginPath();
+  for (var i=0;i<5;i++){
+    var a=-Math.PI/2 + (i-2)*0.30;
+    ctx.moveTo(0,-r*0.34);
+    ctx.lineTo(Math.cos(a)*r*0.19, -r*0.34+Math.sin(a)*r*0.21);
+  }
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.0,r*0.030); ctx.stroke();
+};
+
+UNITS.gourd = function(ctx,r,p){
+  // 葫芦：双球束腰 + 藤蔓卷须 + 一叶
+  ctx.beginPath();
+  ctx.moveTo(0,-r*0.80);
+  ctx.bezierCurveTo(r*0.28,-r*0.80, r*0.31,-r*0.42, r*0.15,-r*0.24);
+  ctx.bezierCurveTo(r*0.02,-r*0.12, r*0.02, r*0.06, r*0.19, r*0.21);
+  ctx.bezierCurveTo(r*0.49, r*0.48, r*0.42, r*0.86, 0, r*0.86);
+  ctx.bezierCurveTo(-r*0.42, r*0.86, -r*0.49, r*0.48, -r*0.19, r*0.21);
+  ctx.bezierCurveTo(-r*0.02, r*0.06, -r*0.02,-r*0.12, -r*0.15,-r*0.24);
+  ctx.bezierCurveTo(-r*0.31,-r*0.42, -r*0.28,-r*0.80, 0,-r*0.80);
+  ctx.closePath();
+  ctx.fillStyle=p.a; ctx.globalAlpha=0.94; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.020); ctx.stroke();
+  // 腰线
+  ctx.beginPath(); ctx.moveTo(-r*0.16,-r*0.21);
+  ctx.quadraticCurveTo(0,-r*0.12, r*0.16,-r*0.21);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.8,r*0.024); ctx.stroke();
+  // 藤与卷须
+  ctx.beginPath(); ctx.moveTo(0,-r*0.80);
+  ctx.bezierCurveTo(r*0.12,-r*1.00, r*0.36,-r*0.94, r*0.30,-r*0.76);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.0,r*0.030); ctx.stroke();
+  ctx.beginPath(); ctx.arc(r*0.25,-r*0.72, r*0.065, 0, Math.PI*1.7);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.7,r*0.020); ctx.stroke();
+  // 叶
+  ctx.save(); ctx.translate(-r*0.40,-r*0.50); ctx.rotate(-0.5);
+  ctx.beginPath(); ctx.ellipse(0,0, r*0.20, r*0.09, 0, 0, Math.PI*2);
+  ctx.fillStyle=p.b; ctx.globalAlpha=0.78; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.6,r*0.016); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r*0.18,0); ctx.lineTo(r*0.18,0);
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.010); ctx.stroke();
+  ctx.restore();
+};
+
+UNITS.knot = function(ctx,r,p){
+  // 盘长：双层方框 + 四向连接带 + 四须，交点压小方
+  var w=Math.max(2,r*0.125);
+  ctx.lineCap='butt'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.rect(-r*0.64,-r*0.64, r*1.28, r*1.28);
+  ctx.strokeStyle=p.a; ctx.lineWidth=w; ctx.stroke();
+  ctx.beginPath(); ctx.rect(-r*0.32,-r*0.32, r*0.64, r*0.64);
+  ctx.strokeStyle=p.a; ctx.lineWidth=w; ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0,-r*0.64); ctx.lineTo(0,-r*0.32);
+  ctx.moveTo(0, r*0.64); ctx.lineTo(0, r*0.32);
+  ctx.moveTo(-r*0.64,0); ctx.lineTo(-r*0.32,0);
+  ctx.moveTo( r*0.64,0); ctx.lineTo( r*0.32,0);
+  ctx.strokeStyle=p.b; ctx.lineWidth=w; ctx.stroke();
+  ctx.beginPath();
+  for (var i=0;i<4;i++){
+    ctx.save(); ctx.rotate(i*Math.PI/2);
+    ctx.moveTo(0,-r*0.64); ctx.lineTo(0,-r*0.90);
+    ctx.restore();
+  }
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1.2,r*0.052); ctx.stroke();
+  ctx.beginPath(); ctx.rect(-r*0.11,-r*0.11, r*0.22, r*0.22);
+  ctx.fillStyle=p.c; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.010); ctx.stroke();
+};
+
+UNITS.deer = function(ctx,r,p){
+  // 鹿：侧身、分叉枝角、四腿、短尾
+  ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.ellipse(-r*0.06, r*0.06, r*0.42, r*0.23, -0.06, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.globalAlpha=0.94; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.020); ctx.stroke();
+  // 颈
+  ctx.beginPath();
+  ctx.moveTo(r*0.26,-r*0.04);
+  ctx.quadraticCurveTo(r*0.46,-r*0.42, r*0.40,-r*0.60);
+  ctx.lineTo(r*0.56,-r*0.60);
+  ctx.quadraticCurveTo(r*0.60,-r*0.28, r*0.40, r*0.04);
+  ctx.closePath();
+  ctx.fillStyle=p.a; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.020); ctx.stroke();
+  // 头
+  ctx.beginPath();
+  ctx.ellipse(r*0.51,-r*0.65, r*0.16, r*0.098, -0.30, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill();
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.8,r*0.020); ctx.stroke();
+  // 枝角
+  ctx.beginPath();
+  ctx.moveTo(r*0.44,-r*0.72); ctx.quadraticCurveTo(r*0.40,-r*0.94, r*0.24,-r*0.96);
+  ctx.moveTo(r*0.46,-r*0.84); ctx.lineTo(r*0.33,-r*0.90);
+  ctx.moveTo(r*0.48,-r*0.74); ctx.quadraticCurveTo(r*0.62,-r*0.92, r*0.66,-r*0.84);
+  ctx.moveTo(r*0.58,-r*0.80); ctx.lineTo(r*0.70,-r*0.78);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(1.0,r*0.030); ctx.stroke();
+  // 眼
+  ctx.beginPath(); ctx.arc(r*0.56,-r*0.67, r*0.028, 0, Math.PI*2);
+  ctx.fillStyle=p.ink; ctx.fill();
+  // 四腿
+  ctx.beginPath();
+  [[-0.30,0],[-0.16,0],[0.14,0],[0.28,0]].forEach(function(q){
+    ctx.moveTo(q[0]*r, r*0.22);
+    ctx.lineTo(q[0]*r - r*0.03, r*0.68);
+    ctx.lineTo(q[0]*r + r*0.05, r*0.70);
+  });
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(1.0,r*0.032); ctx.stroke();
+  // 尾
+  ctx.beginPath(); ctx.moveTo(-r*0.44, r*0.00); ctx.lineTo(-r*0.60,-r*0.14);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.8,r*0.026); ctx.stroke();
+};
+
 var MOTIFS = [
 {
   id:'baoxiang', name:'宝相花', alias:'宝相团花', era:'唐', cat:'植物',
@@ -3004,7 +3884,67 @@ MOTIFS.push(
 );
 
 /* 文物出处：一句话交代这条纹样在哪个实物上可以见到 */
+
+/* ================= v14 新增六条纹样 ================= */
+MOTIFS.push(
+ { id:'jiaoye', name:'蕉叶纹', alias:'芭蕉叶纹', era:'商周', cat:'植物',
+   unit:'banana', petals:0, defaultBone:'border2', symN:0, palette:'mojin',
+   bones:['border2','single','fitting'],
+   carrier:'商周青铜觚、尊、爵的颈部与腹部；元代青花梅瓶、明清瓷器',
+   form:'纵向二方连续。每片蕉叶作尖顶长三角形，中脉为轴，两侧羽状侧脉等距斜出，叶片首尾相接环绕器身，形成向上的节奏。属于<b>二方连续</b>与<b>单独纹样</b>的并用。',
+   meaning:'蕉叶层层向上舒展，取「生生不息、节节高升」之意。青铜器上常与云雷纹地配合，是商周礼器最常见的颈部装饰。',
+   desc:'蕉叶纹最早见于商周青铜器的觚、尊、爵，用作颈部与腹部的带状装饰；元代以后被大量移植到青花瓷上，因为青花钴料的浓淡最能表现叶脉层次。它看着像植物写生，实际高度几何化——叶形被压成等腰三角形，侧脉被规整成等距斜线，这正是「图案化」的典型手法。',
+   tags:['青铜器','青花','二方连续','向上'] },
+ { id:'juhua', name:'菊花纹', alias:'菊瓣纹', era:'宋', cat:'植物',
+   unit:'chrys', petals:12, defaultBone:'radial', symN:12, palette:'shiqing',
+   bones:['radial','fitting','allover4'],
+   carrier:'宋代定窑、耀州窑瓷器；宋锦、明清织绣',
+   form:'多层放射对称。花瓣细长如舌，分内外两三层，逐层缩小并错开半个瓣位，花心作小圆。属于<b>旋转对称（12 阶）</b>与<b>适合纹样</b>。',
+   meaning:'菊花凌霜而开，象征长寿、坚贞与隐逸。宋人尤重菊，取其「晚节」之意；民间又因「菊」近「吉」音，视为吉庆之花。',
+   desc:'宋代是菊花纹的鼎盛期。定窑印花、耀州窑刻花都把菊的舌状花瓣抽象成等宽细长条，靠「层数」与「错位」制造繁密感。与宝相花不同，菊花纹保留了明确的物种特征——细长舌瓣、多层排列，一眼可辨。',
+   tags:['宋代','瓷器','长寿','放射对称'] },
+ { id:'shiliu', name:'石榴纹', alias:'榴开百子', era:'唐', cat:'植物',
+   unit:'pomegranate', petals:0, defaultBone:'single', symN:0, palette:'zheshi',
+   bones:['single','fitting','allover4'],
+   carrier:'唐代织锦、宋元瓷器、明清织绣与民间年画',
+   form:'以单独纹样为主。果实作圆球，顶部五裂萼片，常作「剖开」处理露出密集籽粒；也可与折枝、缠枝结合成适合纹样。',
+   meaning:'石榴多籽，「榴开百子」是最直白的多子多福祈愿。唐代起成为婚俗与吉祥图案的固定母题，与「多子」「家族繁盛」直接绑定。',
+   desc:'石榴经丝绸之路传入中原，唐代开始大量出现在织锦与金银器上。工匠常把果实剖开一半，让籽粒成为视觉中心——这是「以形表意」的典型：不是画石榴，而是画「多」。明清以后与佛手、桃组成「三多图」（多子、多福、多寿）。',
+   tags:['唐代','多子','吉祥','丝路'] },
+ { id:'hulu', name:'葫芦纹', alias:'葫芦蔓带', era:'明清', cat:'植物',
+   unit:'gourd', petals:0, defaultBone:'single', symN:0, palette:'danqing',
+   bones:['single','border2','allover4'],
+   carrier:'明清织绣、瓷器、民间剪纸与建筑装饰',
+   form:'单独纹样。双球束腰，上小下大，顶生藤蔓与卷须，旁配一叶；作连续纹样时以藤蔓串联，称「葫芦蔓带」。',
+   meaning:'「葫芦」谐音「福禄」，藤蔓绵长又引申为「子孙万代」。葫芦也是道教八仙中铁拐李的法器，兼具吉祥与神仙意味。',
+   desc:'葫芦纹在明清极流行，因为它一句话说了两件事：福禄（谐音）与绵延（藤蔓）。画法分「写实」与「剪影」两路——宫廷织绣偏写实，民间剪纸偏剪影，但都以「束腰」这一特征作为识别点。',
+   tags:['明清','福禄','谐音','民间'] },
+ { id:'panchang', name:'盘长纹', alias:'盘肠纹、吉祥结', era:'明清', cat:'几何',
+   unit:'knot', petals:0, defaultBone:'single', symN:0, palette:'mojin',
+   bones:['single','border2','allover4'],
+   carrier:'明清织锦、瓷器、建筑彩画、藏传佛教法器',
+   form:'几何回环。以方形回环相互穿插套接，无始无终，四向对称。属于<b>单独纹样</b>，也可作二方连续的单元。',
+   meaning:'盘长本为佛教八吉祥之一，取「回环贯彻、长久不断」之意；民间因形似肠又称「盘肠」，寓意子孙绵延、福寿无尽头。',
+   desc:'盘长是八吉祥里唯一纯几何的成员。难点不在画，而在「穿插」——线条必须一上一下交替，才读得出立体交织感。这也正是它常被用来考验织工与画工的原因：织锦上的盘长要在一个个经纬交点上决定谁压谁。',
+   tags:['八吉祥','几何','佛教','连绵'] },
+ { id:'luzi', name:'鹿纹', alias:'仙鹿纹', era:'汉', cat:'动物',
+   unit:'deer', petals:0, defaultBone:'single', symN:0, palette:'shiqing',
+   bones:['single','allover4','border2'],
+   carrier:'汉代画像石与瓦当、唐代金银器、宋元瓷器、明清织绣',
+   form:'以单独纹样为主。鹿作侧身行走或回首之姿，双角分叉，四肢细长；作连续纹样时常与云气、花草穿插。',
+   meaning:'「鹿」谐音「禄」，是官俸与富贵的象征；鹿又是仙人坐骑，与「寿」相连。所以鹿纹一句话兼得「禄」与「寿」。',
+   desc:'汉代画像石上的鹿多作奔跑状，线条极简而有动势；唐代金银器上的鹿趋于写实，常见「衔芝」或「回首」之姿。鹿纹的辨识关键在角——分叉的枝角是它区别于羊、马的唯一硬特征。',
+   tags:['汉代','禄','长寿','动物'] }
+);
+
 var MOTIF_SRC = {
+  jiaoye:'商周青铜觚、尊、爵；元代青花梅瓶、明清瓷器',
+  juhua:'宋代定窑、耀州窑瓷器；宋锦与明清织绣',
+  shiliu:'唐代织锦与金银器、宋元瓷器、明清织绣',
+  hulu:'明清织绣、瓷器与民间剪纸',
+  panchang:'明清织锦、瓷器、建筑彩画（八吉祥之一）',
+  luzi:'汉代画像石与瓦当、唐代金银器、明清织绣',
+
   baoxiang:'敦煌莫高窟唐代壁画、唐代金银器与织锦',
   tuanhua:'唐代铜镜背纹、敦煌藻井、明清织绣',
   chanzhi:'明代青花瓷、清代织锦与刺绣',
@@ -4732,6 +5672,24 @@ initStudioV2();
     + '· 问纹：可以按朝代、类属、器物、寓意、出处、演变来提问，也可以说「考考我」；回答下面的按钮能直接追问，或把纹样带进工坊。<br>'
     + '· 工坊：选母题与骨式、换配色与底质，可导出 PNG 或存成配方。';
   ab.appendChild(d);
+})();
+
+/* v13e：把工坊拆成「左图 / 右控件」两个列容器。
+   纯 CSS 做不到——左右两栏共用 grid 行高，右栏会被左栏那张
+   858px 的图撑出巨大空隙。这里在初始化时一次性重排 DOM。 */
+(function(){
+  var v=document.getElementById('v-studio');
+  if (!v || v.querySelector(':scope > .st-main')) return;
+  var main=document.createElement('div'); main.className='st-main';
+  var side=document.createElement('div'); side.className='st-side';
+  var kids=[].slice.call(v.children);
+  kids.forEach(function(el){
+    var c=el.classList;
+    if (c.contains('stage') || c.contains('zoom-row') || c.contains('st-recipe')) main.appendChild(el);
+    else side.appendChild(el);
+  });
+  v.appendChild(main);
+  v.appendChild(side);
 })();
 </script>
 </body>
