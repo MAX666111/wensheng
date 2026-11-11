@@ -1022,6 +1022,25 @@ input[type=range]::-webkit-slider-thumb{
   }
   .hdr > .stats-row > *{ font-size:11px; }
 }
+
+/* ==== v15 画布比例 ==== */
+/* 工坊主图在桌面上限高，保证调参数时整幅图始终在视野里 */
+@media (min-width:980px){
+  #v-studio > .st-main > .stage{ width:min(100%, calc(100vh - 200px)); margin-left:auto; margin-right:auto; }
+}
+/* 详情主图按骨式选比例：二方连续是横带，给它宽幅；其余保持方形 */
+#hero-wrap[data-b="border2"] .d-hero{ aspect-ratio:16/9; }
+#hero-wrap[data-b="allover4"] .d-hero,
+#hero-wrap[data-b="radial"] .d-hero,
+#hero-wrap[data-b="single"] .d-hero,
+#hero-wrap[data-b="fitting"] .d-hero{ aspect-ratio:1/1; }
+
+/* 容器决定主图尺寸（canvas 绝对定位 100%），所以比例打在 .hero-wrap 上 */
+#hero-wrap[data-b="border2"]{ aspect-ratio:16/9; }
+#hero-wrap[data-b="allover4"],
+#hero-wrap[data-b="radial"],
+#hero-wrap[data-b="single"],
+#hero-wrap[data-b="fitting"]{ aspect-ratio:1/1; }
 </style>
 </head>
 <body>
@@ -4148,6 +4167,8 @@ function drawHero(){
   /* renderMotif 用 getBoundingClientRect 量尺寸，而该矩形是「已被 CSS 缩放后」的，
      会与持久在元素上的 transform 形成正反馈：每重绘一次 backing store 就再涨一档。
      量尺寸前先把自身 transform 摘掉，量完再交回 hvApply 统一设置。 */
+  var hw = $('#hero-wrap');
+  if (hw) hw.setAttribute('data-b', state.cur.defaultBone || 'single');
   var prev = cv.style.transform;
   cv.style.transform = 'none';
   var base = window.devicePixelRatio || 2;
