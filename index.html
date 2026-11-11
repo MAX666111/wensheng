@@ -3122,10 +3122,89 @@ UNITS.deer = function(ctx,r,p){
   ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.8,r*0.026); ctx.stroke();
 };
 
+/* 宝相花：复合理想花——外缘收成云头、双钩内层、十六颗联珠、花心宝珠 */
+UNITS.baoxiang = function(ctx,r,p,petals){
+  petals = Math.max(6, petals || 8);
+  var i, a;
+  for (i=0;i<petals;i++){
+    a = i*Math.PI*2/petals;
+    ctx.save(); ctx.rotate(a);
+    ctx.beginPath();
+    ctx.moveTo(0, r*0.10);
+    ctx.bezierCurveTo(r*0.30,-r*0.18, r*0.26,-r*0.72, 0,-r*0.92);
+    ctx.bezierCurveTo(-r*0.26,-r*0.72, -r*0.30,-r*0.18, 0, r*0.10);
+    ctx.closePath();
+    ctx.globalAlpha=0.94; ctx.fillStyle=p.a; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.020); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, r*0.04); ctx.lineTo(0,-r*0.86);
+    ctx.globalAlpha=0.5; ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.011); ctx.stroke(); ctx.globalAlpha=1;
+    ctx.restore();
+  }
+  for (i=0;i<petals;i++){
+    a = (i*Math.PI*2)/petals + Math.PI/petals;
+    ctx.save(); ctx.rotate(a);
+    ctx.beginPath();
+    ctx.moveTo(0, r*0.04);
+    ctx.bezierCurveTo(r*0.20,-r*0.14, r*0.18,-r*0.50, 0,-r*0.62);
+    ctx.bezierCurveTo(-r*0.18,-r*0.50, -r*0.20,-r*0.14, 0, r*0.04);
+    ctx.closePath();
+    ctx.globalAlpha=0.94; ctx.fillStyle=p.b; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.014); ctx.stroke();
+    ctx.restore();
+  }
+  for (i=0;i<16;i++){
+    a = i*Math.PI*2/16;
+    ctx.beginPath(); ctx.arc(Math.sin(a)*r*0.30, -Math.cos(a)*r*0.30, r*0.032, 0, Math.PI*2);
+    ctx.fillStyle=p.c; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.3,r*0.009); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.arc(0,0,r*0.15,0,Math.PI*2);
+  ctx.fillStyle=p.c; ctx.fill(); ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.016); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,r*0.065,0,Math.PI*2); ctx.fillStyle=p.ink; ctx.fill();
+};
+
+/* 莲花：尖瓣、双层错开、中心莲蓬带莲子 */
+UNITS.lianhua = function(ctx,r,p,petals){
+  petals = Math.max(6, petals || 8);
+  var i, a;
+  for (i=0;i<petals;i++){
+    a = i*Math.PI*2/petals;
+    ctx.save(); ctx.rotate(a);
+    ctx.beginPath();
+    ctx.moveTo(0, r*0.02);
+    ctx.quadraticCurveTo(r*0.42,-r*0.40, 0,-r*0.94);
+    ctx.quadraticCurveTo(-r*0.42,-r*0.40, 0, r*0.02);
+    ctx.closePath();
+    ctx.globalAlpha=0.94; ctx.fillStyle=p.a; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.020); ctx.stroke();
+    ctx.restore();
+  }
+  for (i=0;i<petals;i++){
+    a = (i*Math.PI*2)/petals + Math.PI/petals;
+    ctx.save(); ctx.rotate(a);
+    ctx.beginPath();
+    ctx.moveTo(0, r*0.02);
+    ctx.quadraticCurveTo(r*0.26,-r*0.26, 0,-r*0.58);
+    ctx.quadraticCurveTo(-r*0.26,-r*0.26, 0, r*0.02);
+    ctx.closePath();
+    ctx.globalAlpha=0.94; ctx.fillStyle=p.b; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.014); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(0,0,r*0.26,0,Math.PI*2);
+  ctx.globalAlpha=0.92; ctx.fillStyle=p.c; ctx.fill(); ctx.globalAlpha=1;
+  ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.7,r*0.018); ctx.stroke();
+  var seeds = [[0,0],[0.09,-0.08],[-0.09,-0.08],[0.09,0.09],[-0.09,0.09],[0,-0.14],[0.14,0],[-0.14,0]];
+  for (i=0;i<seeds.length;i++){
+    ctx.beginPath(); ctx.arc(seeds[i][0]*r, seeds[i][1]*r, r*0.028, 0, Math.PI*2);
+    ctx.fillStyle=p.ink; ctx.fill();
+  }
+};
+
 var MOTIFS = [
 {
   id:'baoxiang', name:'宝相花', alias:'宝相团花', era:'唐', cat:'植物',
-  unit:'rosette', petals:8, defaultBone:'radial', symN:8, palette:'danqing',
+  unit:'baoxiang', petals:8, defaultBone:'radial', symN:8, palette:'danqing',
   bones:['radial','fitting','allover4'],
   carrier:'唐代铜镜、敦煌藻井、宋元织锦、明清瓷器',
   form:'多层放射对称。以中心花心为轴，花瓣作 4 出或 8 出层层展开，每层花瓣大小按等比收缩、逐层错开位置，形成“由内向外、层层包裹”的秩序。属于<b>旋转对称（n 阶）</b>与<b>适合纹样</b>的结合。',
@@ -3245,7 +3324,7 @@ var MOTIFS = [
 },
 {
   id:'lianhua', name:'莲花纹', alias:'荷花纹、莲瓣纹', era:'南北朝', cat:'植物',
-  unit:'rosette', petals:8, defaultBone:'radial', symN:8, palette:'shiqing',
+  unit:'lianhua', petals:8, defaultBone:'radial', symN:8, palette:'shiqing',
   bones:['radial','fitting','border2'],
   carrier:'南北朝造像、敦煌藻井、宋元瓷器、寺庙建筑',
   form:'以八瓣为典型，作<b>放射对称</b>；器物上常简化为莲瓣纹带，转为二方连续环绕器身一周。',
@@ -3999,17 +4078,17 @@ var MOTIF_SRC = {
   buzi:'故宫博物院藏明清补服；佳士得中国古代官阶纹章图录',
   fangsheng:'故宫博物院藏黑漆描金山水纹方胜式盘',
   qiequ:'西周中晚期青铜器（鼎、簋）',
-  panchi:'春秋战国青铜器',
-  panhui:'春秋战国青铜器',
+  panchi:'春秋战国青铜器（蟠螭双龙交缠，多见于壶、鉴）',
+  panhui:'春秋战国青铜器（蟠虺群蛇盘绕，多见于鼎、簋腹部）',
   tuanlong:'明清龙袍与织锦',
   qilin:'清代武一品补子、民间织绣',
-  bianfu:'明清瓷器与织绣',
+  bianfu:'明清瓷器、织锦与服饰',
   shouzi:'明清织绣与瓷器',
   lianqian:'汉至明清织锦、瓷器',
   luohua:'明代织锦与瓷器',
   putao:'唐代海马葡萄镜',
   hudie:'宋至明清织绣、瓷器',
-  bogu:'明清瓷器与织绣',
+  bogu:'明清瓷器与木雕（博古为文玩器物组合）',
   feiyu:'明代赐服飞鱼服',
   juban:'宋代瓷器与织绣',
 };
@@ -4309,7 +4388,7 @@ function answerBoneConcept(q){
 }
 
 var INTENTS = [
-  { id:'era',      kw:['唐','宋','明','清','汉','商周','周','南北朝','魏晋','新石器','朝代','时期','年代'], label:'按朝代检索' },
+  { id:'era',      kw:['唐','宋','元','明','清','汉','商周','周','春秋','战国','南北朝','魏晋','新石器','朝代','时期','年代'], label:'按朝代检索' },
   { id:'meaning',  kw:['寓意','意思','象征','代表什么','什么含义','为什么','祝福'], label:'寓意解释' },
   { id:'form',     kw:['骨式','怎么排','排列','连续','对称','构图','形式','法则','怎么组合'], label:'形式法则分析' },
   { id:'compare',  kw:['区别','不同','比较','差别','一样吗'], label:'多纹样对比' },
@@ -4330,11 +4409,11 @@ var THING_WORDS = ['瓷器','织锦','青铜','漆器','织物','服装','建筑
 /* 吉祥语 → 在 meaning 里怎么找 */
 var WISH_WORDS = ['长寿','富贵','吉祥','平安','多子','权力','辟邪','丰收','爱情','清廉','团圆','功名'];
 
-var ERA_TEXT = {'新石器':'新石器时代','商周':'商周','春秋战国':'春秋战国时期','汉':'汉代','魏晋':'魏晋',
+var ERA_TEXT = {'新石器':'新石器时代','商周':'商周','春秋战国':'春秋战国时期','汉':'汉代','魏晋':'魏晋','魏晋南北朝':'魏晋南北朝',
                 '南北朝':'南北朝','唐':'唐代','宋':'宋代','元':'元代','明清':'明清两代'};
 function eraText(e){ return ERA_TEXT[e] || e; }
 /* 绘制单元（母题）的中文说法：代码里是英文 id，面向用户时要讲人话 */
-var UNIT_CN = {rosette:'团花（圆形适合）',vine:'缠枝卷草',meander:'回旋折线',cloud:'云头',
+var UNIT_CN = {rosette:'团花（圆形适合）',baoxiang:'宝相花（复合团花）',lianhua:'莲花（尖瓣莲）',vine:'缠枝卷草',meander:'回旋折线',cloud:'云头',
   wave:'水波江崖',lattice:'几何格律',fish:'鱼形',honeysuckle:'忍冬卷草',wan:'万字折线',
   taotie:'兽面',kuilong:'夔龙',phoenix:'凤鸟',sishen:'四神',zhuyu:'茱萸叉形',lianzhu:'联珠圆环',
   juancao:'卷草',lingyang:'团窠花环',mantang:'池水荷花',yunjian:'云头环绕',bajixiang:'八宝',
@@ -4519,8 +4598,9 @@ var BONE_WORDS = [
 ];
 var ERA_MOTIF = { '唐':'baoxiang', '宋':'zhezhi', '明清':'haishui',
                   '南北朝':'lianhua', '汉':'yunqi', '商周':'yunlei',
-                  '新石器':'yuwen', '魏晋南北朝':'rendong' };
-var ERA_KEYS = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','元','明清','春秋战国','春秋战国'];
+                  '新石器':'yuwen', '魏晋南北朝':'rendong',
+                  '元':'manchi', '春秋战国':'panchi' };
+var ERA_KEYS = ['新石器','商周','汉','魏晋南北朝','南北朝','唐','宋','元','明清','春秋战国'];
 
 function parseMake(q, fallback){
   var reasons = [], target = findMotifInText(q), palette = null, bone = null, i, j, e;
@@ -5712,6 +5792,14 @@ initStudioV2();
   v.appendChild(main);
   v.appendChild(side);
 })();
+
+/* 离线可用：网络优先，断网回落到缓存（sw.js） */
+try {
+  if ('serviceWorker' in navigator &&
+      (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+} catch(e){}
 </script>
 </body>
 </html>
