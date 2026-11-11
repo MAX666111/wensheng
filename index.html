@@ -763,6 +763,65 @@ input[type=range]::-webkit-slider-thumb{
 }
 @media (min-width:1600px){ .grid{grid-template-columns:repeat(6,minmax(0,1fr))} }
 @media (prefers-reduced-motion: reduce){ .rail-go{transition:none} }
+
+/* ===== v9 色彩体系：中国古典色，全部平涂，不用渐变与投影 ===== */
+:root{
+  --cinnabar:#A83B2C;   /* 朱砂 */
+  --gamboge:#B8862B;    /* 藤黄 */
+  --azurite:#3C6E8F;    /* 石青 */
+  --ochre:#8C6A4A;      /* 赭石 */
+  --indigo:#2F4858;     /* 花青 */
+  --paper-c:#F2EFE8;    /* 宣纸（提亮一档，卡片用） */
+}
+.hdr h1::after{ content:''; display:block; width:52px; height:3px;
+  background:var(--cinnabar); margin:10px 0 0 0; }
+.card{ background:var(--paper-c); }
+.card .catbar{ position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:var(--cc,#8A7B63); z-index:2; }
+.card .meta{ background:#fff; }
+.card .tag{ display:flex; gap:6px; margin-top:5px; }
+.card .tag b{ font-weight:600; font-size:13px; line-height:1.7;
+  padding:0 7px; border-radius:2px; color:#fff; letter-spacing:.02em; }
+.card .t-era{ background:var(--ec,#8A7B63); }
+.card .t-cat{ background:var(--cc,#8A7B63); }
+.card .bone-line{ margin-top:5px; font-size:12px; color:var(--ink-2);
+  letter-spacing:.01em; border-top:1px solid var(--line-2); padding-top:5px; }
+.card:hover{ border-color:var(--cc,#8A7B63); }
+
+/* 筛选条：选中态用朱砂平涂 */
+.chip.on{ background:var(--cinnabar); border-color:var(--cinnabar); color:#fff; }
+.chip{ background:#fff; }
+
+/* 页头：加一条平涂色带做装裱首线 */
+.hdr::before{ content:''; display:block; height:4px;
+  background:var(--cinnabar); width:100%; }
+.hdr{ padding-top:0; }
+
+/* 详情页：标题竖条改朱砂，段落小标题前加色点 */
+.d-sec h3{ position:relative; padding-left:11px; }
+.d-sec h3::before{ content:''; position:absolute; left:0; top:.42em;
+  width:4px; height:.86em; background:var(--cinnabar); border-radius:1px; }
+
+/* 构成拆解 */
+.anat{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0 8px; }
+.anat figure{ margin:0; border:1px solid var(--line); border-radius:3px;
+  overflow:hidden; background:var(--paper-c); }
+.anat canvas{ display:block; width:100%; aspect-ratio:1/1; }
+.anat figcaption{ font-size:11.5px; color:var(--ink-2); text-align:center;
+  padding:5px 4px 6px; border-top:1px solid var(--line-2); background:#fff; }
+.an-note{ font-size:12.5px; color:var(--ink-2); line-height:1.75; }
+
+/* ===== v9b 检视倍率 ===== */
+.zoom-row{ display:flex; align-items:center; gap:6px; margin:-2px 0 12px; }
+.zoom-lab{ font-size:12.5px; color:var(--ink-2); margin-right:2px; }
+.zo{ font:inherit; font-size:12.5px; padding:4px 10px; border-radius:999px;
+  border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer;
+  transition:background .14s,border-color .14s,color .14s; }
+.zo:hover{ border-color:var(--ink-3); }
+.zo.on{ background:var(--cinnabar); border-color:var(--cinnabar); color:#fff; }
+.stage{ position:relative; }
+.stage canvas{ transition:transform .18s ease; transform-origin:center center; }
+@media (prefers-reduced-motion: reduce){ .stage canvas{ transition:none; } }
 </style>
 </head>
 <body>
@@ -800,6 +859,12 @@ input[type=range]::-webkit-slider-thumb{
 
     <section class="view" id="v-studio">
       <div class="stage"><canvas id="stage"></canvas></div>
+      <div class="zoom-row" id="zoom-row">
+        <span class="zoom-lab">检视倍率</span>
+        <button class="zo on" data-z="1">1×</button>
+        <button class="zo" data-z="1.6">1.6×</button>
+        <button class="zo" data-z="2.4">2.4×</button>
+      </div>
       <div class="st-recipe" id="st-recipe"></div>
 
       <div class="st-presets-wrap">
@@ -1653,7 +1718,7 @@ function drawGuides(ctx, W, H, bone, n){
 function renderMotif(canvas, motif, opts){
   opts = opts || {};
   if (opts.guides === undefined) opts.guides = showGuides;
-  var dpr = Math.min(window.devicePixelRatio||2, 2);
+  var dpr = opts.dpr || Math.min(window.devicePixelRatio||2, 2);
   var rect = canvas.getBoundingClientRect();
   var W = Math.max(60, Math.round(rect.width));
   var H = Math.max(60, Math.round(rect.height));
@@ -2595,6 +2660,19 @@ function filtered(){
 
 var gridTimer = null;
 var _gridAnim = true;   // 切到图鉴页时置 true，只错落一次，避免搜索时反复跳动
+/* 类属色：七个类属各一色，用于卡片左侧书口条与标签 */
+var CAT_COLOR = {'植物':'#4A7047','动物':'#8C5A2B','几何':'#3C6E8F',
+                 '云气':'#5E7385','山水':'#2F6B62','宗教':'#7B4B6B','器物':'#8A6A2F'};
+var CAT_TINT  = {'植物':'#E4EADF','动物':'#EFE5D8','几何':'#DEE7EE',
+                 '云气':'#E2E7EA','山水':'#DCE9E5','宗教':'#EADFE6','器物':'#EDE6D5'};
+/* 朝代色：按时代由早到晚，由土黄经赭到朱，再到青 */
+var ERA_COLOR = {'新石器':'#8A7B63','商周':'#6E5B3E','春秋战国':'#6E6A3E',
+                 '汉':'#7B3B2E','魏晋南北朝':'#4E6B7A','南北朝':'#58707E',
+                 '唐':'#A83B2C','宋':'#4A6B5A','元':'#3B5570','明清':'#8A4A2F'};
+function catColor(c){ return CAT_COLOR[c] || '#8A7B63'; }
+function catTint(c){ return CAT_TINT[c] || '#E6E2D8'; }
+function eraColor(e){ return ERA_COLOR[e] || '#8A7B63'; }
+
 function renderGrid(){
   var list = filtered();
   var g = $('#grid');
@@ -2603,10 +2681,14 @@ function renderGrid(){
     return;
   }
   g.innerHTML = list.map(function(m){
-    return '<div class="card" data-id="'+m.id+'">'
+    return '<div class="card" data-id="'+m.id+'" style="--cc:'+catColor(m.cat)+'">'
+      + '<i class="catbar"></i>'
       + '<div class="cv-wrap"><canvas data-mid="'+m.id+'"></canvas></div>'
       + '<div class="meta"><div class="nm">'+m.name+'</div>'
-      + '<div class="tag">'+m.era+' · '+m.cat+'</div></div></div>';
+      + '<div class="tag"><b class="t-era" style="--ec:'+eraColor(m.era)+'">'+m.era+'</b>'
+      + '<b class="t-cat">'+m.cat+'</b></div>'
+      + '<div class="bone-line">'+(typeof boneCN==='function'?boneCN(m.defaultBone):m.defaultBone)
+      + (m.symN>0?(' · '+m.symN+' 阶'):'')+'</div></div></div>';
   }).join('');
 
   // 绘制：必须同步完成。
@@ -2668,12 +2750,28 @@ function openDetail(m){
     + '<div class="bone-row" id="d-bones">'+bones+'</div>'
     + '<div style="font-size:10.5px;color:var(--ink-3);margin-top:6px;letter-spacing:.04em">↑ 点击骨式可直接切换预览</div>'
     + '<div class="d-sec"><h3>形式法则</h3><p>'+m.form+'</p></div>'
+    + '<div class="d-sec"><h3>构成拆解</h3>'
+    + '<div class="anat">'
+    + '<figure><canvas class="an-c"></canvas><figcaption>母题单体「'+unitCN(m.unit)+'」</figcaption></figure>'
+    + '<figure><canvas class="an-c"></canvas><figcaption>套「'+boneCN(m.defaultBone)+'」骨式</figcaption></figure>'
+    + '</div>'
+    + '<p class="an-note">左图只画一个母题单体，右图把它放进骨式骨架（虚线为骨架线）。同一母题换一种骨式，观感就完全不同——这正是本站把「母题」与「骨式」拆成两轴的由来。</p>'
+    + '</div>'
     + '<div class="d-sec"><h3>寓意</h3><p>'+m.meaning+'</p></div>'
     + '<div class="d-sec"><h3>解读</h3><p>'+m.desc+'</p></div>'
     + '<div class="d-sec"><h3>配色</h3><p style="font-size:12.5px;color:var(--ink-2)">'+(p.name)+'</p><div class="swatches">'+sw+'</div></div>'
     + '<div class="d-sec"><h3>文物出处</h3><p class="src">'+(MOTIF_SRC[m.id]||'—')+'</p></div>'
     + '<div class="d-sec" style="margin-top:22px">'
     + '<button class="btn" id="d-studio" style="width:100%">用这个母题去创作 →</button></div>';
+  // 构成拆解：真实绘制两张，左=母题单体，右=带骨架线
+  (function(){
+    var an = $('#d-body').querySelectorAll('.an-c');
+    if (an.length < 2) return;
+    renderMotif(an[0], m, { bone:'single', petals:m.petals, palette:m.palette });
+    renderMotif(an[1], m, { bone:m.defaultBone, n:m.symN, petals:m.petals,
+                            palette:m.palette, guides:true });
+  })();
+
   // 骨式点击切换：让“认知”页也能直观看到同一母题的不同排布
   (function(){
     var spans = $('#d-bones').querySelectorAll('span');
@@ -3285,10 +3383,14 @@ function curMotif(){
 
 function paintStage(){
   var m = curMotif();
+  var z = studio.zoom || 1;
   renderMotif($('#stage'), m, {
     bone: studio.bone, n: studio.n, density: studio.density,
-    palette: studio.palette, petals: studio.petals
+    palette: studio.palette, petals: studio.petals,
+    dpr: Math.min(4, (window.devicePixelRatio || 2) * z)
   });
+  var st = $('#stage');
+  if (st) st.style.transform = z > 1 ? ('scale(' + z + ')') : '';
 }
 
 function initStudio(){
@@ -3713,11 +3815,16 @@ var _paintStage0 = paintStage;
 paintStage = function(){
   var m = curMotif();
   var bg = BGS.filter(function(x){ return x.id === studio.bg; })[0] || BGS[0];
+  var z = studio.zoom || 1;
+  // 倍率越高，backing store 越密——放大后能看到真实笔触，而不是把低分辨率图拉大
   renderMotif($('#stage'), m, {
     bone: studio.bone, n: studio.n, density: studio.density,
     palette: studio.palette, petals: studio.petals,
-    bgColor: bg.color || undefined
+    bgColor: bg.color || undefined,
+    dpr: Math.min(4, (window.devicePixelRatio || 2) * z)
   });
+  var st = $('#stage');
+  if (st) st.style.transform = z > 1 ? ('scale(' + z + ')') : '';
   renderRecipe();
 };
 
@@ -3979,6 +4086,19 @@ initStudioV2();
     if (typeof go === 'function') go('ask');
     if (typeof initTalk === 'function') initTalk();
     setTimeout(function(){ if (typeof ask === 'function') ask('考考我'); }, 120);
+  });
+})();
+/* 工坊检视倍率 */
+(function(){
+  var row = document.getElementById('zoom-row');
+  if (!row) return;
+  row.addEventListener('click', function(e){
+    var b = e.target.closest('.zo'); if (!b) return;
+    studio.zoom = (+b.dataset.z) || 1;
+    Array.prototype.forEach.call(row.querySelectorAll('.zo'), function(x){
+      x.classList.toggle('on', x === b);
+    });
+    paintStage();
   });
 })();
 </script>
