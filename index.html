@@ -3221,7 +3221,7 @@ function drawHero(){
   hvApply();
 }
 
-function heroReset(){ HV.z = HV.base; HV.tx = 0; HV.ty = 0; hvApply(); }
+function heroReset(){ HV.z = HV.base; HV.tx = 0; HV.ty = 0; hvApply(); drawHero(); }
 
 /* anchor-preserving zoom: screen = center + t + z*u */
 function heroZoomAt(px, py, z2){
