@@ -2754,6 +2754,169 @@ UNIT_DETAIL.feiyu = function(ctx, r, p){
   ctx.globalAlpha = 1;
 };
 
+
+/* ---------- v17：补齐八条母题的专属细描（v14 的六条 + v16 的两条） ---------- */
+UNIT_DETAIL.banana = function(ctx,r,p){
+  // 蕉叶：次级侧脉错开半格、叶缘锯齿、叶尖细线
+  ctx.lineCap='round';
+  for (var i=0;i<7;i++){
+    var y=r*(-0.78+i*0.24);
+    var half=r*0.20*(1-Math.abs(y)/(r*0.95)*0.55);
+    ctx.beginPath();
+    ctx.moveTo(0,y); ctx.quadraticCurveTo(half*0.5, y+r*0.06, half*0.78, y+r*0.11);
+    ctx.moveTo(0,y); ctx.quadraticCurveTo(-half*0.5, y+r*0.06, -half*0.78, y+r*0.11);
+    ctx.strokeStyle=p.c; ctx.globalAlpha=0.60; ctx.lineWidth=Math.max(0.3,r*0.008); ctx.stroke(); ctx.globalAlpha=1;
+  }
+  for (var s=-1;s<=1;s+=2){
+    ctx.beginPath();
+    for (var j=0;j<9;j++){
+      var yy=r*(-0.82+j*0.20);
+      var xx=s*r*0.30*(1-Math.abs(yy)/(r*0.95)*0.60);
+      ctx.moveTo(xx*0.94, yy); ctx.lineTo(xx*1.08, yy+r*0.075);
+    }
+    ctx.strokeStyle=p.ink; ctx.globalAlpha=0.50; ctx.lineWidth=Math.max(0.3,r*0.008); ctx.stroke(); ctx.globalAlpha=1;
+  }
+  ctx.beginPath(); ctx.moveTo(-r*0.05,-r*0.88); ctx.lineTo(0,-r*0.975); ctx.lineTo(r*0.05,-r*0.88);
+  ctx.strokeStyle=p.b; ctx.lineWidth=Math.max(0.5,r*0.016); ctx.stroke();
+};
+
+UNIT_DETAIL.chrys = function(ctx,r,p){
+  // 菊花：每片舌瓣的中脉与三叉瓣尖、花心外圈
+  var n=12;
+  for (var layer=0; layer<2; layer++){
+    var len=r*(layer?0.66:0.92), wid=r*(layer?0.072:0.056), off=layer?Math.PI/n:0;
+    for (var i=0;i<n;i++){
+      ctx.save(); ctx.rotate(off + i*Math.PI*2/n);
+      ctx.beginPath(); ctx.moveTo(0,-r*0.13); ctx.lineTo(0,-len*0.92);
+      ctx.strokeStyle=p.ink; ctx.globalAlpha=0.42; ctx.lineWidth=Math.max(0.3,r*0.009); ctx.stroke(); ctx.globalAlpha=1;
+      ctx.beginPath();
+      ctx.moveTo(-wid*1.05,-len*0.88); ctx.lineTo(0,-len*1.03); ctx.lineTo(wid*1.05,-len*0.88);
+      ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke();
+      ctx.restore();
+    }
+  }
+  ctx.beginPath(); ctx.arc(0,0,r*0.112,0,Math.PI*2);
+  ctx.strokeStyle=p.ink; ctx.globalAlpha=0.48; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke(); ctx.globalAlpha=1;
+};
+
+UNIT_DETAIL.pomegranate = function(ctx,r,p){
+  // 石榴：果皮纵向纹理、剖面籽的高光、萼尖
+  for (var s=-1;s<=1;s+=2){
+    ctx.beginPath();
+    ctx.moveTo(s*r*0.10,-r*0.30);
+    ctx.quadraticCurveTo(s*r*0.54,-r*0.05, s*r*0.30, r*0.58);
+    ctx.strokeStyle=p.ink; ctx.globalAlpha=0.33; ctx.lineWidth=Math.max(0.3,r*0.008); ctx.stroke(); ctx.globalAlpha=1;
+  }
+  for (var j=0;j<9;j++){
+    var cx=r*(0.30+0.06*(j%3)), cy=r*(-0.12+0.18*Math.floor(j/3));
+    ctx.beginPath(); ctx.arc(cx-r*0.013,cy-r*0.013,r*0.013,0,Math.PI*2);
+    ctx.fillStyle=p.b; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+  }
+  for (var i=0;i<5;i++){
+    var a=-Math.PI/2+(i-2)*0.30;
+    ctx.beginPath();
+    ctx.arc(Math.cos(a)*r*0.19, -r*0.34+Math.sin(a)*r*0.21, r*0.021, 0, Math.PI*2);
+    ctx.fillStyle=p.c; ctx.fill();
+  }
+};
+
+UNIT_DETAIL.gourd = function(ctx,r,p){
+  // 葫芦：纵向筋线、束腰双横纹、叶片侧脉
+  for (var s=-1;s<=1;s+=2){
+    ctx.beginPath();
+    ctx.moveTo(s*r*0.05,-r*0.74);
+    ctx.bezierCurveTo(s*r*0.21,-r*0.55, s*r*0.06,-r*0.35, s*r*0.03,-r*0.12);
+    ctx.bezierCurveTo(s*r*0.10, r*0.15, s*r*0.27, r*0.40, s*r*0.18, r*0.64);
+    ctx.strokeStyle=p.ink; ctx.globalAlpha=0.30; ctx.lineWidth=Math.max(0.3,r*0.009); ctx.stroke(); ctx.globalAlpha=1;
+  }
+  ctx.beginPath();
+  ctx.moveTo(-r*0.15,-r*0.155); ctx.quadraticCurveTo(0,-r*0.09, r*0.15,-r*0.155);
+  ctx.moveTo(-r*0.16,-r*0.265); ctx.quadraticCurveTo(0,-r*0.20, r*0.16,-r*0.265);
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke();
+  ctx.save(); ctx.translate(-r*0.40,-r*0.50); ctx.rotate(-0.5);
+  ctx.beginPath();
+  for (var j=-1;j<=1;j+=2){
+    ctx.moveTo(0,0); ctx.lineTo(r*0.12, j*r*0.055);
+    ctx.moveTo(0,0); ctx.lineTo(-r*0.12, j*r*0.055);
+  }
+  ctx.strokeStyle=p.ink; ctx.globalAlpha=0.55; ctx.lineWidth=Math.max(0.3,r*0.008); ctx.stroke(); ctx.globalAlpha=1;
+  ctx.restore();
+};
+
+UNIT_DETAIL.knot = function(ctx,r,p){
+  // 盘长：四角节点珠、内层细边、四向出线上的刻口
+  [[-0.64,-0.64],[0.64,-0.64],[-0.64,0.64],[0.64,0.64]].forEach(function(q){
+    ctx.beginPath(); ctx.arc(q[0]*r, q[1]*r, r*0.040, 0, Math.PI*2);
+    ctx.fillStyle=p.c; ctx.fill();
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.3,r*0.009); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.rect(-r*0.575,-r*0.575, r*1.15, r*1.15);
+  ctx.strokeStyle=p.ink; ctx.globalAlpha=0.38; ctx.lineWidth=Math.max(0.3,r*0.009); ctx.stroke(); ctx.globalAlpha=1;
+  ctx.beginPath();
+  for (var i=0;i<4;i++){
+    ctx.save(); ctx.rotate(i*Math.PI/2);
+    ctx.moveTo(-r*0.045,-r*0.71); ctx.lineTo(-r*0.045,-r*0.80);
+    ctx.moveTo( r*0.045,-r*0.71); ctx.lineTo( r*0.045,-r*0.80);
+    ctx.restore();
+  }
+  ctx.strokeStyle=p.c; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke();
+};
+
+UNIT_DETAIL.deer = function(ctx,r,p){
+  // 鹿：梅花斑、耳、蹄、腹线
+  [[-0.26,0.02],[-0.12,-0.04],[0.02,0.04],[-0.20,0.14],[0.10,-0.02],[-0.34,0.08],[0.18,0.10]].forEach(function(q){
+    ctx.beginPath(); ctx.arc(q[0]*r,q[1]*r,r*0.029,0,Math.PI*2);
+    ctx.fillStyle=p.c; ctx.globalAlpha=0.60; ctx.fill(); ctx.globalAlpha=1;
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.25,r*0.007); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.ellipse(r*0.44,-r*0.78, r*0.055, r*0.032, -0.7, 0, Math.PI*2);
+  ctx.fillStyle=p.a; ctx.fill(); ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.014); ctx.stroke();
+  [[-0.30],[-0.16],[0.14],[0.28]].forEach(function(q){
+    ctx.beginPath(); ctx.moveTo(q[0]*r-r*0.03, r*0.68); ctx.lineTo(q[0]*r+r*0.05, r*0.70);
+    ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.5,r*0.018); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(-r*0.36, r*0.14); ctx.quadraticCurveTo(-r*0.06, r*0.26, r*0.24, r*0.12);
+  ctx.strokeStyle=p.ink; ctx.globalAlpha=0.33; ctx.lineWidth=Math.max(0.3,r*0.010); ctx.stroke(); ctx.globalAlpha=1;
+};
+
+UNIT_DETAIL.baoxiang = function(ctx,r,p){
+  // 宝相花：联珠环的内外细圈、云头处的回卷小线、花心高光
+  ctx.beginPath(); ctx.arc(0,0,r*0.40,0,Math.PI*2);
+  ctx.strokeStyle=p.ink; ctx.globalAlpha=0.42; ctx.lineWidth=Math.max(0.3,r*0.010); ctx.stroke(); ctx.globalAlpha=1;
+  ctx.beginPath(); ctx.arc(0,0,r*0.215,0,Math.PI*2);
+  ctx.strokeStyle=p.ink; ctx.globalAlpha=0.48; ctx.lineWidth=Math.max(0.35,r*0.012); ctx.stroke(); ctx.globalAlpha=1;
+  for (var i=0;i<8;i++){
+    ctx.save(); ctx.rotate(i*Math.PI/4);
+    ctx.beginPath();
+    ctx.moveTo(-r*0.085,-r*0.62);
+    ctx.quadraticCurveTo(0,-r*0.74, r*0.085,-r*0.62);
+    ctx.strokeStyle=p.ink; ctx.globalAlpha=0.45; ctx.lineWidth=Math.max(0.3,r*0.009); ctx.stroke(); ctx.globalAlpha=1;
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(-r*0.045,-r*0.045, r*0.028, 0, Math.PI*2);
+  ctx.fillStyle=p.bg2||p.c; ctx.globalAlpha=0.65; ctx.fill(); ctx.globalAlpha=1;
+};
+
+UNIT_DETAIL.lianhua = function(ctx,r,p){
+  // 莲花：花瓣中脉与尖端点、莲蓬莲子的高光
+  for (var i=0;i<8;i++){
+    ctx.save(); ctx.rotate(i*Math.PI/4);
+    ctx.beginPath(); ctx.moveTo(0,-r*0.20); ctx.lineTo(0,-r*0.82);
+    ctx.strokeStyle=p.ink; ctx.globalAlpha=0.40; ctx.lineWidth=Math.max(0.3,r*0.010); ctx.stroke(); ctx.globalAlpha=1;
+    ctx.beginPath(); ctx.arc(0,-r*0.86, r*0.016, 0, Math.PI*2);
+    ctx.fillStyle=p.c; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+    ctx.restore();
+  }
+  var seeds=[[0,0],[0.09,-0.08],[-0.09,-0.08],[0.09,0.09],[-0.09,0.09],[0,-0.14],[0.14,0],[-0.14,0]];
+  for (var j=0;j<seeds.length;j++){
+    var cx=seeds[j][0]*r, cy=seeds[j][1]*r;
+    ctx.beginPath(); ctx.arc(cx,cy,r*0.032,0,Math.PI*2);
+    ctx.strokeStyle=p.ink; ctx.globalAlpha=0.50; ctx.lineWidth=Math.max(0.3,r*0.009); ctx.stroke(); ctx.globalAlpha=1;
+    ctx.beginPath(); ctx.arc(cx-r*0.009,cy-r*0.009,r*0.011,0,Math.PI*2);
+    ctx.fillStyle=p.b; ctx.globalAlpha=0.85; ctx.fill(); ctx.globalAlpha=1;
+  }
+};
+
 function drawUnit(ctx, unitId, r, p, petals){
   var u = UNITS[unitId] || UNITS.rosette;
   try { u(ctx, r, p, petals); } catch(e){}
