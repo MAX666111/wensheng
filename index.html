@@ -2790,8 +2790,8 @@ UNIT_DETAIL.chrys = function(ctx,r,p){
       ctx.beginPath(); ctx.moveTo(0,-r*0.13); ctx.lineTo(0,-len*0.92);
       ctx.strokeStyle=p.ink; ctx.globalAlpha=0.42; ctx.lineWidth=Math.max(0.3,r*0.009); ctx.stroke(); ctx.globalAlpha=1;
       ctx.beginPath();
-      ctx.moveTo(-wid*1.05,-len*0.88); ctx.lineTo(0,-len*1.03); ctx.lineTo(wid*1.05,-len*0.88);
-      ctx.strokeStyle=p.ink; ctx.lineWidth=Math.max(0.4,r*0.012); ctx.stroke();
+      ctx.moveTo(-wid*0.66,-len*0.85); ctx.lineTo(0,-len*0.985); ctx.lineTo(wid*0.66,-len*0.85);
+      ctx.strokeStyle=p.ink; ctx.globalAlpha=0.52; ctx.lineWidth=Math.max(0.32,r*0.0075); ctx.stroke(); ctx.globalAlpha=1;
       ctx.restore();
     }
   }
